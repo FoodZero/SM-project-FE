@@ -64,3 +64,20 @@ yarn-error.log
 
 # testing
 /coverage
+
+#sm_ignore
+/android
+/.bundle
+/ios
+/.idea
+/node_modules
+.prettierrc.js
+.watchmanconfig
+App.tsx
+app.json
+bable.config.js
+Gemfile
+jest.config.js
+metro.config.js
+tsconfig.js
+yarn.lock
