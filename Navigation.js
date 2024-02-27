@@ -5,7 +5,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import Splash from './screens/splash';
-import Signin from './screens/signin';
+import Login from './screens/Login/Login';
 import Signup from './screens/signup';
 import KaKaoLogin from './screens/kakaologin';
 import Home from './screens/home';
@@ -25,7 +25,7 @@ function StackScreen() {
       initialRouteName="Splash"
     >
       <Stack.Screen name="Splash" component={Splash} />
-      <Stack.Screen name="Signin" component={Signin} />
+      <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="KaKaoLogin" component={KaKaoLogin} />
       <Stack.Screen name="Signup" component={Signup} />
       <Stack.Screen name="Home" component={BottomStack} />

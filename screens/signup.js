@@ -8,7 +8,6 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    CheckBox,
     Image,
     ScrollView
 } from 'react-native';
@@ -89,12 +88,14 @@ const Signup = () => {
         }
         formBody =  formBody.join('&');
 
+//서버 연결하기 >> async로 전환 중
+
         fetch('/api/members/register',
         {
             method : 'POST',
             body : formBody,
             headers : {
-                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                'Content-Type': 'application/json',
             },
         })
         .then((response) => response.json())
@@ -155,17 +156,12 @@ const Signup = () => {
                     value = {userPnum}
                     onChangeText = {setUserpnum}
                     />
-                    <CheckBox
-                    value={isSelected}
-                    onValueChange={setSelection}
-                    style={Styles.checkbox}
-                  />
                     </View>
-                    <View style={Styles.buttonArea}>
+            <View style={Styles.buttonArea}>
             <TouchableOpacity
               style={Styles.button}
               activeOpacity={0.8} 
-              onPress ={()=> navigation.navigate('Login')}>
+              onPress ={()=> navigation.navigate("Login", {screen : 'Login'})}>
                 <Text style={Styles.BottomText}>회원가입</Text>
             </TouchableOpacity>
             </View>
