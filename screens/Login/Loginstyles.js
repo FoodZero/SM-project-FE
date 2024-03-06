@@ -1,71 +1,176 @@
 //로그인 스타일시트만
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import Constants from 'expo-constants';
+
+const AllWidth = Dimensions.get("window").width;
+const AllHeight = Dimensions.get("window").height;
+
+const FigmaWidth = 390;
+const FigmaHeight = 844;
+
+const BasicWidth =(
+    AllWidth / FigmaWidth
+).toFixed(2);
+
+const BasicHeight =(
+    AllHeight / FigmaHeight
+).toFixed(2);
 
 const Styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
+    Container: {
+      paddingTop: Constants.statusBarHeight,
+      width : AllWidth,
+      height : AllHeight,
+      backgroundColor: '#FFFFFF',
+      borderColor : "#CAF6FF",
+      borderWidth : 1,
     },
-    HomeText: {
+
+    BackContainer: {
+      width: BasicWidth*390,
+      height: BasicHeight*695,
+      backgroundColor: '#FFFFFF',
+      paddingBottom: BasicHeight*102,
+      borderColor : "#CAF6FF",
+      borderWidth : 1,
+    },
+    IconContainer:{
+      backgroundColor: '#FFFFFF',
+      width: BasicWidth*390,
+      height: BasicHeight*20,
+      alignItems: 'flex-end',
+      paddingRight : BasicWidth*25,
+      borderColor : "#CAF6FF",
+      borderWidth : 1,
+    },
+
+    HomeContainer :{
+      width: BasicWidth*83,
+      height: BasicHeight*45,
+      marginTop : BasicHeight*54,
+      marginLeft: BasicWidth*20,
+      borderColor : "#CAF6FF",
+      borderWidth : 1,
+    },
+
+    HomeText : {
+      width: BasicWidth*83,
+      height: BasicHeight*45,
       fontSize: 30,
-      textAlign: "center",
+      fontFamily : 'NotoSansKR',
     },
-    NextBottom: {
-      backgroundColor: "#F9E000",
-      padding: 10,
-      marginTop: "20%",
-      width: "50%",
-      alignSelf: "center",
-      borderRadius: 10,
+
+    InputArea : {
+      width: BasicWidth*325,
+      height: BasicHeight*84,
+      marginTop : BasicHeight*55,
+      marginRight: BasicWidth*32,
+      marginLeft : BasicWidth*32,
+      borderColor : "#CAF6FF",
+      borderWidth : 1,
+
     },
-    BottomText: {
-      fontSize: 15,
-      color: 'white',
-      textAlign: "center",
+
+    Lables : {
+      fontSize : 20,
+      marginBottom : BasicHeight*5
     },
-    formArea: {
-      width: '100%',
-      paddingBottom: wp('10%'),
+
+    TextForm : {
+      fontSize : 20,
+      borderColor : "#E2E2E2",
+      borderWidth : 1,
+      paddingHorizontal : 10,
     },
-    textForm: {
-        borderWidth: 0.5,
-        borderColor: '#888',
-        width: '100%',
-        height: hp('5%'),
-        paddingLeft: 5,
-        paddingRight: 5,
-        marginBottom: 5,
-    },
-    buttonArea: {
-        width: '100%',
-        height: hp('5%'),
-    },
-    button: {
-        backgroundColor: "#3873EA",
-        width: "100%",
-        height: "100%",
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    buttonTitle: {
-        color: 'white',
-    },
-    checkboxContainer: {
+
+    CheckboxesContainer : {
+
       flexDirection: 'row',
-      marginBottom: 20,
-    },
-    checkbox: {
       alignSelf: 'center',
     },
-    label: {
-      margin: 8,
-    },
-    minibuttoncontainor: {
+
+    CheckboxContainer : {
       flexDirection: 'row',
-      marginBottom: 20,
+      alignSelf: 'center',
+      paddingRight: 32,
+      paddingLeft : 32,
+      marginRight: 10,
+      marginLeft : 10,
     },
-    minitext:{
-      fontSize : 16,
-    }
-  })
+
+    Checkbox : {
+    },
+
+    CheckboxText : {
+      marginLeft : 10,
+    },
+
+    MiniButtonContainer : {
+
+      paddingRight: 40,
+      paddingLeft : 40,
+      flexDirection: 'row',
+      alignSelf: 'center',
+    },
+
+    MiniText : {
+
+    },
+
+    ButtonArea : {
+
+      paddingRight: 32,
+      paddingLeft : 32,
+    },
+
+    FastButtonArea : {
+ 
+      paddingRight: 32,
+      paddingLeft : 32,
+    },
+
+    Button : {
+      height : 65,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderColor : '#3873EA',
+      backgroundColor : '#3873EA',
+      
+    },
+    ButtonText :{
+          alignSelf : 'center',
+          fontWeight : '700',
+          fontSize : 20,
+          color : '#FFFFFF',
+        },
+
+    FastButton : {
+      height : 65,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderColor : '#F9E000',
+      backgroundColor : '#F9E000',
+      marginBottom : 30,
+      
+    },
+
+    
+    
+    FastButtonText :{
+      alignSelf : 'center',
+      fontWeight : '700',
+      fontSize : 20,
+      color : '#332024',
+    },
+    
+    FastLables : {
+
+      fontSize : 20,
+      marginTop : 25,
+      marginBottom : 5,
+      textAlign : 'center',
+    },
+  });
+
+  export default Styles;

@@ -4,9 +4,11 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-import Splash from './screens/splash';
+import Splash from './screens/Splash/splash';
 import Login from './screens/Login/Login';
-import Signup from './screens/signup';
+import Signup from './screens/Signup/signup';
+import Email from './screens/Email/Email';
+import Password from './screens/Pw/Pw';
 import KaKaoLogin from './screens/kakaologin';
 import Home from './screens/home';
 
@@ -23,11 +25,14 @@ function StackScreen() {
   return (
     <Stack.Navigator
       initialRouteName="Splash"
+      screenOptions = {{ headerShown: false }}
     >
       <Stack.Screen name="Splash" component={Splash} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="KaKaoLogin" component={KaKaoLogin} />
       <Stack.Screen name="Signup" component={Signup} />
+      <Stack.Screen name="Email" component={Email} />
+      <Stack.Screen name="Password" component={Password} />
       <Stack.Screen name="Home" component={BottomStack} />
     </Stack.Navigator>
   );

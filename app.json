@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "AwesomeProject",
-    "slug": "AwesomeProject",
+    "name": "fridgefixer",
+    "slug": "fridgefixer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,5 +26,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     }
+    
   }
 }
