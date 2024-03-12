@@ -17,23 +17,18 @@ const BasicHeight =(
     AllHeight / FigmaHeight
 ).toFixed(2);
 
+
 const Styles = StyleSheet.create({
     Container: {
-      paddingTop: Constants.statusBarHeight,
-      width : AllWidth,
-      height : AllHeight,
-      backgroundColor: '#FFFFFF',
-      borderColor : "#CAF6FF",
-      borderWidth : 1,
+      flex: 1,
+      backgroundColor: '#FFFFFF'
     },
 
     BackContainer: {
-      width: BasicWidth*390,
-      height: BasicHeight*695,
+      width : AllWidth,
+      height : AllHeight,
+      paddingTop: BasicHeight*13,
       backgroundColor: '#FFFFFF',
-      paddingBottom: BasicHeight*102,
-      borderColor : "#CAF6FF",
-      borderWidth : 1,
     },
     IconContainer:{
       backgroundColor: '#FFFFFF',
@@ -41,8 +36,6 @@ const Styles = StyleSheet.create({
       height: BasicHeight*20,
       alignItems: 'flex-end',
       paddingRight : BasicWidth*25,
-      borderColor : "#CAF6FF",
-      borderWidth : 1,
     },
 
     HomeContainer :{
@@ -50,26 +43,28 @@ const Styles = StyleSheet.create({
       height: BasicHeight*45,
       marginTop : BasicHeight*54,
       marginLeft: BasicWidth*20,
-      borderColor : "#CAF6FF",
-      borderWidth : 1,
+      marginBottom: BasicHeight*55,
     },
 
     HomeText : {
       width: BasicWidth*83,
       height: BasicHeight*45,
       fontSize: 30,
-      fontFamily : 'NotoSansKR',
     },
 
-    InputArea : {
+    InputArea1 : {
       width: BasicWidth*325,
-      height: BasicHeight*84,
-      marginTop : BasicHeight*55,
+      height: BasicHeight*114,
       marginRight: BasicWidth*32,
       marginLeft : BasicWidth*32,
-      borderColor : "#CAF6FF",
-      borderWidth : 1,
+      marginBottom : BasicHeight*40,
+    },
 
+    InputArea2 : {
+      width: BasicWidth*325,
+      height: BasicHeight*114,
+      marginRight: BasicWidth*32,
+      marginLeft : BasicWidth*32,
     },
 
     Lables : {
@@ -78,40 +73,59 @@ const Styles = StyleSheet.create({
     },
 
     TextForm : {
+      width: BasicWidth*325,
+      height: BasicHeight*50,
       fontSize : 20,
       borderColor : "#E2E2E2",
       borderWidth : 1,
       paddingHorizontal : 10,
     },
+    Text : {
+        width: BasicWidth*141,
+        height: BasicHeight*30,
+        marginLeft: BasicWidth*10,
+        color: '#E82323',
+        fontSize: 13,
+        //alignSelf: 'stretch',
+      },
 
     CheckboxesContainer : {
-
       flexDirection: 'row',
-      alignSelf: 'center',
+      width: BasicWidth*267,
+      height: BasicHeight*26,
+      marginRight: BasicWidth*58,
+      marginLeft : BasicWidth*65,
+      marginBottom : BasicHeight*30,
+      justifyContent: 'center',
     },
 
     CheckboxContainer : {
       flexDirection: 'row',
       alignSelf: 'center',
-      paddingRight: 32,
-      paddingLeft : 32,
-      marginRight: 10,
-      marginLeft : 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+      
     },
 
     Checkbox : {
     },
 
     CheckboxText : {
-      marginLeft : 10,
+      width: BasicWidth*87,
+      height: BasicHeight*26,
+      fontSize: 18,
+      alignContent: 'center',
     },
 
     MiniButtonContainer : {
-
-      paddingRight: 40,
-      paddingLeft : 40,
+      width: BasicWidth*264,
+      height: BasicHeight*23,
+      marginRight: BasicWidth*65,
+      marginLeft : BasicWidth*61,
+      marginTop: BasicHeight*25,
+      marginBottom: BasicHeight*25,
       flexDirection: 'row',
-      alignSelf: 'center',
+      justifyContent: 'center',
     },
 
     MiniText : {
@@ -125,13 +139,15 @@ const Styles = StyleSheet.create({
     },
 
     FastButtonArea : {
- 
-      paddingRight: 32,
-      paddingLeft : 32,
+      width: BasicWidth*325,
+      height: BasicHeight*104,
+      marginRight: BasicWidth*32,
+      marginLeft : BasicWidth*33,
     },
 
     Button : {
-      height : 65,
+      width: BasicWidth*325,
+      height: BasicHeight*65,
       justifyContent: 'center',
       alignItems: 'center',
       borderColor : '#3873EA',
@@ -146,12 +162,12 @@ const Styles = StyleSheet.create({
         },
 
     FastButton : {
-      height : 65,
+      width: BasicWidth*325,
+      height: BasicHeight*65,
       justifyContent: 'center',
       alignItems: 'center',
       borderColor : '#F9E000',
       backgroundColor : '#F9E000',
-      marginBottom : 30,
       
     },
 
@@ -165,11 +181,15 @@ const Styles = StyleSheet.create({
     },
     
     FastLables : {
-
+      
       fontSize : 20,
       marginTop : 25,
       marginBottom : 5,
       textAlign : 'center',
+    },
+
+    Scroll:{
+      flex: 1,
     },
   });
 
