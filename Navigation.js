@@ -5,11 +5,13 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import Splash from './screens/Splash/splash';
-import Login from './screens/Login/Login';
-import Signup from './screens/Signup/signup';
-import Email from './screens/Email/Email';
-import Password from './screens/Pw/Pw';
-import KaKaoLogin from './screens/kakaologin';
+import Login from './screens/Auth/Login';
+import Signup from './screens/Auth/signup';
+import KaKaoLogin from './screens/Auth/kakaologin';
+import FindEmail from './screens/Auth/EmailScreen/FindEmail';
+import EmailNotice from './screens/Auth/EmailScreen/EmailNotice';
+import FindPassword from './screens/Auth/PasswordScreen/FindPassword';
+import PasswordReset from './screens/Auth/PasswordScreen/PasswordReset';
 import Home from './screens/home';
 
 import Screen1 from './screens/screen1';
@@ -31,8 +33,10 @@ function StackScreen() {
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="KaKaoLogin" component={KaKaoLogin} />
       <Stack.Screen name="Signup" component={Signup} />
-      <Stack.Screen name="Email" component={Email} />
-      <Stack.Screen name="Password" component={Password} />
+      <Stack.Screen name="FindEmail" component={FindEmail} />
+      <Stack.Screen name="EmailNotice" component={EmailNotice} />
+      <Stack.Screen name="FindPassword" component={FindPassword} />
+      <Stack.Screen name="PasswordReset" component={PasswordReset} />
       <Stack.Screen name="Home" component={BottomStack} />
     </Stack.Navigator>
   );
