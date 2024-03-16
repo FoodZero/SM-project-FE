@@ -6,8 +6,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import Splash from './screens/Splash/splash';
 import Login from './screens/Auth/Login';
-import Signup from './screens/Auth/signup';
-import KaKaoLogin from './screens/Auth/kakaologin';
+import Signup from './screens/Auth/Signup';
+import KaKaoLogin from './screens/Auth/KakaoLogin';
 import FindEmail from './screens/Auth/EmailScreen/FindEmail';
 import EmailNotice from './screens/Auth/EmailScreen/EmailNotice';
 import FindPassword from './screens/Auth/PasswordScreen/FindPassword';
