@@ -18,23 +18,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from "axios";
 
-
-const Signup = () => {
+const Register = () => {
   const navigation = useNavigation();
 
+  // 뒤로가기 액션함수
+  const backAction = () => {
+  Alert.alert('잠시만요!', '입력내용이 저장되지 않습니다.\n이전 단계로 돌아갈까요?', [
+    {
+      text: '아니오',
+      onPress: () => null,
+      style: 'cancel',
+    },
+    {text: '네', onPress: () => navigation.navigate("Login")},
+  ]);
+  return true;
+};
+//안드로이드 기기자체 뒤로가기 눌렀을 때 작동하는 함수
   useEffect(() => {
-    const backAction = () => {
-      Alert.alert('잠시만요!', '입력내용이 저장되지 않습니다.\n이전 단계로 돌아갈까요?', [
-        {
-          text: '아니오',
-          onPress: () => null,
-          style: 'cancel',
-        },
-        {text: '네', onPress: () => navigation.navigate("Login", { screen: 'Login' })},
-      ]);
-      return true;
-    };
-
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction,
@@ -43,74 +43,165 @@ const Signup = () => {
     return () => backHandler.remove();
   }, []);
   
+  //백엔드로 보내줘야 하는 값 저장용 state
   const [UserEmail, setUserEmail] = useState();
   const [UserPassword, setUserPassword] = useState();
   const [UserPnum, setUserPnum] = useState();
   const [UserchkPnum, setUserchkPnum] = useState();
   const [UserNick, setUserNick] = useState();
 
-  //const onSubmit = (data) => console.log(data)
-
+  //유효성 검사와 같은 boolean으로 표기해야 하는 함수들
   const [loading, setLoading] = useState(false);
-
-  const [errortext, setErrortext] = useState('');
-  const [errortext2, setErrortext2] = useState('');
   const [isRegistraionSuccess, setIsRegistraionSuccess] = useState(false);
   const [ValidEmail, setValidEmail] = useState(false);
   const [ValidPassword, setValidPassword] = useState(false);
   const [ValidNick, setValidNick] = useState(false);
-  //const [errortext, setErrortext] = useState('');
-  //const [Time, setTime] = useState(179)
-  //const {verification} = useSelector((state: RootState) => state.auth)
-  //const {expireAt} = verification.OTP
+  const [isNickPre, setIsNickPre] = useState(false);
+  const [isFirstButton, setIsFirstButton] = useState(false);
+  const [timerActive, setTimerActive] = useState(false);
+  const [timer, setTimer] = useState(180);
 
+  //이어서 쓰기 편하기 위해 Ref만들어 준 함수들
   const EmailInputRef = createRef();
   const PasswordInputRef = createRef();
   const PhonenumberInputRef = createRef();
   const PhonenumberchkInputRef = createRef();
   const NicknameInputRef = createRef();
+  const TimerRef = createRef();
 
+  //이메일 유효성 검사
   const HandleEmailChk = (text) =>{
     let emailRegex = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,}$/i;
-
     setUserEmail(text)
+    //이메일 유효성 오류
     if(emailRegex.test(text) == false){
       setValidEmail(true);
     }
+    //이메일 유효성 통과
     else{
       setValidEmail(false);
     }
   }
 
+  //비밀번호 유효성 검사
   const HandlePwChk = (text) =>{
-    let passwordRegex = /^[A-Za-z0-9]{8,16}$/;
-
+    let passwordRegex = /^[A-Za-z0-9#?!@$%^&*-](?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-])[a-z0-9#?!@$%^&*-]{8,16}$/;
     setUserPassword(text)
+    //비밀번호 유효성 오류
     if(passwordRegex.test(text) == false){
       setValidPassword(true);
     }
+    //비밀번호 유효성 통과
     else{
       setValidPassword(false);
     }
   }
 
-  const HandleNickChk = (text) =>{
-    let nicknameRegex = /^[가-힣A-Za-z0-9]{2,15}$/;
+  //닉네임 중복검사(버튼 클릭시 작동)
+  const NickFind = useCallback(async () => {
+    if(loading){
+      return;
+    }
+    try{
+      setLoading(true);
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/nickname',{
+        nickname: UserNick,
+      })
+      //에러날 시, 선점함수 = true, 버튼눌림함수 = true
+    }catch(error){
+      console.log(error);
+      setIsNickPre(true);
+      setIsFirstButton(true);
+    }finally{
+      setLoading(false);
+      setIsFirstButton(true);
+    }
+  }, [loading,UserNick]);
 
-    setUserPassword(text)
+  //닉네임 유효성 검사
+  const HandleNickChk = (text) =>{
+    setIsFirstButton(false);
+    let nicknameRegex = /^[가-힣A-Za-z0-9]{2,15}$/;
+    //선점 검사 아직안했으므로 선점함수 >> false
+    setIsNickPre(false);
+    setUserNick(text)
+    //유효성 검사 실패시
     if(nicknameRegex.test(text) == false){
       setValidNick(true);
     }
+    //유효성 검사 성공시
     else{
       setValidNick(false);
     }
-  }
+    }
+
+    //전화번호 입력 후 전송 누를 시 타이머 작동용 함수
+  const handlephonecert = () => {
+    console.log(`전화번호: ${UserPnum}`);
+    setTimerActive(true);
+    startTimer();
+  };
+
+  const timerReset = () => {
+    setTimer = 180;
+
+  };
+
+  // 타이머 세팅 (다시 눌렀을 때 시간이 2배로 빨리가고, reset안되는 문제 해결해야함!!!!!!!)
+  const startTimer = () => {
+    // Set up a timer that updates every second
+    const intervalId = setInterval(() => {
+      setTimer((prevTimer) => {
+        if (prevTimer > 0) {
+          // If the timer is greater than 0, decrement it
+          return prevTimer - 1;
+        }
+        if(prevTimer = 0){
+          return timerReset;
+        }
+        else {
+          // If the timer reaches 0, stop the timer
+          clearInterval(intervalId);
+          setTimerActive(false);
+          return 0;
+        }
+      });
+    }, 1000);
+  };
+
+        const data = {
+          email: UserEmail,
+          password: UserPassword,
+          nickname: UserNick,
+          phone:UserPnum,
+          infoAgree: true,
+          messageAgree: true,
+          certificationCode:UserchkPnum,
+        };
+        
+        const HandleRegister = useCallback(async () => {
+      
+          if(loading){
+            return;
+          }
+          try{
+            setLoading(true);
+            const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/register',data)
+          }catch(error){
+            console.log(error);
+            console.log(data);
+          }finally{
+            setLoading(false);
+            //navigation.navigate("Home");
+          }
+        }, [loading,UserEmail,UserPassword]);
+
     return (
       <SafeAreaView style={Styles.Container}>
         <ScrollView style = {Styles.Scroll}>
         <View style = {Styles.BackContainer}>
           <View style = {Styles.IconContainer}>
-            <TouchableOpacity onPress={() => alert('뒤로가기')}>
+            <TouchableOpacity onPress={backAction}>
             <Icon name = "close" size = {20}/>
             </TouchableOpacity>
           </View>
@@ -123,6 +214,7 @@ const Signup = () => {
           <TextInput
           style={Styles.TextForm}
           placeholder = "이메일을 입력해주세요."
+          value={UserEmail}
           onChangeText = {(text) => HandleEmailChk(text)}
           inputMode = 'email'
           returnKeyType= 'next'
@@ -137,11 +229,12 @@ const Signup = () => {
       </View>
 
       <View style={Styles.InputArea}>
-        <Text style={Styles.Lables}>비밀번호</Text>
+        <Text style={Styles.Lables}>비밀번호*</Text>
         <TextInput
           style={Styles.TextForm}
           placeholder = "비밀번호을 입력해주세요."
           onChangeText = {(text) => HandlePwChk(text)}
+          value={UserPassword}
           returnKeyType= 'next'
           ref = {PasswordInputRef}
           onSubmitEditing={() =>
@@ -154,12 +247,13 @@ const Signup = () => {
       </View>
 
       <View style={Styles.PnumInputArea}>
-        <Text style={Styles.Lables}>전화번호</Text>
+        <Text style={Styles.Lables}>전화번호*</Text>
         <View style = {Styles.MiniArea}>
         <TextInput
           style={Styles.PnumForm}
           placeholder = "숫자만 입력"
-          onChangeText = {UserEmail => setUserEmail(UserEmail)}
+          value={UserPnum}
+          onChangeText = {(UserPnum) => setUserPnum(UserPnum)}
           inputMode = 'tel'
           returnKeyType= 'next'
           ref = {PhonenumberInputRef}
@@ -170,31 +264,38 @@ const Signup = () => {
         <TouchableOpacity
           style={Styles.MiniButton}
           activeOpacity={0.8}
+          onPress={handlephonecert}
           >
           <Text style={Styles.MiniButtonText}>전송</Text>
         </TouchableOpacity>
         </View>
-        <TextInput
-        style={Styles.TextForm} 
-        textColor= {"#AFAFAF"}
-        placeholder="인증번호 입력"
-        onChangeText={(chkPnum) => setChkPnum(chkPnum)}
-        ref = {PhonenumberchkInputRef}
-        returnKeyType="next"
-        onSubmitEditing={() =>
-          NicknameInputRef.current && NicknameInputRef.current.focus()
-        }
-        blurOnSubmit = {false}
-        inputMode="numeric"
-        />
-      </View>
+        <View style={Styles.AuthForm}>
+          <TextInput
+            style={Styles.AuthText}
+            textColor= {"#AFAFAF"}
+            placeholder="인증번호 입력"
+            onChangeText={(chkPnum) => setUserchkPnum(chkPnum)}
+            value={UserchkPnum}
+            ref = {PhonenumberchkInputRef}
+            returnKeyType="next"
+            onSubmitEditing={() =>
+              NicknameInputRef.current && NicknameInputRef.current.focus()
+            }
+            blurOnSubmit = {false}
+            inputMode="numeric"
+          />
+          <Text style={Styles.PnumTime}>{Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}</Text>
+        
+        </View>
+        </View>
 
       <View style={Styles.NickInputArea}>
-        <Text style={Styles.Lables}>닉네임</Text>
+        <Text style={Styles.Lables}>닉네임*</Text>
         <View style={Styles.NickArea}>
         <TextInput
           style={Styles.NickForm}
           placeholder = "2~15자리"
+          value={UserNick}
           onChangeText = {(text) => HandleNickChk(text)}
           returnKeyType= 'done'
           ref = {NicknameInputRef}
@@ -202,19 +303,26 @@ const Signup = () => {
         <TouchableOpacity
           style={Styles.NickButton}
           activeOpacity={0.8}
+          disabled = {ValidNick}
+          onPress={NickFind}
           >
           <Text style={Styles.MiniButtonText}>중복 확인</Text>
         </TouchableOpacity>
-        {
-          ValidNick ? (<Text style= {Styles.Text}>2~15사이로 입력해주세요</Text>) : (<Text style= {Styles.Text}> </Text>)
-        }
         </View>
+        {
+          ValidNick ? <Text style= {Styles.Text}> </Text> : ( 
+            isFirstButton ? (
+              isNickPre ? <Text style= {Styles.Text}>이미 사용 중인 닉네임입니다.</Text> : <Text style= {Styles.ValidText}>사용가능한 닉네임입니다.</Text>
+            ) : <Text style= {Styles.Text}> </Text>
+          )
+        }
       </View>
 
       <View style={Styles.ButtonArea}>
         <TouchableOpacity
           style={Styles.Button}
           activeOpacity={0.8}
+          onPress={HandleRegister}
           >
           <Text style={Styles.ButtonText}>완료</Text>
         </TouchableOpacity>
@@ -313,6 +421,31 @@ const Styles = StyleSheet.create({
       paddingHorizontal : 10,
     },
 
+    AuthForm : {
+      width: BasicWidth*325,
+      height: BasicHeight*50,
+      borderColor : "#E2E2E2",
+      borderWidth : 1,
+      paddingHorizontal : 10,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+
+    AuthText:{
+      width: BasicWidth*115,
+      height: BasicHeight*29,
+      fontSize : 20,
+      
+    },
+
+    PnumTime:{
+      width: BasicWidth*39,
+      height: BasicHeight*29,
+      fontSize : 20,
+      color: "#AFAFAF",
+      marginLeft: BasicWidth*160
+    },
+
     PnumForm : {
       width: BasicWidth*225,
       height: BasicHeight*50,
@@ -342,6 +475,15 @@ const Styles = StyleSheet.create({
       //alignSelf: 'stretch',
     },
 
+    ValidText : {
+      width: BasicWidth*325,
+      height: BasicHeight*30,
+      marginLeft: BasicWidth*10,
+      color: '#3873EA',
+      fontSize: 13,
+      //alignSelf: 'stretch',
+    },
+
     ButtonArea : {
 
       paddingRight: 32,
@@ -351,6 +493,7 @@ const Styles = StyleSheet.create({
     Button : {
       width: BasicWidth*325,
       height: BasicHeight*65,
+      marginBottom: BasicHeight*38,
       justifyContent: 'center',
       alignItems: 'center',
       borderColor : '#3873EA',
@@ -403,9 +546,9 @@ const Styles = StyleSheet.create({
       width: BasicWidth*325,
       height: BasicHeight*50,
       flexDirection: 'row',
-    },
+    }
   });
-export default Signup;
+export default Register;
 
 /*
   async function getData() {

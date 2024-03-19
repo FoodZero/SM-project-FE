@@ -53,7 +53,7 @@ const FindPassword = () => {
   const handleClose = () => {
     // Add logic to close the screen, navigate back, or perform any other action
     console.log('Closing the screen...');
-    navigation.navigate('FindEmail');
+    navigation.navigate("Login");
   };
 
   return (

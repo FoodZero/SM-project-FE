@@ -3,17 +3,14 @@ import {
   ActivityIndicator,
   View,
   Image,
-  Text
+  Text,
+  Dimensions,
+  StyleSheet,
 } from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Splashimage from '../../assets/Images/splashimg.png';
 import { useNavigation } from "@react-navigation/native";
-import styles from './splashstyles';
 
 const SplashScreen = ({navigation}) => {
   //State for ActivityIndicator animation
@@ -28,7 +25,7 @@ const SplashScreen = ({navigation}) => {
       AsyncStorage.getItem('user_id').then((value) =>
         navigation.replace(value === null ? 'Login' : 'Home'),
       );
-    }, 3000);
+    }, 2000);
   }, []);
 
   return (
@@ -39,5 +36,29 @@ const SplashScreen = ({navigation}) => {
         />
     </View>
   );
-};
+}
+
+const AllWidth = Dimensions.get("window").width;
+const AllHeight = Dimensions.get("window").height;
+
+const FigmaWidth = 390;
+const FigmaHeight = 844;
+
+const BasicWidth =(
+    AllWidth / FigmaWidth
+).toFixed(2);
+
+const BasicHeight =(
+    AllHeight / FigmaHeight
+).toFixed(2);
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: '#CAF6FF',
+    },
+
+    image: {
+        resizeMode: "contain",
+    },
+  });
 export default SplashScreen;

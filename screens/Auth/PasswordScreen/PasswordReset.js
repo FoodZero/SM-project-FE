@@ -24,7 +24,7 @@ const PasswordReset = () => {
   const handleClose = () => {
     // Add logic to close the screen, navigate back, or perform any other action
     console.log('Closing the screen...');
-    navigation.navigate('FindPassword');
+    navigation.navigate("Login");
   };
 
   const handleRetrieveEmail = () => {

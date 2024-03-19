@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import {createRef, useState} from 'react';
 import {
   StyleSheet,
@@ -15,22 +15,32 @@ import CheckBox from 'expo-checkbox';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
+import axios from "axios";
 
 const Login = () => {
   const navigation = useNavigation();
-
+  //둘다 맞을때만 홈화면으로 이동가능하게 하는 것만 남았음
+  const testlogin = async () => {
+    const data = {
+        email: UserEmail,
+        password: UserPassword,
+    };
+    try {
+        const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/login', data);
+        console.log(response.data);
+    } catch (error) {
+        console.error(error);
+    }
+}
   const onLogin = (data) =>{
     console.log(data);
-    navigation.navigate("Login", {screen : 'Login'});
+    navigation.navigate("Login");
   };
-  const [Form, setForm] = useState({
-    email: '',
-    password: '',
-  });
+
   const [UserEmail, setUserEmail] = useState("");
   const [UserPassword, setUserPassword] = useState("");
 
+  const [loading, setLoading] = useState(false);
   const [loginSelected, setloginSelection] = useState(false); 
   const [idSelected, setidSelection] = useState(false);
   const [ValidEmail, setValidEmail] = useState(false);
@@ -53,7 +63,7 @@ const Login = () => {
   }
 
   const HandlePwChk = (text) =>{
-    let passwordRegex = /^[A-Za-z0-9]{8,16}$/;
+    let passwordRegex = /^[A-Za-z0-9#?!@$%^&*-](?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-])[a-z0-9#?!@$%^&*-]{8,16}$/;
 
     setUserPassword(text)
     if(passwordRegex.test(text) == false){
@@ -73,6 +83,28 @@ const Login = () => {
       setValidPassword(false);
     }
   }
+
+  const data = {
+    email: UserEmail,
+    password: UserPassword,
+  };
+  
+  const HandleLogin = useCallback(async () => {
+
+    if(loading){
+      return;
+    }
+    try{
+      setLoading(true);
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/login',data)
+    }catch(error){
+      console.log(error);
+      console.log(data);
+    }finally{
+      setLoading(false);
+      //navigation.navigate("Home");
+    }
+  }, [loading,UserEmail,UserPassword]);
 
   return (
     //로그인
@@ -94,6 +126,7 @@ const Login = () => {
           style={Styles.TextForm}
           placeholder = "이메일을 입력해주세요."
           onChangeText = {(text) => HandleEmailChk(text)}
+          onChange={setUserEmail}
           value = {UserEmail}
           inputMode = 'email'
           returnKeyType= 'next'
@@ -112,7 +145,9 @@ const Login = () => {
         <Text style={Styles.Lables}>비밀번호*</Text>
         <TextInput
           style={Styles.TextForm}
-          placeholder = "비밀번호를 입력해주세요."
+          onChange={setUserPassword}
+          value={UserPassword}
+          placeholder = "8~16자리 영문+숫자+특수문자 조합"
           onChangeText = {(text) => HandlePwChk(text)}
           returnKeyType= 'done'
           ref = {PasswordInputRef}
@@ -149,6 +184,7 @@ const Login = () => {
         <TouchableOpacity
           style={Styles.Button}
           activeOpacity={0.8}
+          onPress={HandleLogin}
           >
           <Text style={Styles.ButtonText}>로그인</Text>
         </TouchableOpacity>
@@ -156,7 +192,7 @@ const Login = () => {
   
       <View style = {Styles.MiniButtonContainer}>
         <TouchableOpacity
-          onPress={() => navigation.navigate("Signup", { screen: 'Signup' })}>
+          onPress={() => navigation.navigate("Register", { screen: 'Register' })}>
           <Text style = {Styles.MiniText}> 회원가입 </Text>
         </TouchableOpacity>
         <Text> | </Text>
