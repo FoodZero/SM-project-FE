@@ -96,28 +96,6 @@ const Register = () => {
       setValidPassword(false);
     }
   }
-
-  //닉네임 중복검사(버튼 클릭시 작동)
-  const NickFind = useCallback(async () => {
-    if(loading){
-      return;
-    }
-    try{
-      setLoading(true);
-      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/nickname',{
-        nickname: UserNick,
-      })
-      //에러날 시, 선점함수 = true, 버튼눌림함수 = true
-    }catch(error){
-      console.log(error);
-      setIsNickPre(true);
-      setIsFirstButton(true);
-    }finally{
-      setLoading(false);
-      setIsFirstButton(true);
-    }
-  }, [loading,UserNick]);
-
   //닉네임 유효성 검사
   const HandleNickChk = (text) =>{
     setIsFirstButton(false);
@@ -169,32 +147,75 @@ const Register = () => {
     }, 1000);
   };
 
-        const data = {
-          email: UserEmail,
-          password: UserPassword,
-          nickname: UserNick,
-          phone:UserPnum,
-          infoAgree: true,
-          messageAgree: true,
-          certificationCode:UserchkPnum,
-        };
-        
-        const HandleRegister = useCallback(async () => {
-      
-          if(loading){
-            return;
-          }
-          try{
-            setLoading(true);
-            const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/register',data)
-          }catch(error){
-            console.log(error);
-            console.log(data);
-          }finally{
-            setLoading(false);
-            //navigation.navigate("Home");
-          }
-        }, [loading,UserEmail,UserPassword]);
+  //닉네임 중복검사(버튼 클릭시 작동)
+  const NickFind = useCallback(async () => {
+    if(loading){
+      return;
+    }
+    try{
+      setLoading(true);
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/nickname',{
+        nickname: UserNick,
+      })
+      //에러날 시, 선점함수 = true, 버튼눌림함수 = true
+    }catch(error){
+      console.log(error);
+      setIsNickPre(true);
+      setIsFirstButton(true);
+    }finally{
+      setLoading(false);
+      setIsFirstButton(true);
+    }
+  }, [loading,UserNick]);
+
+  const data = {
+    email: UserEmail,
+    password: UserPassword,
+    nickname: UserNick,
+    phone:UserPnum,
+    infoAgree: true,
+    messageAgree: true,
+    certificationCode:UserchkPnum,
+  };
+  //회원가입 전체 전달 api연결 (!!!분기 부분 추가 요망!!!)
+  const HandleRegister = useCallback(async () => {
+    if(loading){
+      return;
+    }
+    try{
+      setLoading(true);
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/register',data)
+    }catch(error){
+      console.log(error);
+      console.log(data);
+    }finally{
+      setLoading(false);
+      //navigation.navigate("Home");
+    }
+  }, [loading,UserEmail,UserPassword]);
+
+  //본인인증 문자 검사 (비용나가는거 방지하기 위해 연결 끊어둠)
+  const ValidPnum = useCallback(async () => {
+    setTimerActive(true);
+    startTimer();
+    /*
+    if(loading){
+      return;
+    }
+    try{
+      setLoading(true);
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/send',{
+        phone: UserPnum
+      })
+    }catch(error){
+      console.log(error);
+      console.log(data);
+    }finally{
+      setLoading(false);
+      //navigation.navigate("Home");
+    }
+    */
+  }, [loading,UserPnum]);
 
     return (
       <SafeAreaView style={Styles.Container}>
@@ -264,7 +285,7 @@ const Register = () => {
         <TouchableOpacity
           style={Styles.MiniButton}
           activeOpacity={0.8}
-          onPress={handlephonecert}
+          onPress={ValidPnum}
           >
           <Text style={Styles.MiniButtonText}>전송</Text>
         </TouchableOpacity>
