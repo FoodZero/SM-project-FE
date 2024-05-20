@@ -18,6 +18,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from "axios";
 import messaging from '@react-native-firebase/messaging';
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 
 const Register = () => {
   const navigation = useNavigation();
@@ -243,11 +244,14 @@ const App = () => {
     }catch(error){
       console.log(error);
       console.log(data);
+      showToast();
+
     }finally{
       setLoading(false);
       //navigation.navigate("Home");
     }
   }, [loading,UserEmail,UserPassword]);
+
 
   //본인인증 문자 검사 (비용나가는거 방지하기 위해 연결 끊어둠)
   const ValidPnum = useCallback(async () => {
@@ -265,10 +269,46 @@ const App = () => {
     }catch(error){
       console.log(error);
       console.log(data);
+     
     }finally{
       setLoading(false);
     }
   }, [loading,UserPnum]);
+  
+  const showToast = () => {
+    Toast.show({
+      type: 'errortoast',
+      position: 'top',
+
+      visibilityTime: 2000,
+    });
+  }
+
+  const toastConfig = {
+    'errortoast': ({errtext}) => (
+      <View 
+        style={{
+          backgroundColor: '#A2A2A2',
+          flexDirection: 'row',
+          alignItems: 'center',
+          alignContent: 'center',
+          height: BasicWidth* 39,
+          width: BasicHeight* 190,
+          padding: 10,
+          borderRadius: 10, 
+        }}>
+        <Text
+          style={{
+            color: '#FFFFFF',
+            alignSelf: 'center',
+            marginLeft: BasicWidth*19,
+          }}
+        >
+          회원가입에 실패했습니다.
+        </Text>
+      </View>
+    ),
+  };
 
     return (
       <SafeAreaView style={Styles.Container}>
@@ -403,6 +443,7 @@ const App = () => {
       </View>
       </View>
       </ScrollView>
+      <Toast config={toastConfig} />
       </SafeAreaView>
     );
 }

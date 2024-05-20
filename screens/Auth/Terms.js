@@ -86,7 +86,7 @@ const Terms = () => {
         </View>
           <View style={Styles.HometextArea}>
             <Text style={Styles.HomeText}>
-              이용약관에 동의해주세요
+              이용약관에{"\n"}동의해주세요
             </Text>
           </View>
           <View style={Styles.TermAreaAll}>

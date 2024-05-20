@@ -177,8 +177,8 @@ const PermissionModal = ({ isVisible, onClose})=>{
                     <View style={Styles.Pearea1}>
                         <Icon name = "bell" size = {25} color= "#3873EA"/>
                         <View style={Styles.explarea1}>
-                            <Text style={Styles.exptitle1}>알림(선택)</Text>
-                            <Text>유통기한 마감 디데이 확인, 레시피 추천 팝업, 커뮤니티 알림</Text>
+                            <Text style={Styles.exptitle}>알림(선택)</Text>
+                            <Text style={Styles.expmin1}>유통기한 마감 디데이 확인,{"\n"} 레시피 추천 팝업, 커뮤니티 알림</Text>
                         </View>  
                     </View>
                 </View>
@@ -233,6 +233,8 @@ const Styles = StyleSheet.create({
         marginLeft: BasicWidth*20,
         marginTop: BasicHeight*50,
         fontSize:25,
+        fontWeight: 'bold',
+        color: '#000000',
     },
     Minititle: {
         width: BasicWidth*195,
@@ -258,6 +260,7 @@ const Styles = StyleSheet.create({
         width: BasicWidth*113,
         height: BasicHeight*26,
         fontSize: 18,
+        color: '#000000',
     },
     expmin:{
         width: BasicWidth*191,
@@ -277,20 +280,20 @@ const Styles = StyleSheet.create({
     },
     Pearea1:{
         width:BasicWidth*177,
-        height: BasicHeight*49,
+        height: BasicHeight*72,
         marginLeft: BasicWidth*21,
         flexDirection: 'row',
         alignItems: "center",
     },
     explarea1:{
         width: BasicWidth*237,
-        height: BasicHeight*49,
+        height: BasicHeight*72,
         marginLeft: BasicWidth*18,
     },
-    exptitle1:{
-        width: BasicWidth*113,
-        height: BasicHeight*26,
-        fontSize: 18,
+    expmin1:{
+        width: BasicWidth*211,
+        height: BasicHeight*46,
+        fontSize: 16,
     },
 });
 
