@@ -35,14 +35,26 @@ const Register = () => {
 };
 //안드로이드 기기자체 뒤로가기 눌렀을 때 작동하는 함수
   useEffect(() => {
+    const getData = () => {
+        // 'tasks'항목에 저장된 자료 
+        const info = AsyncStorage.getItem('terms');
+        const msg = AsyncStorage.getItem('alert');
+        if(info && msg != null){
+          setisinfo(true);
+          setismessage(true);
+        }
+    };
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction,
     );
-
+    getData();
+    console.log(ismessage);
+    console.log(isinfo);
     return () => backHandler.remove();
   }, []);
-  
+
+
   //백엔드로 보내줘야 하는 값 저장용 state
   const [UserEmail, setUserEmail] = useState();
   const [UserPassword, setUserPassword] = useState();
@@ -52,6 +64,8 @@ const Register = () => {
 
   //유효성 검사와 같은 boolean으로 표기해야 하는 함수들
   const [loading, setLoading] = useState(false);
+  const [ismessage, setismessage] = useState(false);
+  const [isinfo, setisinfo] = useState(false);
   const [isRegistraionSuccess, setIsRegistraionSuccess] = useState(false);
   const [ValidEmail, setValidEmail] = useState(false);
   const [ValidPassword, setValidPassword] = useState(false);
@@ -149,6 +163,8 @@ const Register = () => {
 
   //닉네임 중복검사(버튼 클릭시 작동)
   const NickFind = useCallback(async () => {
+    console.log(ismessage);
+    console.log(isinfo);
     if(loading){
       return;
     }
@@ -173,8 +189,9 @@ const Register = () => {
     password: UserPassword,
     nickname: UserNick,
     phone:UserPnum,
-    infoAgree: true,
-    messageAgree: true,
+    infoAgree: isinfo,
+    messageAgree: ismessage,
+    //토큰 후추
     certificationCode:UserchkPnum,
   };
   //회원가입 전체 전달 api연결 (!!!분기 부분 추가 요망!!!)
@@ -404,6 +421,7 @@ const Styles = StyleSheet.create({
       width: BasicWidth*111,
       height: BasicHeight*45,
       fontSize: 30,
+      fontWeight: "700",
     },
 
     InputArea : {

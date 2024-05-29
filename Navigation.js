@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import Splash from './screens/Splash/splash';
 import Login from './screens/Auth/Login';
+import Terms from './screens/Auth/Terms';
 import Register from './screens/Auth/Register';
 import KaKaoLogin from './screens/Auth/KakaoLogin';
 import FindEmail from './screens/Auth/EmailScreen/FindEmail';
@@ -33,6 +34,7 @@ function StackScreen() {
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="KaKaoLogin" component={KaKaoLogin} />
       <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="Terms" component={Terms} />
       <Stack.Screen name="FindEmail" component={FindEmail} />
       <Stack.Screen name="EmailNotice" component={EmailNotice} />
       <Stack.Screen name="FindPassword" component={FindPassword} />

@@ -15,33 +15,20 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "infoPlist" :{
-        "NSCameraUsageDescription" : "영수증 및 음식 촬영.",
-        "NSPhotoLibraryUsageDescription" : "영수증 음식 품목 읽기",
-        "NSLocationUsageDescription" : "위치기반 서비스 제공 시 필요",
-        "" : "알림권한"
-      }
+      "supportsTablet": true
     },
     "android": {
+      "android": {
+        "blockedPermissions": ["android.permission.CAMERA"]
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "blockedPermissions": 
-        [
-          "android.permission.CAMERA",
-          "android.permission.LOCATION",
-          "android.permission.READ_EXTERNAL_STORAGE",
-          "android.permission.WRITE_EXTERNAL_STORAGE",
-          "android.permission.VIBRATE"
-
-        ]
+      }
 
     },
     "web": {
       "favicon": "./assets/favicon.png"
     }
-    
   }
 }

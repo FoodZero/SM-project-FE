@@ -10,28 +10,40 @@ import {
   Image,
   ScrollView,
   TouchableWithoutFeedback,
+  PermissionsAndroid,
 } from 'react-native';
 import CheckBox from 'expo-checkbox';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Font from "expo-font";
+import PermissionModal from '../Splash/PermissionModal';
+import { AutoFocus, Camera, CameraType } from 'expo-camera';
 
 const Login = () => {
   const navigation = useNavigation();
-  //둘다 맞을때만 홈화면으로 이동가능하게 하는 것만 남았음
-  const testlogin = async () => {
-    const data = {
-        email: UserEmail,
-        password: UserPassword,
-    };
-    try {
-        const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/login', data);
-        console.log(response.data);
-    } catch (error) {
-        console.error(error);
+
+  useEffect(() => {
+    console.log(`Open Modal`);
+    setModalVisible(true);
+  }, []);
+
+  /*
+  const [fontLoaded, setFontLoaded] = useState(false);
+  useEffect(() => {
+    async function loadFont() {
+      await Font.loadAsync({
+        'Notosans': require('../../assets/Fonts/NotoSansKR-Light.ttf'),
+      });
+      setFontLoaded(true);
+      
     }
-}
+    loadFont();
+  }, []);
+  */
+  //둘다 맞을때만 홈화면으로 이동가능하게 하는 것만 남았음
   const onLogin = (data) =>{
     console.log(data);
     navigation.navigate("Login");
@@ -46,10 +58,10 @@ const Login = () => {
   const [ValidEmail, setValidEmail] = useState(false);
   const [ValidPassword, setValidPassword] = useState(false);
   const [ValidUser, setValidUser] = useState(false);
-
-  const EmailInputRef = createRef();
+  const [isModalVisible, setModalVisible] = useState(false);
+  const EmailInputRef = createRef(); 
   const PasswordInputRef = createRef();
-
+  
   const HandleEmailChk = (text) =>{
     let emailRegex = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,}$/i;
 
@@ -88,8 +100,17 @@ const Login = () => {
     email: UserEmail,
     password: UserPassword,
   };
-  
-  const HandleLogin = useCallback(async () => {
+  const HandleLogin = () =>{
+    HandleServer();
+    if(ValidUser == true){
+    console.log('홈화면으로 이동합니다');
+    navigation.navigate("Home");
+    }
+    else{
+      console.log('로그인에 문제가 있습니다.');
+    }
+  };
+  const HandleServer = useCallback(async () => {
 
     if(loading){
       return;
@@ -100,16 +121,41 @@ const Login = () => {
     }catch(error){
       console.log(error);
       console.log(data);
+      setValidUser(false);
     }finally{
       setLoading(false);
-      //navigation.navigate("Home");
+      setValidUser(true);
     }
   }, [loading,UserEmail,UserPassword]);
 
+  const handleModal = () => {
+    // Add logic to find email using the entered phone number
+    // This could involve making an API call to your server, for example.
+    console.log(`Open Modal`);
+    setModalVisible(true);
+  };
+
+  const FCMcheck = useCallback(async () => {
+
+    if(loading){
+      return;
+    }
+    try{
+      setLoading(true);
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/fcm/send',null)
+    }catch(error){
+      console.log(error);
+      console.log(data);
+    }finally{
+      console.log(response);
+    }
+  }, [loading]);
+
   return (
     //로그인
-    <SafeAreaView style={Styles.Container}>
+      <SafeAreaView style={Styles.Container}>
       <ScrollView style = {Styles.Scroll}>
+      <PermissionModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} />
       <View style = {Styles.BackContainer}>
         <View style = {Styles.IconContainer}>
           <TouchableOpacity onPress={() => alert('뒤로가기')}>
@@ -160,16 +206,16 @@ const Login = () => {
 
       <View style = {Styles.CheckboxesContainer}>
 
-        <View style = {Styles.CheckboxContainer}>
+        <View style = {Styles.CheckboxContainer1}>
           <CheckBox
               value={loginSelected}
               onValueChange={setloginSelection}
               style={Styles.Checkbox}
               color={loginSelected? '#CAF6FF': undefined}/>
-          <Text style={Styles.CheckboxText}>자동로그인</Text>
+          <Text style={Styles.CheckboxText}>자동 로그인</Text>
         </View>
 
-        <View style = {Styles.CheckboxContainer}>
+        <View style = {Styles.CheckboxContainer2}>
           <CheckBox
               value={idSelected}
               onValueChange={setidSelection}
@@ -189,10 +235,19 @@ const Login = () => {
           <Text style={Styles.ButtonText}>로그인</Text>
         </TouchableOpacity>
       </View>
-  
+      <View style={Styles.ButtonArea}>
+        <TouchableOpacity
+          style={Styles.Button}
+          activeOpacity={0.8}
+          onPress={FCMcheck}
+          >
+          <Text style={Styles.ButtonText}>FCM</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style = {Styles.MiniButtonContainer}>
         <TouchableOpacity
-          onPress={() => navigation.navigate("Register", { screen: 'Register' })}>
+          onPress={() => navigation.navigate("Terms", { screen: 'Terms' })}>
           <Text style = {Styles.MiniText}> 회원가입 </Text>
         </TouchableOpacity>
         <Text> | </Text>
@@ -269,6 +324,8 @@ const Styles = StyleSheet.create({
       width: BasicWidth*83,
       height: BasicHeight*45,
       fontSize: 30,
+      fontWeight: "700",
+      //fontFamily: "Notosans",
     },
 
     InputArea1 : {
@@ -288,7 +345,8 @@ const Styles = StyleSheet.create({
 
     Lables : {
       fontSize : 20,
-      marginBottom : BasicHeight*5
+      marginBottom : BasicHeight*5,
+      //fontFamily: "Notosans",
     },
 
     TextForm : {
@@ -298,6 +356,7 @@ const Styles = StyleSheet.create({
       borderColor : "#E2E2E2",
       borderWidth : 1,
       paddingHorizontal : 10,
+      //fontFamily: "Notosans",
     },
     Text : {
         width: BasicWidth*141,
@@ -305,6 +364,7 @@ const Styles = StyleSheet.create({
         marginLeft: BasicWidth*10,
         color: '#E82323',
         fontSize: 13,
+        //fontFamily: "Notosans"
         //alignSelf: 'stretch',
       },
 
@@ -318,22 +378,33 @@ const Styles = StyleSheet.create({
       justifyContent: 'center',
     },
 
-    CheckboxContainer : {
+    CheckboxContainer1 : {
       flexDirection: 'row',
       alignSelf: 'center',
+      alignContent: 'center',
       justifyContent: 'center',
-      alignItems: 'center',
-      
+
+    },
+
+    CheckboxContainer2 : {
+      flexDirection: 'row',
+      alignSelf: 'center',
+      alignContent: 'center',
+      justifyContent: 'center',
+      marginLeft : BasicWidth*33,
     },
 
     Checkbox : {
+      alignSelf: 'center',
     },
 
     CheckboxText : {
       width: BasicWidth*87,
       height: BasicHeight*26,
+      paddingLeft : BasicWidth*10,
+      flexWrap: 'wrap',
       fontSize: 18,
-      alignContent: 'center',
+      //fontFamily: "Notosans"
     },
 
     MiniButtonContainer : {
@@ -348,7 +419,7 @@ const Styles = StyleSheet.create({
     },
 
     MiniText : {
-
+      //fontFamily: "Notosans"
     },
 
     ButtonArea : {
@@ -397,6 +468,7 @@ const Styles = StyleSheet.create({
       fontWeight : '700',
       fontSize : 20,
       color : '#332024',
+      //fontFamily: "Notosans"
     },
     
     FastLables : {
@@ -405,6 +477,7 @@ const Styles = StyleSheet.create({
       marginTop : 25,
       marginBottom : 5,
       textAlign : 'center',
+      //fontFamily: "Notosans"
     },
 
     Scroll:{
