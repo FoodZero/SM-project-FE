@@ -35,17 +35,22 @@ const KaKaoLogin = () => {
         },
       }).then((response) => {
         console.log(response);
-        AccessToken = response.data.access_token;
+        AccessToken = response.data.result.accessToken;
+        
         //console.log(AccessToken);
           //requestUserInfo(AccessToken);
         // Check if isSuccess is false
     if (!response.data.isSuccess) {
       navigation.navigate("Signup", { screen: "Signup" });
       //회원가입화면으로 이동
+     
+      
     } else {
       // If isSuccess is true, proceed with storing the access token
       storeData(AccessToken);
-      
+      console.log("accesstoken:",AccessToken);
+      navigation.navigate("screen1", { screen: "screen1" });
+      navigation.navigate("screen1", { AccessToken: AccessToken });
     }
   }) .catch (function (error) {
     console.log('error', error);

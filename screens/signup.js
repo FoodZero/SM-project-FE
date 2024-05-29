@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-//http://www.sm-project-refrigerator.store/api/members/callback/kakao
 const Signup = () => {
 
   const navigation = useNavigation();
@@ -26,10 +25,10 @@ const Signup = () => {
     <View style={Styles.container}>      
       <Text style={Styles.HomeText}>회원가입 화면</Text>
       <TouchableOpacity
-          onPress={() => navigation.navigate( "Home", { screen: "Home"} )}
+          onPress={() => navigation.navigate( "screen3", { screen: "screen3"} )}
           style={Styles.NextBottom}
         >
-          <Text style={Styles.BottomText}>홈 화면으로</Text>
+          <Text style={Styles.BottomText}>screen3</Text>
         </TouchableOpacity>
     </View>
   )
