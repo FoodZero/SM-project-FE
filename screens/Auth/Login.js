@@ -11,6 +11,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   PermissionsAndroid,
+  AppState,
 } from 'react-native';
 import CheckBox from 'expo-checkbox';
 import { useNavigation } from "@react-navigation/native";
@@ -19,6 +20,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PermissionModal from '../Splash/PermissionModal';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 const Login = () => {
   const navigation = useNavigation();
@@ -112,7 +114,8 @@ const Login = () => {
     HandleServer();
     if(ValidUser == true){
     console.log('홈화면으로 이동합니다');
-    navigation.navigate("Home");
+    const AccessToken = AsyncStorage.getItem("userAccessToken");
+    navigation.navigate("FoodInput", { AccessToken: AccessToken });
     }
     else{
       console.log('로그인에 문제가 있습니다.');
@@ -128,6 +131,8 @@ const Login = () => {
     try{
       setLoading(true);
       const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/login',data)
+      console.log(response);
+      await AsyncStorage.setItem('userAccessToken', response.data.result.accessToken);
     }catch(error){
       console.log(error);
       console.log(data);
@@ -135,6 +140,8 @@ const Login = () => {
     }finally{
       setLoading(false);
       setValidUser(true);
+      const AccessToken = await AsyncStorage.getItem("userAccessToken");
+      console.log(AccessToken);
     }
   }, [loading,UserEmail,UserPassword]);
 
@@ -178,7 +185,7 @@ const Login = () => {
           }
         />
         {
-          ValidEmail ? (<Text style= {Styles.Text}>이메일을 입력해주세요</Text>) : (<Text style= {Styles.Text}> </Text>)
+          ValidEmail ? (<Text style= {Styles.Text}>이메일을 입력해주세요.</Text>) : (<Text style= {Styles.Text}> </Text>)
         }
       </View>
 
@@ -195,7 +202,7 @@ const Login = () => {
           ref = {PasswordInputRef}
         />
         {
-          ValidPassword ? (<Text style= {Styles.Text}>비밀번호를 입력해 주세요</Text>) : (<Text style= {Styles.Text}> </Text>)
+          ValidPassword ? (<Text style= {Styles.Text}>비밀번호를 입력해 주세요.</Text>) : (<Text style= {Styles.Text}> </Text>)
         }
       </View>
 
@@ -282,7 +289,7 @@ const BasicHeight =(
 const Styles = StyleSheet.create({
     Container: {
       flex: 1,
-      backgroundColor: '#FFFFFF'
+      backgroundColor: '#FFFFFF',
     },
 
     BackContainer: {
@@ -311,8 +318,9 @@ const Styles = StyleSheet.create({
       width: BasicWidth*83,
       height: BasicHeight*45,
       fontSize: 30,
-      fontWeight: "700",
-      //fontFamily: "Notosans",
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Bold',
+      color: '#000000',
     },
 
     InputArea1 : {
@@ -333,7 +341,9 @@ const Styles = StyleSheet.create({
     Lables : {
       fontSize : 20,
       marginBottom : BasicHeight*5,
-      //fontFamily: "Notosans",
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     TextForm : {
@@ -343,7 +353,8 @@ const Styles = StyleSheet.create({
       borderColor : "#E2E2E2",
       borderWidth : 1,
       paddingHorizontal : 10,
-      //fontFamily: "Notosans",
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
     },
     Text : {
         width: BasicWidth*141,
@@ -351,8 +362,8 @@ const Styles = StyleSheet.create({
         marginLeft: BasicWidth*10,
         color: '#E82323',
         fontSize: 13,
-        //fontFamily: "Notosans"
-        //alignSelf: 'stretch',
+        includeFontPadding: false,
+        fontFamily: 'NotoSansKR-Light',
       },
 
     CheckboxesContainer : {
@@ -390,8 +401,10 @@ const Styles = StyleSheet.create({
       height: BasicHeight*26,
       paddingLeft : BasicWidth*10,
       flexWrap: 'wrap',
-      fontSize: 18,
-      //fontFamily: "Notosans"
+      fontSize: 16,
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     MiniButtonContainer : {
@@ -406,7 +419,9 @@ const Styles = StyleSheet.create({
     },
 
     MiniText : {
-      //fontFamily: "Notosans"
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     ButtonArea : {
@@ -433,9 +448,11 @@ const Styles = StyleSheet.create({
     },
     ButtonText :{
           alignSelf : 'center',
-          fontWeight : '700',
           fontSize : 20,
           color : '#FFFFFF',
+          includeFontPadding: false,
+          fontFamily: 'NotoSansKR-Bold',
+          
         },
 
     FastButton : {
@@ -452,10 +469,10 @@ const Styles = StyleSheet.create({
     
     FastButtonText :{
       alignSelf : 'center',
-      fontWeight : '700',
       fontSize : 20,
-      color : '#332024',
-      //fontFamily: "Notosans"
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Bold',
+      color: '#000000',
     },
     
     FastLables : {
@@ -464,7 +481,9 @@ const Styles = StyleSheet.create({
       marginTop : 25,
       marginBottom : 5,
       textAlign : 'center',
-      //fontFamily: "Notosans"
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     Scroll:{

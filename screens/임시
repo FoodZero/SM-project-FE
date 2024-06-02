@@ -1,0 +1,92 @@
+import React, { useRef, useState } from 'react';
+import { View, Button, Alert } from 'react-native';
+import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import { useIsFocused } from '@react-navigation/native';
+import RNFS from 'react-native-fs';
+
+const CameraScreen = () => {
+  const [isCameraInitialized, setIsCameraInitialized] = useState(false);
+  const [imageSource, setImageSource] = useState(null);
+  const [filepath, setFilepath] = useState(null);
+  const cameraRef = useRef(null);
+  const devices = useCameraDevices();
+  const device = devices.back;
+  const isFocused = useIsFocused();
+  const TOKEN = 'YOUR_ACCESS_TOKEN';
+
+  const onInitialized = () => {
+    setIsCameraInitialized(true);
+  };
+
+  const capturePhoto = async () => {
+    if (!cameraRef.current) return;
+
+    try {
+      const photo = await cameraRef.current.takePhoto({
+        quality: 0.5,
+        skipMetadata: true,
+      });
+
+      console.log(photo);
+      setImageSource(photo.path);
+
+      const fileName = photo.path.split('mrousavy-')[1];
+      const newPath = `${RNFS.TemporaryDirectoryPath}/${fileName}.jpg`;
+      await RNFS.moveFile(photo.path, newPath);
+      setFilepath(newPath);
+
+      uploadPhoto(newPath);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const uploadPhoto = async (photoUri) => {
+    try {
+      const base64Data = await RNFS.readFile(photoUri, 'base64');
+
+      const response = await fetch('http://www.sm-project-refrigerator.store/api/food/receipt', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: base64Data }),
+      });
+
+      if (!response.ok) {
+        console.error('Server response:', response);
+      }
+
+      const responseText = await response.text();
+      console.log('Server response:', responseText);
+      Alert.alert('Upload Success', 'Image uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading photo', error);
+      Alert.alert('Upload Failed', 'Image upload failed');
+    }
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      {device != null && isFocused ? (
+        <Camera
+          style={{ flex: 1 }}
+          device={device}
+          isActive={isFocused}
+          ref={cameraRef}
+          onInitialized={onInitialized}
+        />
+      ) : (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Button title="Camera not available" disabled />
+        </View>
+      )}
+      {isCameraInitialized && (
+        <Button title="Take Photo and Upload" onPress={capturePhoto} />
+      )}
+    </View>
+  );
+};
+
+export default CameraScreen;

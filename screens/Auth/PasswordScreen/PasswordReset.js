@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet , SafeAreaView, ScrollView} from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import axios from 'axios';
 
 const PasswordReset = () => {
+  const route = useRoute();
+  const { Email } = route.params;
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordsMatch, setPasswordsMatch] = useState(true);
@@ -14,7 +17,7 @@ const PasswordReset = () => {
       // Add logic to handle password reset (e.g., make an API call to update the password)
       console.log('Password reset successful');
       console.log(`reset password is :${confirmPassword}`);
-      
+      passwordreset();
     } else {
       // Passwords do not match, display an error message
       setPasswordsMatch(false);
@@ -24,7 +27,7 @@ const PasswordReset = () => {
   const handleClose = () => {
     // Add logic to close the screen, navigate back, or perform any other action
     console.log('Closing the screen...');
-    navigation.navigate("Login");
+    navigation.navigate('FindPassword');
   };
 
   const handleRetrieveEmail = () => {
@@ -33,8 +36,31 @@ const PasswordReset = () => {
     navigation.navigate('FindEmail');
   };
 
+  const data1 = {
+    email: Email,
+    newPassword: password,
+    passwordCheck: confirmPassword,
+  };
+  const passwordreset = async () => {
+    try {
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/password/reset', data1); // Assuming data2 is defined somewhere
+      console.log(response);
+      if (response.data.isSuccess) { 
+       
+       // navigation.navigate("home"); // Navigate to home screen
+      } else {
+        // If isSuccess is false, proceed with storing the access token
+        console.log("Response indicates failure.");
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
       <Text style={styles.headerText}>비밀번호 재설정</Text>
       <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
         <Text style={styles.closeButtonText}>X</Text>
@@ -66,7 +92,8 @@ const PasswordReset = () => {
       <TouchableOpacity style={styles.retrieveButton} onPress={handleRetrieveEmail}>
         <Text style={styles.retrieveButtonText}>이메일 찾기</Text>
       </TouchableOpacity>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -76,10 +103,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    marginTop:30,
   },
   headerText: {
     fontSize: 30,
-    fontWeight: 'bold',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
     marginBottom: 40,
     marginRight: 150,
    
@@ -87,6 +116,8 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 10,
     fontSize: 16,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
     marginRight:255,
   },
   input: {
@@ -112,17 +143,20 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   closeButton: {
     position: 'absolute',
-    top: 10,
+    top: 0,
     right: 10,
-    padding: 10,
-   
+    padding: 0,
   },
   closeButtonText: {
     fontSize: 25,
     color: 'black',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   retrieveButton: {
     padding: 5,
@@ -132,7 +166,10 @@ const styles = StyleSheet.create({
   retrieveButtonText: {
     textDecorationLine: 'underline',
     fontSize: 16,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
     color: 'black',
+    marginLeft: 130,
   },
 
 });

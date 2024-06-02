@@ -213,7 +213,9 @@ const Styles = StyleSheet.create({
       width: BasicWidth*166,
       height: BasicHeight*90,
       fontSize: 30,
-      fontWeight: "700",
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Bold',
+      color: '#000000',
     },
     Button : {
       width: BasicWidth*325,
@@ -236,7 +238,8 @@ const Styles = StyleSheet.create({
 
     ButtonText :{
       alignSelf : 'center',
-      fontWeight : '700',
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Bold',
       fontSize : 20,
       color : '#FFFFFF',
     },
@@ -268,14 +271,20 @@ const Styles = StyleSheet.create({
     EmailText:{
       width: BasicWidth*76,
       height: BasicHeight*23,
-      fontSize: 16,
+
       textDecorationLine: 'underline',
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
     TermText:{
       width: BasicWidth*197,
       height: BasicHeight*22,
       marginLeft: BasicWidth*15,
       fontSize: 15,
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
     Termicons:{
       height:BasicHeight*23,

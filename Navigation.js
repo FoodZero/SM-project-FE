@@ -9,18 +9,21 @@ import Login from './screens/Auth/Login';
 import Terms from './screens/Auth/Terms';
 import Register from './screens/Auth/Register';
 import KaKaoLogin from './screens/Auth/KakaoLogin';
+import Signin from './screens/Auth/KakaoScreen/Signin';
 import FindEmail from './screens/Auth/EmailScreen/FindEmail';
 import EmailNotice from './screens/Auth/EmailScreen/EmailNotice';
 import FindPassword from './screens/Auth/PasswordScreen/FindPassword';
 import PasswordReset from './screens/Auth/PasswordScreen/PasswordReset';
 import Home from './screens/home';
 
-import Screen1 from './screens/screen1';
-import Screen2 from './screens/screen2';
+import FoodInput from './screens/FoodInput';
+import FoodDetail from './screens/FoodInputDetail';
 import Screen3 from './screens/screen3';
 import Screen4 from './screens/screen4';
 import Screen5 from './screens/screen5';
 import Screen6 from './screens/screen6';
+
+import CameraScreen from './screens/Camerascreen';
 
 const Stack = createStackNavigator();
 
@@ -33,12 +36,16 @@ function StackScreen() {
       <Stack.Screen name="Splash" component={Splash} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="KaKaoLogin" component={KaKaoLogin} />
+      <Stack.Screen name="Signin" component={Signin} />
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="Terms" component={Terms} />
       <Stack.Screen name="FindEmail" component={FindEmail} />
       <Stack.Screen name="EmailNotice" component={EmailNotice} />
       <Stack.Screen name="FindPassword" component={FindPassword} />
       <Stack.Screen name="PasswordReset" component={PasswordReset} />
+      <Stack.Screen name= "CameraScreen" component={CameraScreen} />
+      <Stack.Screen name="FoodInput" component={FoodInput} />
+      <Stack.Screen name="FoodDetail" component={FoodDetail} />
       <Stack.Screen name="Home" component={BottomStack} />
     </Stack.Navigator>
   );
@@ -49,8 +56,7 @@ const TopTab = createMaterialTopTabNavigator();
 function Top1() {
   return (
     <TopTab.Navigator>
-      <TopTab.Screen name="Top1 Screen1" component={Screen1} />
-      <TopTab.Screen name="Top1 Screen2" component={Screen2} />
+
     </TopTab.Navigator>
   )
 }

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet,ScrollView, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import PasswordModal from './PasswordModal';
+import axios from 'axios';
+    
 
-  
 const FindPassword = () => {
   const [Email, setEmail] = useState('');
   const [certificationNumber, setcertificationNumber] = useState('');
@@ -16,10 +17,13 @@ const FindPassword = () => {
     // Add logic to find email using the entered phone number
     // This could involve making an API call to your server, for example.
     console.log(`Finding password for email: ${Email}`);
+    
     setTimerActive(true);
     startTimer();
     setModalVisible(true);
+    certificationrequest();
   };
+  
 
   const startTimer = () => {
     // Set up a timer that updates every second
@@ -41,7 +45,8 @@ const FindPassword = () => {
   const handlecertificationNumber = () => {
    
     console.log(`certification Number is:${certificationNumber}`);
-    navigation.navigate('PasswordReset');
+    certificationsend();
+   
   };
   
   const handleRetrieveEmail = () => {
@@ -53,11 +58,48 @@ const FindPassword = () => {
   const handleClose = () => {
     // Add logic to close the screen, navigate back, or perform any other action
     console.log('Closing the screen...');
-    navigation.navigate("Login");
+    navigation.navigate('FindEmail');
   };
 
+
+  const data1 = {
+    email: Email,
+  };
+  const certificationrequest = async () => {
+    
+  
+    try {
+        const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/password/send', data1);
+        console.log(response);
+    } catch (error) {
+        console.error(error);
+    }
+  }
+
+  const data2 = {
+    email: Email,
+    certificationCode: certificationNumber,
+  };
+  const certificationsend = async () => {
+    try {
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/password', data2); // Assuming data2 is defined somewhere
+      console.log(response);
+      if (response.data.isSuccess) { 
+       
+        navigation.navigate("PasswordReset", { Email }); // Navigate to PasswordReset screen
+      } else {
+        // If isSuccess is false, proceed with storing the access token
+        console.log("Response indicates failure.");
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
       <Text style={styles.headerText}>비밀번호 찾기</Text>
       <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
         <Text style={styles.closeButtonText}>X</Text>
@@ -92,7 +134,8 @@ const FindPassword = () => {
       <TouchableOpacity style={styles.retrieveButton} onPress={handleRetrieveEmail}>
         <Text style={styles.retrieveButtonText}>이메일 찾기</Text>
       </TouchableOpacity>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -102,10 +145,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    marginLeft:30,
+    marginTop:40,
   },
   headerText: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 30,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
     marginBottom: 80,
     marginRight: 180,
   },
@@ -119,11 +165,15 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 25,
     color: 'black',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   label: {
     marginBottom: 10,
     fontSize: 16,
     marginRight:260,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   certificationNumberinput: {
     height: 40,
@@ -136,6 +186,8 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 18,
     marginTop: 10,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   phoneNumberinput: {
 
@@ -179,22 +231,30 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   retrieveButton: {
     padding: 5,
     marginBottom:200,
-    marginTop:20
+    marginTop:20,
+    marginLeft:110,
   },
   retrieveButtonText: {
     textDecorationLine: 'underline',
     fontSize: 16,
     color: 'black',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
 
   timerText: {
     fontSize: 12,
     marginTop: 10,
+    marginLeft:110,
     color: 'gray',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
 
 });

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 
 
-  
+
 const FindEmail = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [certificationNumber, setcertificationNumber] = useState('');
@@ -13,8 +14,8 @@ const FindEmail = () => {
 
   const handleFindEmail = () => {
     // Add logic to find email using the entered phone number
-    // This could involve making an API call to your server, for example.
     console.log(`Finding email for phone number: ${phoneNumber}`);
+    certificationrequest();
     setTimerActive(true);
     startTimer();
   };
@@ -35,11 +36,12 @@ const FindEmail = () => {
       });
     }, 1000);
   };
-
+  
   const handlecertificationNumber = () => {
    
-    console.log(`certification Number is:${certificationNumber}`);
-    navigation.navigate('EmailNotice');
+    console.log(`certification Number is: ${certificationNumber}`);
+    certificationsend();
+   
   };
   
   const handleRetrievePassword = () => {
@@ -51,11 +53,49 @@ const FindEmail = () => {
   const handleClose = () => {
     // Add logic to close the screen, navigate back, or perform any other action
     console.log('Closing the screen...');
-    navigation.navigate("Login");
+  };
+
+ var REQ_PARAM1 ={"phone" : phoneNumber }
+  const certificationrequest = async () => {
+    var AccessToken = "none";
+    axios ({
+      method: 'POST',
+      url:'http://www.sm-project-refrigerator.store/api/members/send',
+      headers:{"Content-Type" : "application/json; charset=utf-8"},
+      data:JSON.stringify(REQ_PARAM1),
+    }).then(function(response){
+      console.log(response);
+  }) .catch (function (error) {
+  console.log('error', error);
+  });
+};
+//이메일 찾기 인증코드 보내는 api
+var REQ_PARAM2 = {
+  "phone": phoneNumber,
+  "certificationCode":certificationNumber};
+
+  const certificationsend = async () => {
+    var AccessToken = "none";
+    axios({
+      method: 'POST',
+      url: 'http://www.sm-project-refrigerator.store/api/members/email',
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      data: JSON.stringify(REQ_PARAM2),
+    }).then(function (response) {
+      if (response.data.isSuccess) {
+        const Email = response.data.result.email;
+        navigation.navigate('EmailNotice', { Email }); // 이메일 주소를 함께 전달
+      } else {
+        console.log("Email not found or an error occurred.");
+      }
+    }).catch(function (error) {
+      console.log('error', error);
+    });
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
       <Text style={styles.headerText}>이메일 찾기</Text>
       <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
         <Text style={styles.closeButtonText}>X</Text>
@@ -89,7 +129,8 @@ const FindEmail = () => {
       <TouchableOpacity style={styles.retrieveButton} onPress={handleRetrievePassword}>
         <Text style={styles.retrieveButtonText}>비밀번호 찾기</Text>
       </TouchableOpacity>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -99,16 +140,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    marginLeft:30,
+    marginTop:40,
   },
   headerText: {
     fontSize: 30,
-    fontWeight: 'bold',
-    marginBottom: 80,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Bold',
+    marginBottom: 90,
     marginRight: 200,
   },
   closeButton: {
     position: 'absolute',
-    top: 10,
+    top: 0,
     right: 10,
     padding: 10,
    
@@ -116,11 +160,15 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 25,
     color: 'black',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   label: {
     marginBottom: 10,
     fontSize: 16,
     marginRight:240,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   certificationNumberinput: {
     height: 40,
@@ -133,6 +181,8 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 18,
     marginTop: 10,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   phoneNumberinput: {
 
@@ -160,6 +210,7 @@ const styles = StyleSheet.create({
     width: '90%',
     marginBottom: 10,
     marginTop: 40,
+    
   },
 
   sendButton: {
@@ -171,27 +222,36 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginLeft: 10,
     height: 40,
+    
   },
 
   buttonText: {
     color: 'white',
     fontSize: 16,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
   retrieveButton: {
     padding: 5,
     marginBottom:200,
-    marginTop:20
+    marginTop:20,
+    marginLeft:106,
   },
   retrieveButtonText: {
     textDecorationLine: 'underline',
     fontSize: 16,
     color: 'black',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
 
   timerText: {
     fontSize: 12,
     marginTop: 10,
     color: 'gray',
+    marginLeft:120,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
   },
 
 });

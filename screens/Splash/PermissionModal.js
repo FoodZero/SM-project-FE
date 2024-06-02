@@ -15,6 +15,7 @@ import { PERMISSIONS, RESULTS, request, requestMultiple, Permission, check } fro
 
 
 const PermissionModal = ({ isVisible, onClose})=>{
+    const [includeFontPadding, setIncludeFontPadding] = useState(false);
     const storeData = async (Alert) => {
         //
         try {
@@ -30,13 +31,15 @@ const PermissionModal = ({ isVisible, onClose})=>{
       const requestPermission = async () => {
         const camera = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.CAMERA) : await request(PERMISSIONS.ANDROID.CAMERA);
         const photo = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.PHOTO_LIBRARY) : await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
+        const media = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.PHOTO_LIBRARY) : await request(PERMISSIONS.ANDROID.ACCESS_MEDIA_LOCATION);
         const location = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE) : await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-        //const notification = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.NOTIFICATIONS) : await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
+        const notification = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.NOTIFICATIONS) : await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
     
         console.log('Camera Permission : ', camera);
         console.log('Photo Permission : ', photo);
+        console.log('Photo Permission : ', media);
         console.log('Location Permission : ', location);
-        //console.log('Notification Permission : ', notification);
+        console.log('Notification Permission : ', notification);
     
         storeData();
     };
@@ -188,7 +191,7 @@ const PermissionModal = ({ isVisible, onClose})=>{
                     style={Styles.ButtonArea}
                     onPress={requestPermission}
                 >
-                    <Text>확인</Text>
+                    <Text style={Styles.buttontext} >확인</Text>
                 </TouchableOpacity>
                 </View>
             </View>
@@ -232,16 +235,19 @@ const Styles = StyleSheet.create({
         height: BasicHeight*45,
         marginLeft: BasicWidth*20,
         marginTop: BasicHeight*50,
-        fontSize:25,
-        fontWeight: 'bold',
         color: '#000000',
+        fontSize: 25,
+        fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
     },
     Minititle: {
         width: BasicWidth*195,
         height: BasicHeight*26,
         marginLeft: BasicWidth*20,
         fontSize: 18,
-        marginBottom: BasicHeight*71
+        marginBottom: BasicHeight*71,
+        fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
     },
     Pearea:{
         width:BasicWidth*177,
@@ -261,11 +267,15 @@ const Styles = StyleSheet.create({
         height: BasicHeight*26,
         fontSize: 18,
         color: '#000000',
+        fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
     },
     expmin:{
         width: BasicWidth*191,
         height: BasicHeight*23,
         fontSize: 16,
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
     },
     ButtonArea:{
         width: BasicWidth*325,
@@ -294,7 +304,15 @@ const Styles = StyleSheet.create({
         width: BasicWidth*211,
         height: BasicHeight*46,
         fontSize: 16,
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
     },
+    buttontext:{
+        fontFamily: 'NotoSansKR-Bold',
+        includeFontPadding: false,
+        fontSize: 20,
+        color: '#FFFFFF',
+    }
 });
 
 export default PermissionModal;

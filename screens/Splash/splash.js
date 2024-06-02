@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Splashimage from '../../assets/Images/splashimg.png';
+import Splashimage from '../../src/assets/splash.png';
 import { useNavigation } from "@react-navigation/native";
 import PermissionModal from './PermissionModal';
 
