@@ -4,10 +4,16 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-import Splash from './screens/splash';
-import signin from './screens/signin';
-import signup from './screens/signup';
-import KaKaoLogin from './screens/kakaologin';
+
+import Splash from './screens/Splash/splash';
+import Login from './screens/Auth/Login';
+import Terms from './screens/Auth/Terms';
+import Register from './screens/Auth/Register';
+import KaKaoLogin from './screens/Auth/KakaoLogin';
+import FindEmail from './screens/Auth/EmailScreen/FindEmail';
+import EmailNotice from './screens/Auth/EmailScreen/EmailNotice';
+import FindPassword from './screens/Auth/PasswordScreen/FindPassword';
+import PasswordReset from './screens/Auth/PasswordScreen/PasswordReset';
 import Home from './screens/home';
 
 import Screen1 from './screens/screen1';
@@ -23,11 +29,19 @@ function StackScreen() {
   return (
     <Stack.Navigator
       initialRouteName="Splash"
+
+      screenOptions = {{ headerShown: false }}
     >
       <Stack.Screen name="Splash" component={Splash} />
-      <Stack.Screen name="Signin" component={signin} />
+      <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="KaKaoLogin" component={KaKaoLogin} />
-      <Stack.Screen name="Signup" component={signup} />
+      <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="Terms" component={Terms} />
+      <Stack.Screen name="FindEmail" component={FindEmail} />
+      <Stack.Screen name="EmailNotice" component={EmailNotice} />
+      <Stack.Screen name="FindPassword" component={FindPassword} />
+      <Stack.Screen name="PasswordReset" component={PasswordReset} />
+
       <Stack.Screen name="Home" component={BottomStack} />
     </Stack.Navigator>
   );
