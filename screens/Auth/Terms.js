@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -87,12 +86,12 @@ const Terms = () => {
         </View>
           <View style={Styles.HometextArea}>
             <Text style={Styles.HomeText}>
-              이용약관에 동의해주세요
+              이용약관에{"\n"}동의해주세요
             </Text>
           </View>
           <View style={Styles.TermAreaAll}>
             <TouchableOpacity onPress={Allcheck}>
-              <Icon name = "check-circle-outline" size = {22} color= {Allchk? "#3873EA" :"#AFAFAF"}/>
+              <Icon name = "check-circle-outline" size = {22} color= {Termchk && Privchk && Locachk? "#3873EA" :"#AFAFAF"}/>
             </TouchableOpacity>
             <Text style={Styles.TermText}>
               약관 전체동의
@@ -214,7 +213,9 @@ const Styles = StyleSheet.create({
       width: BasicWidth*166,
       height: BasicHeight*90,
       fontSize: 30,
-      fontWeight: "700",
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Bold',
+      color: '#000000',
     },
     Button : {
       width: BasicWidth*325,
@@ -237,7 +238,8 @@ const Styles = StyleSheet.create({
 
     ButtonText :{
       alignSelf : 'center',
-      fontWeight : '700',
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Bold',
       fontSize : 20,
       color : '#FFFFFF',
     },
@@ -269,14 +271,20 @@ const Styles = StyleSheet.create({
     EmailText:{
       width: BasicWidth*76,
       height: BasicHeight*23,
-      fontSize: 16,
+
       textDecorationLine: 'underline',
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
     TermText:{
       width: BasicWidth*197,
       height: BasicHeight*22,
       marginLeft: BasicWidth*15,
       fontSize: 15,
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
     Termicons:{
       height:BasicHeight*23,

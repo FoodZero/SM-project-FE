@@ -9,19 +9,23 @@ import Splash from './screens/Splash/splash';
 import Login from './screens/Auth/Login';
 import Terms from './screens/Auth/Terms';
 import Register from './screens/Auth/Register';
-import KaKaoLogin from './screens/Auth/KakaoLogin';
+import KaKaoLogin from './screens/Auth/KakaoScreen/KakaoLogin';
 import FindEmail from './screens/Auth/EmailScreen/FindEmail';
 import EmailNotice from './screens/Auth/EmailScreen/EmailNotice';
 import FindPassword from './screens/Auth/PasswordScreen/FindPassword';
 import PasswordReset from './screens/Auth/PasswordScreen/PasswordReset';
 import Home from './screens/home';
 
+import FoodInput from './screens/FoodInput';
+import FoodDetail from './screens/FoodInputDetail';
 import Screen1 from './screens/screen1';
 import Screen2 from './screens/screen2';
 import Screen3 from './screens/screen3';
 import Screen4 from './screens/screen4';
 import Screen5 from './screens/screen5';
 import Screen6 from './screens/screen6';
+
+import CameraScreen from './screens/Camerascreen';
 
 const Stack = createStackNavigator();
 
@@ -41,7 +45,9 @@ function StackScreen() {
       <Stack.Screen name="EmailNotice" component={EmailNotice} />
       <Stack.Screen name="FindPassword" component={FindPassword} />
       <Stack.Screen name="PasswordReset" component={PasswordReset} />
-
+      <Stack.Screen name= "CameraScreen" component={CameraScreen} />
+      <Stack.Screen name="FoodInput" component={FoodInput} />
+      <Stack.Screen name="FoodDetail" component={FoodDetail} />
       <Stack.Screen name="Home" component={BottomStack} />
     </Stack.Navigator>
   );

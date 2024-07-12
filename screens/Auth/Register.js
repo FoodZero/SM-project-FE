@@ -13,15 +13,47 @@ import {
     ScrollView,
     BackHandler,
     Alert,
+    SafeAreaView,
 } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from "axios";
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 
 const Register = () => {
   const navigation = useNavigation();
 
-  // 뒤로가기 액션함수
+  const checkToken = async () => {
+    const fcmToken = await messaging().getToken();
+    if (fcmToken) {
+       console.log(fcmToken);
+    } 
+   };
+   
+   const requestUserPermission = async () => {
+    await notifee.requestPermission();
+  
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  
+    return enabled;
+  };
+
+/*
+const App = () => {
+  const foregroundListener = useCallback(() => {
+    messaging().onMessage(async message => {
+      console.log(message)
+    })
+  }, [])
+      
+  useEffect(() => {
+    foregroundListener()  
+  }, [])
+}
+*/
+
+  // 뒤로가기 액션함수 >>>modal창으로 수정필요<<<
   const backAction = () => {
   Alert.alert('잠시만요!', '입력내용이 저장되지 않습니다.\n이전 단계로 돌아갈까요?', [
     {
@@ -33,7 +65,8 @@ const Register = () => {
   ]);
   return true;
 };
-//안드로이드 기기자체 뒤로가기 눌렀을 때 작동하는 함수
+
+//안드로이드 기기 자체 뒤로가기 눌렀을 때 작동하는 함수
   useEffect(() => {
     const getData = () => {
         // 'tasks'항목에 저장된 자료 
@@ -44,15 +77,25 @@ const Register = () => {
           setismessage(true);
         }
     };
+
+    //FCM토큰값 가져오기
+    const checkToken = async () => {
+      const fcmToken = await messaging().getToken();
+      console.log(fcmToken);
+      setUserFCMtoken(fcmToken);
+     };
+    
+     //뒤로가기 버튼 이벤트
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction,
     );
     getData();
-    console.log(ismessage);
-    console.log(isinfo);
+    checkToken();
+    //console.log(ismessage);
+    //console.log(isinfo);
     return () => backHandler.remove();
-  }, []);
+  }, [UserFCMtoken]);
 
 
   //백엔드로 보내줘야 하는 값 저장용 state
@@ -61,6 +104,7 @@ const Register = () => {
   const [UserPnum, setUserPnum] = useState();
   const [UserchkPnum, setUserchkPnum] = useState();
   const [UserNick, setUserNick] = useState();
+  const [UserFCMtoken, setUserFCMtoken] = useState();
 
   //유효성 검사와 같은 boolean으로 표기해야 하는 함수들
   const [loading, setLoading] = useState(false);
@@ -134,9 +178,9 @@ const Register = () => {
     startTimer();
   };
 
+  //타이머 초기화 함수
   const timerReset = () => {
     setTimer = 180;
-
   };
 
   // 타이머 세팅 (다시 눌렀을 때 시간이 2배로 빨리가고, reset안되는 문제 해결해야함!!!!!!!)
@@ -149,7 +193,7 @@ const Register = () => {
           return prevTimer - 1;
         }
         if(prevTimer = 0){
-          return timerReset;
+          return timerReset();
         }
         else {
           // If the timer reaches 0, stop the timer
@@ -184,6 +228,7 @@ const Register = () => {
     }
   }, [loading,UserNick]);
 
+  //회원가입 data
   const data = {
     email: UserEmail,
     password: UserPassword,
@@ -191,9 +236,10 @@ const Register = () => {
     phone:UserPnum,
     infoAgree: isinfo,
     messageAgree: ismessage,
-    //토큰 후추
+    fcmToken: UserFCMtoken,
     certificationCode:UserchkPnum,
   };
+
   //회원가입 전체 전달 api연결 (!!!분기 부분 추가 요망!!!)
   const HandleRegister = useCallback(async () => {
     if(loading){
@@ -205,17 +251,20 @@ const Register = () => {
     }catch(error){
       console.log(error);
       console.log(data);
+      showToast();
+
     }finally{
       setLoading(false);
       //navigation.navigate("Home");
     }
   }, [loading,UserEmail,UserPassword]);
 
+
   //본인인증 문자 검사 (비용나가는거 방지하기 위해 연결 끊어둠)
   const ValidPnum = useCallback(async () => {
     setTimerActive(true);
     startTimer();
-    /*
+    
     if(loading){
       return;
     }
@@ -227,12 +276,50 @@ const Register = () => {
     }catch(error){
       console.log(error);
       console.log(data);
+     
     }finally{
       setLoading(false);
-      //navigation.navigate("Home");
     }
-    */
   }, [loading,UserPnum]);
+
+  //토스트 메세지 함수
+  const showToast = () => {
+    Toast.show({
+      type: 'errortoast',
+      position: 'top',
+
+      visibilityTime: 2000,
+    });
+  }
+
+  //토스트 메세지 커스텀 함수
+  const toastConfig = {
+    'errortoast': ({errtext}) => (
+      <View 
+        style={{
+          backgroundColor: '#A2A2A2',
+          flexDirection: 'row',
+          alignItems: 'center',
+          alignContent: 'center',
+          height: BasicWidth* 39,
+          width: BasicHeight* 190,
+          padding: 5,
+          borderRadius: 10, 
+        }}>
+        <Text
+          style={{
+            color: '#FFFFFF',
+            alignSelf: 'center',
+            marginLeft: BasicWidth*15,
+            includeFontPadding: false,
+            fontFamily: 'NotoSansKR-Regular',
+          }}
+        >
+          회원가입에 실패했습니다.
+        </Text>
+      </View>
+    ),
+  };
 
     return (
       <SafeAreaView style={Styles.Container}>
@@ -367,6 +454,7 @@ const Register = () => {
       </View>
       </View>
       </ScrollView>
+      <Toast config={toastConfig} />
       </SafeAreaView>
     );
 }
@@ -418,10 +506,12 @@ const Styles = StyleSheet.create({
     },
 
     HomeText : {
-      width: BasicWidth*111,
-      height: BasicHeight*45,
+      width: BasicWidth*150,
+      height: BasicHeight*50,
       fontSize: 30,
-      fontWeight: "700",
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Bold',
+      color: '#000000',
     },
 
     InputArea : {
@@ -432,7 +522,10 @@ const Styles = StyleSheet.create({
     },
     Lables : {
       fontSize : 20,
-      marginBottom : BasicHeight*5
+      marginBottom : BasicHeight*5,
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     PnumInputArea : {
@@ -458,6 +551,8 @@ const Styles = StyleSheet.create({
       borderColor : "#E2E2E2",
       borderWidth : 1,
       paddingHorizontal : 10,
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
     },
 
     AuthForm : {
@@ -472,9 +567,11 @@ const Styles = StyleSheet.create({
 
     AuthText:{
       width: BasicWidth*115,
-      height: BasicHeight*29,
+      height: BasicHeight*50,
       fontSize : 20,
-      
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     PnumTime:{
@@ -482,7 +579,9 @@ const Styles = StyleSheet.create({
       height: BasicHeight*29,
       fontSize : 20,
       color: "#AFAFAF",
-      marginLeft: BasicWidth*160
+      marginLeft: BasicWidth*160,
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
     },
 
     PnumForm : {
@@ -493,6 +592,9 @@ const Styles = StyleSheet.create({
       borderColor : "#E2E2E2",
       borderWidth : 1,
       paddingHorizontal : 10,
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     NickForm : {
@@ -503,6 +605,9 @@ const Styles = StyleSheet.create({
       borderColor : "#E2E2E2",
       borderWidth : 1,
       paddingHorizontal : 10,
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     Text : {
@@ -511,7 +616,8 @@ const Styles = StyleSheet.create({
       marginLeft: BasicWidth*10,
       color: '#E82323',
       fontSize: 13,
-      //alignSelf: 'stretch',
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
     },
 
     ValidText : {
@@ -520,7 +626,8 @@ const Styles = StyleSheet.create({
       marginLeft: BasicWidth*10,
       color: '#3873EA',
       fontSize: 13,
-      //alignSelf: 'stretch',
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
     },
 
     ButtonArea : {
@@ -541,9 +648,10 @@ const Styles = StyleSheet.create({
     },
     ButtonText :{
       alignSelf : 'center',
-      fontWeight : '700',
       fontSize : 20,
       color : '#FFFFFF',
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Bold',
     },
 
     MiniButton : {
@@ -556,9 +664,10 @@ const Styles = StyleSheet.create({
     },
     MiniButtonText :{
       alignSelf : 'center',
-      fontWeight : '700',
       fontSize : 20,
       color : '#FFFFFF',
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
     },
     MiniArea:{
       width: BasicWidth*325,
@@ -580,6 +689,8 @@ const Styles = StyleSheet.create({
       fontWeight : '700',
       fontSize : 20,
       color : '#FFFFFF',
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
     },
     NickArea:{
       width: BasicWidth*325,

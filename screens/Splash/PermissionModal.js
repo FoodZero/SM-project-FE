@@ -7,14 +7,15 @@ import {
     Dimensions,
     StyleSheet,
     Alert,
-    PermissionsAndroid
 } from "react-native";
 import Icon from 'react-native-vector-icons/SimpleLineIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Camera, CameraType } from 'expo-camera';
+
 
 const PermissionModal = ({ isVisible, onClose})=>{
+    const [includeFontPadding, setIncludeFontPadding] = useState(false);
     const storeData = async (Alert) => {
+        //
         try {
           // 'tasks' 라는 항목에 tasks 저장
           await AsyncStorage.setItem('alert', 'Alert');
@@ -25,96 +26,23 @@ const PermissionModal = ({ isVisible, onClose})=>{
           onClose();
         }
       };
-
-      useEffect(() => {
-        const permissionCheck = () => {
-          if (Platform.OS !== "ios" && Platform.OS !== "android") return;
-          const platformPermissions =
-            Platform.OS === "ios"
-              ? PERMISSIONS.IOS.CAMERA
-              : PERMISSIONS.ANDROID.CAMERA;
-          const requestCameraPermission = async () => {
-            try {
-              const result = await request(platformPermissions);
-              result === RESULTS.GRANTED
-                ? setOpenScanner(true)
-                : Alert.alert("카메라 권한을 허용해주세요");
-            } catch (err) {
-              Alert.alert("Camera permission err");
-              console.warn(err);
-            }
-          };
-          requestCameraPermission();
-        };
-      }, []);
-    /*
-    const [hasPermission, setHasPermission] = useState(null);
-
-      const openCameraHandler = async() =>{
-        const {response} = await Permissions.requestPermssions(Permissions.CAMERA);
-        console.log(response);
-      };
-      useEffect(() => {
-        openCameraHandler();
-        console.log(response);
-        onClose();
-      }, []);
-*/
-    /*
-    const requestPermisison = async () => {
-        const response = await Permissions.askAsync(Permissions.CAMERA);
-        console.log(response);
-      };
-      useEffect(() => {
-        requestPermisison();
-      }, []);
-      */
 /*
-    const AndroidRP  = () => {
-        requestMultiple([
-            PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-            PERMISSIONS.ANDROID.CAMERA,
-            PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
-            PERMISSIONS.ANDROID.POST_NOTIFICATIONS,
-        ]).then(response => {
-            console.log('Permission Request : ',response);
-        });
-    };
+      const requestPermission = async () => {
+        const camera = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.CAMERA) : await request(PERMISSIONS.ANDROID.CAMERA);
+        const photo = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.PHOTO_LIBRARY) : await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
+        const media = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.PHOTO_LIBRARY) : await request(PERMISSIONS.ANDROID.ACCESS_MEDIA_LOCATION);
+        const location = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE) : await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+        const notification = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.NOTIFICATIONS) : await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
     
-    const AndroidCP  = () => {
-        checkMultiple([
-            PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-            PERMISSIONS.ANDROID.CAMERA,
-            PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
-            PERMISSIONS.ANDROID.POST_NOTIFICATIONS,
-        ]).then(response => {
-            console.log('Permission Check : ',response);
-        });
-    };
-    const IosRP  = () => {
-        requestMultiple([
-            PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-            PERMISSIONS.IOS.CAMERA,
-            PERMISSIONS.IOS.PHOTO_LIBRARY,
-            PERMISSIONS.IOS.REMINDERS,
-        ]).then(response => {
-            console.log('Permission Request : ',response);
-        });
-    };
+        console.log('Camera Permission : ', camera);
+        console.log('Photo Permission : ', photo);
+        console.log('Photo Permission : ', media);
+        console.log('Location Permission : ', location);
+        console.log('Notification Permission : ', notification);
     
-    const IosCP  = () => {
-        checkMultiple([
-            PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-            PERMISSIONS.IOS.CAMERA,
-            PERMISSIONS.IOS.PHOTO_LIBRARY,
-            PERMISSIONS.IOS.REMINDERS,
-        ]).then(response => {
-            console.log('Permission Check : ',response);
-        });
+        storeData();
     };
-*/
-
-    
+    */
     return(
         <Modal 
         animationType="slide"
@@ -157,8 +85,8 @@ const PermissionModal = ({ isVisible, onClose})=>{
                     <View style={Styles.Pearea1}>
                         <Icon name = "bell" size = {25} color= "#3873EA"/>
                         <View style={Styles.explarea1}>
-                            <Text style={Styles.exptitle1}>알림(선택)</Text>
-                            <Text>유통기한 마감 디데이 확인, 레시피 추천 팝업, 커뮤니티 알림</Text>
+                            <Text style={Styles.exptitle}>알림(선택)</Text>
+                            <Text style={Styles.expmin1}>유통기한 마감 디데이 확인,{"\n"} 레시피 추천 팝업, 커뮤니티 알림</Text>
                         </View>  
                     </View>
                 </View>
@@ -168,7 +96,7 @@ const PermissionModal = ({ isVisible, onClose})=>{
                     style={Styles.ButtonArea}
                     onPress={storeData}
                 >
-                    <Text>확인</Text>
+                    <Text style={Styles.buttontext} >확인</Text>
                 </TouchableOpacity>
                 </View>
             </View>
@@ -212,14 +140,19 @@ const Styles = StyleSheet.create({
         height: BasicHeight*45,
         marginLeft: BasicWidth*20,
         marginTop: BasicHeight*50,
-        fontSize:25,
+        color: '#000000',
+        fontSize: 25,
+        //fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
     },
     Minititle: {
         width: BasicWidth*195,
         height: BasicHeight*26,
         marginLeft: BasicWidth*20,
         fontSize: 18,
-        marginBottom: BasicHeight*71
+        marginBottom: BasicHeight*71,
+        //fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
     },
     Pearea:{
         width:BasicWidth*177,
@@ -238,11 +171,16 @@ const Styles = StyleSheet.create({
         width: BasicWidth*113,
         height: BasicHeight*26,
         fontSize: 18,
+        color: '#000000',
+        //fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
     },
     expmin:{
         width: BasicWidth*191,
         height: BasicHeight*23,
         fontSize: 16,
+        //fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
     },
     ButtonArea:{
         width: BasicWidth*325,
@@ -257,21 +195,29 @@ const Styles = StyleSheet.create({
     },
     Pearea1:{
         width:BasicWidth*177,
-        height: BasicHeight*49,
+        height: BasicHeight*72,
         marginLeft: BasicWidth*21,
         flexDirection: 'row',
         alignItems: "center",
     },
     explarea1:{
         width: BasicWidth*237,
-        height: BasicHeight*49,
+        height: BasicHeight*72,
         marginLeft: BasicWidth*18,
     },
-    exptitle1:{
-        width: BasicWidth*113,
-        height: BasicHeight*26,
-        fontSize: 18,
+    expmin1:{
+        width: BasicWidth*211,
+        height: BasicHeight*46,
+        fontSize: 16,
+        //fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
     },
+    buttontext:{
+        //fontFamily: 'NotoSansKR-Bold',
+        includeFontPadding: false,
+        fontSize: 20,
+        color: '#FFFFFF',
+    }
 });
 
 export default PermissionModal;

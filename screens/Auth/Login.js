@@ -9,8 +9,6 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  TouchableWithoutFeedback,
-  PermissionsAndroid,
 } from 'react-native';
 import CheckBox from 'expo-checkbox';
 import { useNavigation } from "@react-navigation/native";
@@ -18,18 +16,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Font from "expo-font";
 import PermissionModal from '../Splash/PermissionModal';
-import { AutoFocus, Camera, CameraType } from 'expo-camera';
 
 const Login = () => {
   const navigation = useNavigation();
-
+  
   useEffect(() => {
     console.log(`Open Modal`);
     setModalVisible(true);
   }, []);
 
+  //Font 적용문제만 남음!!
   /*
   const [fontLoaded, setFontLoaded] = useState(false);
   useEffect(() => {
@@ -43,15 +40,17 @@ const Login = () => {
     loadFont();
   }, []);
   */
-  //둘다 맞을때만 홈화면으로 이동가능하게 하는 것만 남았음
+  
   const onLogin = (data) =>{
     console.log(data);
     navigation.navigate("Login");
   };
 
+  // 이메일, 비밀번호 입력값받는 state
   const [UserEmail, setUserEmail] = useState("");
   const [UserPassword, setUserPassword] = useState("");
 
+  // 참/거짓값을 받는 state
   const [loading, setLoading] = useState(false);
   const [loginSelected, setloginSelection] = useState(false); 
   const [idSelected, setidSelection] = useState(false);
@@ -59,9 +58,12 @@ const Login = () => {
   const [ValidPassword, setValidPassword] = useState(false);
   const [ValidUser, setValidUser] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+
+  // 현재 이메일, 비밀번호를 받는 Ref
   const EmailInputRef = createRef(); 
   const PasswordInputRef = createRef();
   
+  // 이메일, 비밀번호 정규식
   const HandleEmailChk = (text) =>{
     let emailRegex = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,}$/i;
 
@@ -86,6 +88,7 @@ const Login = () => {
     }
   }
 
+  /*
   const HandleUser = (text) =>{
     setUserPassword(text)
     if(passwordRegex.test(text) == false){
@@ -95,21 +98,27 @@ const Login = () => {
       setValidPassword(false);
     }
   }
+*/
 
+//로그인 위한 데이터
   const data = {
     email: UserEmail,
     password: UserPassword,
   };
+
   const HandleLogin = () =>{
     HandleServer();
     if(ValidUser == true){
     console.log('홈화면으로 이동합니다');
-    navigation.navigate("Home");
+    const AccessToken = AsyncStorage.getItem("userAccessToken");
+    navigation.navigate("FoodInput", { AccessToken: AccessToken });
     }
     else{
       console.log('로그인에 문제가 있습니다.');
     }
   };
+
+  //로그인 위한 서버와 연결
   const HandleServer = useCallback(async () => {
 
     if(loading){
@@ -118,6 +127,8 @@ const Login = () => {
     try{
       setLoading(true);
       const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/login',data)
+      console.log(response);
+      await AsyncStorage.setItem('userAccessToken', response.data.result.accessToken);
     }catch(error){
       console.log(error);
       console.log(data);
@@ -125,31 +136,19 @@ const Login = () => {
     }finally{
       setLoading(false);
       setValidUser(true);
+      const AccessToken = await AsyncStorage.getItem("userAccessToken");
+      console.log(AccessToken);
     }
   }, [loading,UserEmail,UserPassword]);
 
+  /*
   const handleModal = () => {
     // Add logic to find email using the entered phone number
     // This could involve making an API call to your server, for example.
     console.log(`Open Modal`);
     setModalVisible(true);
   };
-
-  const FCMcheck = useCallback(async () => {
-
-    if(loading){
-      return;
-    }
-    try{
-      setLoading(true);
-      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/fcm/send',null)
-    }catch(error){
-      console.log(error);
-      console.log(data);
-    }finally{
-      console.log(response);
-    }
-  }, [loading]);
+  */
 
   return (
     //로그인
@@ -182,7 +181,7 @@ const Login = () => {
           }
         />
         {
-          ValidEmail ? (<Text style= {Styles.Text}>이메일을 입력해주세요</Text>) : (<Text style= {Styles.Text}> </Text>)
+          ValidEmail ? (<Text style= {Styles.Text}>이메일을 입력해주세요.</Text>) : (<Text style= {Styles.Text}> </Text>)
         }
       </View>
 
@@ -199,7 +198,7 @@ const Login = () => {
           ref = {PasswordInputRef}
         />
         {
-          ValidPassword ? (<Text style= {Styles.Text}>비밀번호를 입력해 주세요</Text>) : (<Text style= {Styles.Text}> </Text>)
+          ValidPassword ? (<Text style= {Styles.Text}>비밀번호를 입력해 주세요.</Text>) : (<Text style= {Styles.Text}> </Text>)
         }
       </View>
 
@@ -233,15 +232,6 @@ const Login = () => {
           onPress={HandleLogin}
           >
           <Text style={Styles.ButtonText}>로그인</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={Styles.ButtonArea}>
-        <TouchableOpacity
-          style={Styles.Button}
-          activeOpacity={0.8}
-          onPress={FCMcheck}
-          >
-          <Text style={Styles.ButtonText}>FCM</Text>
         </TouchableOpacity>
       </View>
 
@@ -295,7 +285,7 @@ const BasicHeight =(
 const Styles = StyleSheet.create({
     Container: {
       flex: 1,
-      backgroundColor: '#FFFFFF'
+      backgroundColor: '#FFFFFF',
     },
 
     BackContainer: {
@@ -324,8 +314,9 @@ const Styles = StyleSheet.create({
       width: BasicWidth*83,
       height: BasicHeight*45,
       fontSize: 30,
-      fontWeight: "700",
-      //fontFamily: "Notosans",
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Bold',
+      color: '#000000',
     },
 
     InputArea1 : {
@@ -346,7 +337,9 @@ const Styles = StyleSheet.create({
     Lables : {
       fontSize : 20,
       marginBottom : BasicHeight*5,
-      //fontFamily: "Notosans",
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     TextForm : {
@@ -356,7 +349,8 @@ const Styles = StyleSheet.create({
       borderColor : "#E2E2E2",
       borderWidth : 1,
       paddingHorizontal : 10,
-      //fontFamily: "Notosans",
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
     },
     Text : {
         width: BasicWidth*141,
@@ -364,8 +358,8 @@ const Styles = StyleSheet.create({
         marginLeft: BasicWidth*10,
         color: '#E82323',
         fontSize: 13,
-        //fontFamily: "Notosans"
-        //alignSelf: 'stretch',
+        includeFontPadding: false,
+        //fontFamily: 'NotoSansKR-Light',
       },
 
     CheckboxesContainer : {
@@ -375,7 +369,7 @@ const Styles = StyleSheet.create({
       marginRight: BasicWidth*58,
       marginLeft : BasicWidth*65,
       marginBottom : BasicHeight*30,
-      justifyContent: 'center',
+      //justifyContent: 'center',
     },
 
     CheckboxContainer1 : {
@@ -403,8 +397,10 @@ const Styles = StyleSheet.create({
       height: BasicHeight*26,
       paddingLeft : BasicWidth*10,
       flexWrap: 'wrap',
-      fontSize: 18,
-      //fontFamily: "Notosans"
+      fontSize: 16,
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     MiniButtonContainer : {
@@ -419,7 +415,9 @@ const Styles = StyleSheet.create({
     },
 
     MiniText : {
-      //fontFamily: "Notosans"
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     ButtonArea : {
@@ -446,9 +444,11 @@ const Styles = StyleSheet.create({
     },
     ButtonText :{
           alignSelf : 'center',
-          fontWeight : '700',
           fontSize : 20,
           color : '#FFFFFF',
+          includeFontPadding: false,
+          //fontFamily: 'NotoSansKR-Bold',
+          
         },
 
     FastButton : {
@@ -465,10 +465,10 @@ const Styles = StyleSheet.create({
     
     FastButtonText :{
       alignSelf : 'center',
-      fontWeight : '700',
       fontSize : 20,
-      color : '#332024',
-      //fontFamily: "Notosans"
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Bold',
+      color: '#000000',
     },
     
     FastLables : {
@@ -477,7 +477,9 @@ const Styles = StyleSheet.create({
       marginTop : 25,
       marginBottom : 5,
       textAlign : 'center',
-      //fontFamily: "Notosans"
+      includeFontPadding: false,
+      //fontFamily: 'NotoSansKR-Regular',
+      color: '#000000',
     },
 
     Scroll:{
