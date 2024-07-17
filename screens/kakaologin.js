@@ -1,4 +1,3 @@
-//'
 
 import React from "react";
 import { View, StyleSheet } from "react-native";
@@ -8,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 
 const REST_API_KEY = '09d652793b5af3f3b4e1587039feb0c4';
-const REDIRECT_URI = 'http://localhost:8081/api/members/callback/kakao';
+const REDIRECT_URI = 'http://172.30.1.85:8081/api/members/callback/kakao';
 const INJECTED_JAVASCRIPT = `window.ReactNativeWebView.postMessage('message from webView')`;
 
 const KaKaoLogin = () => {
@@ -28,21 +27,35 @@ const KaKaoLogin = () => {
     const requestToken = async (authorize_code) => {
       var AccessToken = "none";
       axios ({
-        method: 'post',
-        url: 'http://www.sm-project-refrigerator.store/api/members/callback/kakao',
+        method: 'GET',
+        url:'http://www.sm-project-refrigerator.store/api/members/callback/kakao',
         params: {
+       
           code: authorize_code,
         },
       }).then((response) => {
-        AccessToken = response.data.access_token;
+        console.log(response);
+        AccessToken = response.data.result.accessToken;
+        
         //console.log(AccessToken);
           //requestUserInfo(AccessToken);
-        storeData(AccessToken);
-      }).catch(function (error) {
-        console.log('error', error);
-      })
-      navigation.navigate("Signup", { screen: "Signup" } );
-    };
+        // Check if isSuccess is false
+    if (!response.data.isSuccess) {
+      navigation.navigate("Signup", { screen: "Signup" });
+      //회원가입화면으로 이동
+     
+      
+    } else {
+      // If isSuccess is true, proceed with storing the access token
+      storeData(AccessToken);
+      console.log("accesstoken:",AccessToken);
+      navigation.navigate("HomeMain", { screen: "HomeMain" });
+      navigation.navigate("HomeMain", { AccessToken: AccessToken });
+    }
+  }) .catch (function (error) {
+    console.log('error', error);
+  })
+};
   
      function requestUserInfo(AccessToken)  {
        axios ({
@@ -64,7 +77,7 @@ const KaKaoLogin = () => {
        return;
      }
   
-    const storeData = async (returnValue) => {
+     const storeData = async (returnValue) => {
       try {
         await AsyncStorage.setItem('userAccessToken', returnValue);
       } catch (error) {
