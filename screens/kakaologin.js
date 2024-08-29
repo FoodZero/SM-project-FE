@@ -48,9 +48,10 @@ const KaKaoLogin = () => {
     } else {
       // If isSuccess is true, proceed with storing the access token
       storeData(AccessToken);
-      console.log("accesstoken:",AccessToken);
+      navigation.navigate("CommunityTab",{ AccessToken: AccessToken });
       navigation.navigate("HomeMain", { screen: "HomeMain" });
       navigation.navigate("HomeMain", { AccessToken: AccessToken });
+      
     }
   }) .catch (function (error) {
     console.log('error', error);

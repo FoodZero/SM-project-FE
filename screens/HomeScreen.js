@@ -3,6 +3,9 @@ import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet, Image } from
 import { Fontisto, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
+
+
+
 const HomeScreen = ({ route, navigation }) => {
   const AccessToken = route.params?.AccessToken;
   
@@ -229,8 +232,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   refrigeratorImage: {
-    width: 265, // Set the desired width
-    height: 420, // Set the desired height
+    width: 270, // Set the desired width
+    height: 435, // Set the desired height
     marginBottom: 10,
   },
   deleteButton: {

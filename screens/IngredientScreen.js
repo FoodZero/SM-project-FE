@@ -31,9 +31,9 @@ const IngredientScreen = () => {
       return true;
     } else {
       return (
-        (isSelected2 && item.foodType === '냉장') ||
-        (isSelected3 && item.foodType === '냉동') ||
-        (isSelected4 && item.foodType === '실외')
+        (isSelected2 && item.foodType === 'COLD') ||
+        (isSelected3 && item.foodType === 'FROZEN') ||
+        (isSelected4 && item.foodType === 'OUTSIDE')
       );
     }
   }).filter(item => item.name.includes(searchText));
@@ -142,7 +142,7 @@ const AddFoodData = async (name, expire, foodType) => {
 
   const handleClose = () => {
     console.log('Closing the screen...');
-    navigation.navigate("HomeMain");
+    navigation.navigate("HomeMain", { AccessToken: AccessToken });
   };
 
   const handleEdit = () => {

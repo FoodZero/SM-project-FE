@@ -50,7 +50,7 @@ const DetailIngrediant = () => {
 
   const handleClose = () => {
     console.log('Closing the screen...');
-    navigation.navigate('Ingredient');
+    navigation.navigate('Ingredient', { AccessToken: AccessToken });
   };
 
   const handleSave = () => {
