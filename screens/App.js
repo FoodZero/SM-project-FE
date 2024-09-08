@@ -8,5 +8,6 @@ export default function App() {
       <BottomTabNavigator>
           <AlertBox />
       </BottomTabNavigator>
+
   );
 }

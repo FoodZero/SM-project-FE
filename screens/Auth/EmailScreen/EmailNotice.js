@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet,TouchableOpacity } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet,TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import Icon from 'react-native-vector-icons/AntDesign';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 
 
@@ -9,7 +9,8 @@ import { useNavigation } from '@react-navigation/native';
 const EmailNotice = () => {
 
 const navigation = useNavigation();
-
+const route = useRoute();
+const { Email } = route.params;
 const handlelogin = () => {
   // Add logic to close the screen, navigate back, or perform any other action
   console.log('login botton');
@@ -20,10 +21,11 @@ const handleRetrievePassword = () => {
   navigation.navigate('FindPassword');
 };
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
     <Text style={styles.headerText}>이메일 안내</Text>
-    <AntDesign name="checkcircleo" size={50} color="#3873EA" />
-    <Text style={styles.EmailinfoText}>회원님의 이메일 주소는 abcd@naver.com 입니다</Text>
+    <Icon name="checkcircleo" size={50} color="#3873EA" style={styles.icon}/>
+    <Text style={styles.EmailinfoText}>회원님의 이메일 주소는 {Email} 입니다</Text>
 
     <TouchableOpacity style={styles.findButton} onPress={handlelogin}>
         <Text style={styles.buttonText}>로그인</Text>
@@ -31,30 +33,35 @@ const handleRetrievePassword = () => {
       <TouchableOpacity style={styles.retrieveButton} onPress={handleRetrievePassword}>
         <Text style={styles.retrieveButtonText}>비밀번호 찾기</Text>
       </TouchableOpacity>
-    
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 
 const styles = StyleSheet.create({
   container: {
+    marginTop:40,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    marginLeft:30,
   },
   headerText: {
     fontSize: 30,
-    fontWeight: 'bold',
+    includeFontPadding: false,
+    //fontFamily: 'NotoSansKR-Bold',
     marginBottom: 10,
-    marginRight: 200,
+
     marginBottom: 100,
   },
   EmailinfoText: {
     fontSize: 20,
-    marginTop: 25,
+    marginTop: 60,
     marginBottom: 60,
+    includeFontPadding: false,
+    //fontFamily: 'NotoSansKR-Regular',
   },
   findButton: {
     backgroundColor: '#3873EA',
@@ -68,16 +75,26 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
+    includeFontPadding: false,
+    //fontFamily: 'NotoSansKR-Regular',
   },
   retrieveButton: {
     padding: 5,
     marginBottom:200,
-    marginTop:20
+    marginTop:20,
+    marginLeft:115,
   },
   retrieveButtonText: {
     textDecorationLine: 'underline',
     fontSize: 16,
     color: 'black',
+    includeFontPadding: false,
+    //fontFamily: 'NotoSansKR-Regular',
+  },
+  icon: {
+    position: 'absolute',
+    marginLeft: 135,
+    marginTop:110 ,
   },
   
 });

@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "InquiryProject",
-    "slug": "InquiryProject",
+    "name": "fridgefixer",
+    "slug": "fridgefixer",
+
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,10 +16,12 @@
       "supportsTablet": true
     },
     "android": {
+
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
+
     },
     "web": {
       "favicon": "./assets/favicon.png"
