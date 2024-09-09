@@ -38,7 +38,7 @@ const SharingPeople = ({ navigation }) => {
 
   // Function to navigate back to the previous screen
   const handleFinish = () => {
-    navigation.navigate("HomeScreen");
+    navigation.navigate("HomeMain");
   };
 
   // Render item function for FlatList

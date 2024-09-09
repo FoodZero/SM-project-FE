@@ -4,7 +4,6 @@ import { AntDesign } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import CheckBox from "expo-checkbox";
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const IngredientScreen = () => {
   const route = useRoute();
@@ -23,7 +22,8 @@ const IngredientScreen = () => {
    
   ]);
 
-  const refrigeratorId = route.params.id;
+  const AccessToken = route.params?.AccessToken;
+  const refrigeratorId = route.params?.id;
   const filteredData = data.filter(item => item.name.includes(searchText));
 
   const filteredDatabytype = data.filter(item => {
@@ -49,18 +49,15 @@ const IngredientScreen = () => {
     GetFoodData();
   }, []);
   
-
 const GetFoodData = async () => {
-  try {
-    const TOKEN = await AsyncStorage.getItem('userAccessToken');
- // const refrigeratorID = 125;
+  const headers = {
+    Authorization: `Bearer ${AccessToken}`
+  };
 
-  const response = await axios.get(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorID}`, {
-    headers: { Authorization: `Bearer ${TOKEN}` }
-  });
+  try {
+    const response = await axios.get(`http://www.sm-project-refrigerator.store/api/food/ ${refrigeratorId}`, { headers });
     console.log(response.data);
     const IngredientData = response.data.result.foodList;
-    console.log(response.data.result.foodList);
 
      // Calculate daysLeft for each item
      const now = new Date();
