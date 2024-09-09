@@ -15,7 +15,7 @@ import {
     Alert,
     SafeAreaView,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Back from '../../assets/Icons/back.svg';
 import axios from "axios";
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 
@@ -327,7 +327,7 @@ const App = () => {
         <View style = {Styles.BackContainer}>
           <View style = {Styles.IconContainer}>
             <TouchableOpacity onPress={backAction}>
-            <Icon name = "close" size = {20}/>
+            <Back/>
             </TouchableOpacity>
           </View>
           <View style = {Styles.HomeContainer}>

@@ -8,7 +8,7 @@ import { useNavigation, useRoute} from '@react-navigation/native';
 
 const Screen1 = () => {
   const route = useRoute();
-  const AccessToken = route.params?.AccessToken;
+  const AccessToken = AsyncStorage.getItem('userAccessToken');
   const [ingredientNames, setIngredientNames] = useState(['']); // Initial array with one empty string
   const [errorMessage, setErrorMessage] = useState('');
   const navigation = useNavigation();  
@@ -18,7 +18,7 @@ const Screen1 = () => {
     // 버튼이 눌렸을 때 수행할 작업을 여기에 작성하세요
     console.log('입력된 텍스트:', ingredientText);
     console.log('AccessToken:', AccessToken );
-    navigation.navigate('FoodDetail', { ingredient: ingredientText, AccessToken: AccessToken  }); 
+    navigation.navigate('FoodInputDetail', { ingredient: ingredientText}); 
   };
 
   const handleSave = () => {

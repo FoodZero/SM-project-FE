@@ -5,7 +5,7 @@ const Screen1 = () => {
 
   return (
     <View style={Styles.container}>      
-      <Text style={Styles.HomeText}>Screen3</Text>
+      <Text style={Styles.HomeText}>Home</Text>
     </View>
   )
 }

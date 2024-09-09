@@ -1,17 +1,45 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput } from 'react-native';
-import  AntDesign from 'react-native-vector-icons/AntDesign';
+import { AntDesign } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
 
 
 
-const Screen2 = () => {
-  const route = useRoute();
+const QuantityInput = ({ quantity, onIncrease, onDecrease }) => {
+  return (
+    <View style={styles.quantityContainer}>
+      
+      <View style={styles.quantityInputContainer}>
+      <Text style={styles.labelText}>수량 </Text>
+        <TouchableOpacity onPress={onDecrease}>
+          <AntDesign name="minus" size={24} color="#3873EA" />
+        </TouchableOpacity>
+        <TextInput
+          style={styles.quantityInput}
+          value={quantity.toString()}
+          keyboardType="numeric"
+          onChangeText={value => onQuantityChange(value)}
+        />
+        <TouchableOpacity onPress={onIncrease}>
+          <AntDesign name="plus" size={24} color="#3873EA" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const DetailIngrediant = () => {
+
+ 
   const navigation = useNavigation();
+  const route = useRoute();
   const AccessToken = route.params?.AccessToken;
+  const refrigeratorId = route.params?.refrigeratorId;
   const ingredient = route.params?.ingredient;
+  const FoodId = route.params?.FoodId;
+  const date = route.params?.date;
   const [isSelected1, setIsSelected1] = useState(false);
   const [isSelected2, setIsSelected2] = useState(false);
   const [isSelected3, setIsSelected3] = useState(false);
@@ -22,11 +50,11 @@ const Screen2 = () => {
 
   const handleClose = () => {
     console.log('Closing the screen...');
+    navigation.navigate('Ingredient', { AccessToken: AccessToken });
   };
 
   const handleSave = () => {
     console.log('Save button pressed');
-    console.log('AccessToken:', AccessToken );
    //console.log(`제품명: ${ingredient}`);
    //console.log(`유통기한: ${selectedDate}`);
    // console.log(`수량: ${quantity}`);
@@ -39,7 +67,7 @@ const Screen2 = () => {
    //   FoodType = 'OUTSIDE';
    // }
    // console.log(`음식타입: ${FoodType}`);
-    addfood();
+   ModifyFood();
   };
 
   const handleSelect1 = () => {
@@ -74,31 +102,9 @@ const Screen2 = () => {
   
 
 
-  const QuantityInput = ({ quantity, onIncrease, onDecrease }) => {
-    return (
-      <View style={styles.quantityContainer}>
-        
-        <View style={styles.quantityInputContainer}>
-        <Text style={styles.labelText}>수량 </Text>
-          <TouchableOpacity onPress={onDecrease}>
-            <AntDesign name="minus" size={24} color="#3873EA" />
-          </TouchableOpacity>
-          <TextInput
-            style={styles.quantityInput}
-            value={quantity.toString()}
-            keyboardType="numeric"
-            onChangeText={value => onQuantityChange(value)}
-          />
-          <TouchableOpacity onPress={onIncrease}>
-            <AntDesign name="plus" size={24} color="#3873EA" />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-  
 
-  const addfood = async () => {
+  const ModifyFood = async () => {
+  
     let FoodType = '';
     if (isSelected1) {
       FoodType = 'COLD';
@@ -107,20 +113,18 @@ const Screen2 = () => {
     } else if (isSelected3) {
       FoodType = 'OUTSIDE';
     }
-    const refrigeratorld = 10;
+    const headers = {
+      Authorization: `Bearer ${AccessToken}`
+    };
     const data = {
-      name: ingredient,
+      name: textInputValue,
       expire: selectedDate,
       count: quantity,
       foodType: FoodType,
     };
     
-    const headers = {
-      Authorization:`Bearer ${AccessToken}`
-    }
-
     try {
-        const response = await axios.post(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorld}`, data, {headers});
+        const response = await axios.put(`http://www.sm-project-refrigerator.store/api/food/${FoodId}/${refrigeratorId}`, data, { headers });
         console.log(response.data);
         
   
@@ -128,7 +132,7 @@ const Screen2 = () => {
         console.error(error);
     }
    
-  }
+  };
   
 
 
@@ -212,12 +216,10 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 30,
-    includeFontPadding: false,
-    //fontFamily: 'NotoSansKR-Bold',
+    fontWeight: 'bold',
     marginTop: 70,
     marginBottom: 50,
     marginRight: 190,
-    color: 'black',
   },
   backButton: {
     position: 'absolute',
@@ -253,8 +255,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     color: 'white',
-    includeFontPadding: false,
-    //fontFamily: 'NotoSansKR-Regular',
   },
   inputContainer: {
     borderWidth: 1,
@@ -265,17 +265,12 @@ const styles = StyleSheet.create({
     width: '90%',
   },
   inputText: {
+    color: '#000', // Set text color here
     fontSize: 16,
-    includeFontPadding: false,
-    //fontFamily: 'NotoSansKR-Regular',
-    color: '#000000',
   },
   labelText: {
     fontSize: 16,
     marginBottom: 5,
-    includeFontPadding: false,
-    //fontFamily: 'NotoSansKR-Regular',
-    color: '#000000',
   },
   quantityContainer: {
     borderWidth: 1,
@@ -297,9 +292,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
     width: 50,
     textAlign: 'center',
-    includeFontPadding: false,
-    //fontFamily: 'NotoSansKR-Regular',
-    color: '#000000',
   },
   textInput: {
     borderWidth: 1,
@@ -310,4 +302,5 @@ const styles = StyleSheet.create({
     width: '90%',
   },
 });
-export default Screen2;
+
+export default DetailIngrediant;

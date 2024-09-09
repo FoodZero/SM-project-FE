@@ -16,8 +16,25 @@ import FindPassword from './screens/Auth/PasswordScreen/FindPassword';
 import PasswordReset from './screens/Auth/PasswordScreen/PasswordReset';
 import Home from './screens/home';
 
-import FoodInput from './screens/FoodInput';
-import FoodDetail from './screens/FoodInputDetail';
+
+import HomeScreen from './screens/Home/HomeScreen';
+import IngredientScreen from './screens/Home/IngredientScreen';
+import DetailIngredientScreen from './screens/Home/DetailIngredientScreen';
+import FoodInput from './screens/Home/FoodInput';
+import FoodInputDetail from './screens/Home/FoodInputDetail';
+import CameraScreen from './screens/Home/Camerascreen';
+
+import RecipeMain from './screens/Recipe/RecipeMain';
+import GPTRecipeDetail from './screens/Recipe/GPTRecipeDetail';
+import GptRecipeList from './screens/Recipe/GptRecipeList';
+import RecipeDetail from './screens/Recipe/RecipeDetail';
+
+import CommunityScreen from './screens/Community/CommunityScreen';
+import CreatePostScreen from './screens/Community/CreatePostScreen';
+import DetailCommunityScreen from './screens/Community/DetailCommunityScreen';
+import LocationScreen from './screens/Community/LocationScreen';
+import SharingPeople from './screens/Home/SharingPeopleScreen';
+
 import Screen1 from './screens/screen1';
 import Screen2 from './screens/screen2';
 import Screen3 from './screens/screen3';
@@ -25,9 +42,22 @@ import Screen4 from './screens/screen4';
 import Screen5 from './screens/screen5';
 import Screen6 from './screens/screen6';
 
-import CameraScreen from './screens/Camerascreen';
+
+
+import HomeIcon from './assets/Icons/Home.svg';
+import HomeOnIcon from './assets/Icons/HomeOn.svg';
+
+import Recipe from './assets/Icons/Recipe.svg';
+import RecipeOn from './assets/Icons/RecipeOn.svg';
+
+import Community from './assets/Icons/Community.svg';
+import CommunityOn from './assets/Icons/CommunityOn.svg';
+
+import Setting from './assets/Icons/Setting.svg';
+import SettingOn from './assets/Icons/SettingOn.svg';
 
 const Stack = createStackNavigator();
+
 
 function StackScreen() {
   return (
@@ -45,9 +75,6 @@ function StackScreen() {
       <Stack.Screen name="EmailNotice" component={EmailNotice} />
       <Stack.Screen name="FindPassword" component={FindPassword} />
       <Stack.Screen name="PasswordReset" component={PasswordReset} />
-      <Stack.Screen name= "CameraScreen" component={CameraScreen} />
-      <Stack.Screen name="FoodInput" component={FoodInput} />
-      <Stack.Screen name="FoodDetail" component={FoodDetail} />
       <Stack.Screen name="Home" component={BottomStack} />
     </Stack.Navigator>
   );
@@ -55,33 +82,97 @@ function StackScreen() {
 
 const TopTab = createMaterialTopTabNavigator();
 
-function Top1() {
+function HomeTab() {
   return (
-    <TopTab.Navigator>
-      <TopTab.Screen name="Top1 Screen1" component={Screen1} />
-      <TopTab.Screen name="Top1 Screen2" component={Screen2} />
-    </TopTab.Navigator>
+    <Stack.Navigator
+      initialRouteName='HomeScreen'
+      screenOptions = {{ headerShown: true }}
+    >
+      <Stack.Screen name="HomeScreen" component={HomeScreen} />
+      <Stack.Screen name="Ingredient" component={IngredientScreen} />
+      <Stack.Screen name="DetailIngredient" component={DetailIngredientScreen} />
+      {/*<Stack.Screen name="CameraScreen" component={CameraScreen} />*/}
+      <Stack.Screen name="FoodInput" component={FoodInput} />
+      <Stack.Screen name="FoodInputDetail" component={FoodInputDetail} />
+      <Stack.Screen name="SharingPeople" component={SharingPeople} />
+    </Stack.Navigator>
   )
 }
 
-function Top2() {
+function RecipeTab() {
   return (
-    <TopTab.Navigator>
-      <TopTab.Screen name="Top2 Screen4" component={Screen4} />
-      <TopTab.Screen name="Top2 Screen5" component={Screen5} />
-      <TopTab.Screen name="Top2 Screen6" component={Screen6} />
-    </TopTab.Navigator>
+    <Stack.Navigator
+    initialRouteName="RecipeScreen"
+    screenOptions = {{ headerShown: false }}
+  >
+    <Stack.Screen name="RecipeMain" component={RecipeMain} />
+    <Stack.Screen name="GPTRecipeDetail" component={GPTRecipeDetail} />
+    <Stack.Screen name="GptRecipeList" component={GptRecipeList} />
+    <Stack.Screen name="RecipeDetail" component={RecipeDetail} />
+  </Stack.Navigator>
   )
+
+}
+
+function CommunityTab() {               
+  return (
+    <Stack.Navigator
+      initialRouteName="CommunityScreen"
+      screenOptions = {{ headerShown: false }}
+    >
+      <Stack.Screen name="CommunityScreen" component={CommunityScreen} />
+      <Stack.Screen name="CreatePostScreen" component={CreatePostScreen} />
+      <Stack.Screen name="DetailCommunityScreen" component={DetailCommunityScreen} />
+      <Stack.Screen name="LocationScreen" component={LocationScreen} />
+    </Stack.Navigator>
+  )
+}
+
+function SettingTab() {
+  <Stack.Navigator
+      initialRouteName="SettingScreen"
+      screenOptions = {{ headerShown: false }}
+    >
+      <Stack.Screen name="Top2 Screen6" component={Screen6} />
+    </Stack.Navigator>
 }
 
 const BottomTab = createBottomTabNavigator();
 
 function BottomStack() {
   return (
-    <BottomTab.Navigator>
-      <BottomTab.Screen name="Top1" component={Top1} />
-      <BottomTab.Screen name="Bottom" component={Screen3} />
-      <BottomTab.Screen name="Top2" component={Top2} />
+    <BottomTab.Navigator
+      active
+      screenOptions = {{ headerShown: false }}
+    >
+      <BottomTab.Screen
+        name="홈"
+        component={HomeTab}
+        options={{
+          tabBarIcon: ({ focused }) => (focused ? <HomeOnIcon /> : <HomeIcon />),
+        }}
+      />
+      <BottomTab.Screen
+        name="레시피"
+        component={RecipeTab}
+        options={{
+          tabBarIcon: ({ focused }) => (focused ? <RecipeOn /> : <Recipe />),
+        }}
+      />
+      <BottomTab.Screen
+        name="커뮤니티"
+        component={CommunityTab}
+        options={{
+          tabBarIcon: ({ focused }) => (focused ? <CommunityOn /> : <Community />),
+        }}
+      />
+      <BottomTab.Screen
+        name="설정"
+        component={SettingTab}
+        options={{
+          tabBarIcon: ({ focused }) => (focused ? <SettingOn /> : <Setting />),
+        }}
+      />
     </BottomTab.Navigator>
   );
 }

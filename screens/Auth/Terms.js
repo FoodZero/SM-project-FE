@@ -12,6 +12,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import X from '../../assets/Icons/X.svg';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Terms = () => {
@@ -81,7 +82,7 @@ const Terms = () => {
         <ScrollView style = {Styles.Scroll}>
         <View style = {Styles.IconContainer}>
           <TouchableOpacity onPress={backAction}>
-            <Icon name = "close" size = {20} />
+            <X />
           </TouchableOpacity>
         </View>
           <View style={Styles.HometextArea}>

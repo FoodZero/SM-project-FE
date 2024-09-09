@@ -9,6 +9,7 @@ import {
   Linking,
   Image,
 } from 'react-native';
+import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ICON from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
@@ -47,11 +48,12 @@ const CameraScreen = () => {
       setImageSource(photo.path);
       setShowCamera(false);
       await CameraRoll.save(`file://${photo.path}`, {
-        type: 'photo',
+        type: 'Photos',
+        MimeTypes: 'image/jpeg',
       })
       
       const fileName = photo.path.split('mrousavy-')[1];
-      const newPath = `${RNFS.PicturesDirectoryPath}/${fileName}`;
+      const newPath = `file://${RNFS.PicturesDirectoryPath}/${fileName}`;
       await RNFS.moveFile(photo.path, newPath);
       console.log(newPath);
       setFilepath(newPath);
@@ -64,111 +66,50 @@ const CameraScreen = () => {
     //사진 업로드
     const uploadPhoto = async (photoUri) => {
       try {
-       const TOKEN = await AsyncStorage.getItem('userAccessToken');
+          const TOKEN = await AsyncStorage.getItem('userAccessToken');
 
-        const formData = new FormData();
-        formData.append({
-          uri: photoUri,
-          name: 'receipt.jpg',
-          });
-
-        const response = await fetch('http://www.sm-project-refrigerator.store/api/food/receipt', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            Authorization: `Bearer ${TOKEN}`,
-          },
-        });
-        const responseText = await response.text();
-        console.log('Server response:', responseText);
-        
-        if (!response.ok) {
-          console.error('Server response:', response);
-          return;
-        }
-    
-        //const responseText = await response.text();
-        //console.log('Server response:', responseText);
-      } catch (error) {
-        console.error('Error uploading photo', error);
+          const image = {
+            uri: photoUri,
+            type: 'image/jpeg',
+            name: 'receipt',
+          }
+          const formData = new FormData();
+          formData.append('receipt', image);
+  
+          const headers = {
+              "Content-Type": 'multipart/form-data',
+              Authorization: `Bearer ${TOKEN}`,
+          };
+  
+          const response = await axios.post('http://www.sm-project-refrigerator.store/api/food/receipt', formData, { headers: headers });
+  
+          console.log('Server response:', response.data);
+  
+          if (response.status !== 200) {
+              console.error('Server response:', response);
+              return;
+          }
+  
+            } catch (error) {
+          console.error('Error uploading photo:', error);
       }
-    };
-    /*
-    const getPhotos = async () => {
-      ImageCropPicker.openPicker({
-        multiple: true,
-        mediaType: 'photo',
-        includeBase64: true,
-        includeExif: true,
-        }).then(res => {
-          setImgInfo(res);
-      });
-    };
-    */
-    const selectPhotoFromGallery = () => {
-      const options = {
-        mediaType: 'photo',
-        quality: 1,
-      };
-    
-      launchImageLibrary(options, (response) => {
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-        } else if (response.error) {
-          console.log('ImagePicker Error: ', response.error);
-        } else {
-          const source = {uri: response.assets[0].uri};
-          console.log('Selected image: ', source);
-          // 선택된 이미지의 경로를 RNFS를 사용하여 읽습니다.
-          setImageSource(source);
-        }
-      });
-    };
-
-    const readImageFile = (filePath) => {
-      // 'file://' 접두사를 제거합니다. RNFS에서 필요하지 않을 수 있습니다.
-      const cleanPath = filePath.replace('file://', '');
-      RNFS.readFile(cleanPath, 'base64')
-        .then(contents => {
-          console.log('File contents:', contents);
-          // 여기에서 파일 내용을 사용할 수 있습니다. 예를 들어 base64 인코딩된 이미지 데이터를 상태에 저장하거나 UI에 표시할 수 있습니다.
-        })
-        .catch(err => {
-          console.error('Error reading file:', err.message);
-        });
-    };
-    
-/*
-    import { readFile } from 'react-native-fs';
-
-const loadImageBase64 = async (capturedImageURI) => {
-  try {
-    const base64Data = await readFile(capturedImageURI, 'base64');
-    return 'data:image/jpeg;base64,' + base64Data;
-  } catch (error) {
-    console.error('Error converting image to base64:', error);
-  }
-};
-
-const base64Image = await loadImageBase64(capturedImageURI);
-axios({
-    method: 'POST',
-    url: 'https://example_api/endpoint',
-    params: {
-      api_key: 'YOUR_API_KEY'
-    },
-    data: base64Image,
-    headers: {
-      // define your headers
+  };
+  const selectPhotoFromGallery = async() => {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      quality: 1,
+    });
+    if (result.didCancel){
+      return null;
     }
-  }).then(function (response) {
-    console.log(response.data);
-    return response.data;
-  }).catch(function (error) {
-    console.log(error.message);
-    return null;
-  });
-*/
+    const localUri = result.assets[0].uri;
+    const uriPath = localUri.split("//").pop();
+    const imageName = localUri.split("/").pop();
+    console.log('path:', uriPath);
+    console.log('name:', imageName);
+    uploadPhoto("file://" + uriPath);
+   }
+  
 //기기 오류시 카메라 사용 불가
   if (devices == null) {
     return <Text>Camera not available</Text>;
@@ -202,12 +143,14 @@ axios({
               onPress={() => selectPhotoFromGallery()}
             >
               <ICON name = "images-sharp" size = {40} color = 'white'/>
-              <Text style = {{color: 'white'}}>앨범</Text>
+              <Text style = {styles.text}>앨범</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity>
-              <Feather name = "camera" size = {40} color = 'white'/>
-              <Text style = {{color: 'white'}}>카메라</Text>
+            <TouchableOpacity
+              onPress={() => setShowCamera(true)}
+            >
+              <Feather name = "camera" size = {40} color = '#3873EA' />
+              <Text style = {[styles.text, {color :'#3873EA'}]}>카메라</Text>
             </TouchableOpacity>
           </View>
          
@@ -226,7 +169,6 @@ axios({
           <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.camButton}
-                onPress={() => capturePhoto()}
               >
               <ICON name = "scan" size = {40} color = 'black'/>
               </TouchableOpacity>
@@ -237,14 +179,18 @@ axios({
           >
             <TouchableOpacity
               onPress={() => selectPhotoFromGallery()}
+              style = {styles.selectbutton}
             >
               <ICON name = "images-sharp" size = {40} color = 'white'/>
-              <Text style = {{color: 'white'}}>앨범</Text>
+              <Text style = {styles.text}>앨범</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity
+            style = {styles.selectbutton}
+            onPress={() => setShowCamera(true)}
+            >
               <Feather name = "camera" size = {40} color = 'white'/>
-              <Text style = {{color: 'white'}}>카메라</Text>
+              <Text style = {styles.text}>카메라</Text>
             </TouchableOpacity>
           </View>
         </>
@@ -310,6 +256,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+  },
+  selectbutton: {
+    alignContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text:{
+    color: 'white',
+    fontFamily: 'NotoSansKR-Bold',
   },
   cam: {
     height: BasicHeight*505,

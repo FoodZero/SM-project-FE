@@ -13,7 +13,8 @@ import {
 import CheckBox from 'expo-checkbox';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import X from '../../assets/Icons/X.svg';
+import Sector from '../../assets/Icons/Sector.svg';
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PermissionModal from '../Splash/PermissionModal';
@@ -106,40 +107,25 @@ const Login = () => {
     password: UserPassword,
   };
 
-  const HandleLogin = () =>{
-    HandleServer();
-    if(ValidUser == true){
-    console.log('홈화면으로 이동합니다');
-    const AccessToken = AsyncStorage.getItem("userAccessToken");
-    navigation.navigate("FoodInput", { AccessToken: AccessToken });
-    }
-    else{
+  const HandleLogin = async () => {
+    if (loading) return; // 이미 로딩 중이면 새로운 요청을 방지
+    try {
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/login',data);
+
+      if (response.status === 200) {
+        console.log(response.data);
+        await AsyncStorage.setItem('userAccessToken', response.data.result.accessToken);
+        const AccessToken = response.data.result.accessToken
+        navigation.navigate("Home");
+      }
+    } catch (error) {
+      console.error('Error:', error);
       console.log('로그인에 문제가 있습니다.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  //로그인 위한 서버와 연결
-  const HandleServer = useCallback(async () => {
-
-    if(loading){
-      return;
-    }
-    try{
-      setLoading(true);
-      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/login',data)
-      console.log(response);
-      await AsyncStorage.setItem('userAccessToken', response.data.result.accessToken);
-    }catch(error){
-      console.log(error);
-      console.log(data);
-      setValidUser(false);
-    }finally{
-      setLoading(false);
-      setValidUser(true);
-      const AccessToken = await AsyncStorage.getItem("userAccessToken");
-      console.log(AccessToken);
-    }
-  }, [loading,UserEmail,UserPassword]);
 
   /*
   const handleModal = () => {
@@ -158,7 +144,7 @@ const Login = () => {
       <View style = {Styles.BackContainer}>
         <View style = {Styles.IconContainer}>
           <TouchableOpacity onPress={() => alert('뒤로가기')}>
-          <Icon name = "close" size = {20}/>
+          <X/>
           </TouchableOpacity>
         </View>
       <View style = {Styles.HomeContainer}>
@@ -193,6 +179,7 @@ const Login = () => {
           onChange={setUserPassword}
           value={UserPassword}
           placeholder = "8~16자리 영문+숫자+특수문자 조합"
+          secureTextEntry={true}
           onChangeText = {(text) => HandlePwChk(text)}
           returnKeyType= 'done'
           ref = {PasswordInputRef}
@@ -240,13 +227,13 @@ const Login = () => {
           onPress={() => navigation.navigate("Terms", { screen: 'Terms' })}>
           <Text style = {Styles.MiniText}> 회원가입 </Text>
         </TouchableOpacity>
-        <Text> | </Text>
+        <Sector/>
 
         <TouchableOpacity
           onPress={() => navigation.navigate("FindEmail", { screen: 'FindEmail' })}>
           <Text style = {Styles.MiniText}> 이메일 찾기 </Text>
         </TouchableOpacity>
-        <Text> | </Text>
+        <Sector/>
         <TouchableOpacity
           onPress={() => navigation.navigate("FindPassword", { screen: 'FindPassword' })}>
           <Text style = {Styles.MiniText}> 비밀번호 찾기 </Text>

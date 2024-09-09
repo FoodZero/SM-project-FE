@@ -10,6 +10,10 @@ import {
 } from "react-native";
 import Icon from 'react-native-vector-icons/SimpleLineIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Camera from '../../assets/Icons/camera.svg';
+import Frame from '../../assets/Icons/Frame.svg';
+import LocationPin from '../../assets/Icons/location-pin.svg';
+import Notification from '../../assets/Icons/notification.svg';
 
 
 const PermissionModal = ({ isVisible, onClose})=>{
@@ -59,7 +63,7 @@ const PermissionModal = ({ isVisible, onClose})=>{
                 </View>
                 <View>
                     <View style={Styles.Pearea}>
-                        <Icon name = "camera" size = {25} color= "#3873EA"/>
+                        <Camera />
                         <View style={Styles.explarea}>
                             <Text style={Styles.exptitle}>카메라(필수)</Text>
                             <Text style={Styles.expmin}>영수증 및 음식 촬영</Text>
@@ -67,7 +71,7 @@ const PermissionModal = ({ isVisible, onClose})=>{
                     </View>
 
                     <View style={Styles.Pearea}>
-                        <Icon name = "picture" size = {25} color= "#3873EA"/>
+                        <Frame />
                         <View style={Styles.explarea}>
                             <Text style={Styles.exptitle}>사진(필수)</Text>
                             <Text style={Styles.expmin}>영수증 및 음식 품목 읽기</Text>
@@ -75,7 +79,7 @@ const PermissionModal = ({ isVisible, onClose})=>{
                     </View>
 
                     <View style={Styles.Pearea}>
-                        <Icon name = "location-pin" size = {25} color= "#3873EA"/>
+                        <LocationPin/>
                         <View style={Styles.explarea}>
                             <Text style={Styles.exptitle}>위치정보(선택)</Text>
                             <Text style={Styles.expmin}>위치기반 서비스 제공 시 필요</Text>
@@ -83,7 +87,7 @@ const PermissionModal = ({ isVisible, onClose})=>{
                     </View>
 
                     <View style={Styles.Pearea1}>
-                        <Icon name = "bell" size = {25} color= "#3873EA"/>
+                        <Notification/>
                         <View style={Styles.explarea1}>
                             <Text style={Styles.exptitle}>알림(선택)</Text>
                             <Text style={Styles.expmin1}>유통기한 마감 디데이 확인,{"\n"} 레시피 추천 팝업, 커뮤니티 알림</Text>
