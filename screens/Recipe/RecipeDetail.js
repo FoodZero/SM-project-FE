@@ -182,16 +182,33 @@ const RecipeDetail = () => {
         }
       };
 
-    const gotoFridge = () => {
-        navigation.navigate('커뮤니티', {screen: 'IngredientScreen'});
-        navigation.reset({
-            index: 1, // 두 번째 화면이 포커스되도록 설정
-            routes: [
-              { name: '레시피' }, // Top2 스택을 초기화하여 '레시피'의 초기 화면으로 만듦
-              { name: '커뮤니티', params: { screen: 'IngredientScreen' } } // 화면을 'IngredientScreen'으로 유지
-            ],
-          });
+      const gotoFridge = async () => {
+        try {
+            // AsyncStorage에서 fridgeID 가져오기
+            const fridgeId = await AsyncStorage.getItem('userRefId');
+            console.log('storedfridgeId:', fridgeId);
+            
+            if (fridgeId) {
+                navigation.navigate('홈', {
+                    screen: 'Ingredient', 
+                    params: { Id: fridgeId }
+                });
+                
+                navigation.reset({
+                    index: 1, // 두 번째 화면이 포커스되도록 설정
+                    routes: [
+                        { name: '레시피' }, // Top2 스택을 초기화하여 '레시피'의 초기 화면으로 만듦
+                        { name: '홈', params: { screen: 'Ingredient', params: { Id: fridgeId } } }
+                    ],
+                });
+            } else {
+                console.log('fridgeId is not available');
+            }
+        } catch (error) {
+            console.error('Error fetching fridgeId:', error);
+        }
     };
+    
 
     // 북마크 on/off 기능
     const bookmarkONOFF = () => {

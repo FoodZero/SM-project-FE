@@ -6,7 +6,7 @@ import { ScrollView } from 'react-native';
 import { useNavigation, useRoute} from '@react-navigation/native';
 
 
-const Screen1 = () => {
+const FoodInput = () => {
   const route = useRoute();
   const AccessToken = AsyncStorage.getItem('userAccessToken');
   const [ingredientNames, setIngredientNames] = useState(['']); // Initial array with one empty string
@@ -200,4 +200,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default Screen1;
+export default FoodInput;

@@ -8,10 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const HomeScreen = ({ route, navigation }) => {
-  const AccessToken = route.params?.AccessToken;
   
   // Log AccessToken to ensure it's being passed correctly
-  console.log('AccessToken:', AccessToken);
 
   // Local state for refrigerators
   const [refrigerators, setRefrigerators] = useState([]);
@@ -20,18 +18,19 @@ const HomeScreen = ({ route, navigation }) => {
   useEffect(() => {
     // Fetch refrigerators data when AccessToken changes
       fetchRefrigerators();
-  }, [AccessToken]);
+  },[]);
 
   // Function to fetch refrigerators data (simulated API call)
   const fetchRefrigerators = async () => {
     // Check if AccessToken is valid
     try {
-      const TOKEN = await AsyncStorage.getItem('userAccessToken');
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      console.log('AccessToken:', AccessToken);
       const response = await axios.get('http://www.sm-project-refrigerator.store/api/refrigerator', {
-        headers: { Authorization: `Bearer ${TOKEN}` }
+        headers: { Authorization: `Bearer ${AccessToken}` }
       });
       // Extracting refrigerators data from API response
-      console.log('API response:', response.data);
+      console.log('API response:', response.data.result.refrigeratorList);
       const refrigeratorsData = response.data.result.refrigeratorList;
       setRefrigerators(refrigeratorsData); // Setting refrigerators state
     } catch (error) {
@@ -51,15 +50,15 @@ const HomeScreen = ({ route, navigation }) => {
   // Function to add a refrigerator
   const addRefrigerator = async () => {
     try {
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
       const newId = refrigerators.length ? refrigerators[refrigerators.length - 1].id + 1 : 1;
       const data = {
         name: `냉장고 ${newId}`
       };
-      const headers = {
-        Authorization: `Bearer ${AccessToken}`
-      };
       // Simulated API response
-      const response = await axios.post('http://www.sm-project-refrigerator.store/api/refrigerator', data, { headers });
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/refrigerator', data, {
+        headers: { Authorization: `Bearer ${AccessToken}` }
+      });
       // Update local state after successful API call
       setRefrigerators([...refrigerators, { id: newId, name: data.name }]);
       console.log('API response:', response.data);
@@ -72,11 +71,12 @@ const HomeScreen = ({ route, navigation }) => {
   const deleteRefrigerator = async (id) => {
     setRefrigerators(refrigerators.filter(fridge => fridge.id !== id));
     try {
-      const headers = {
-        Authorization: `Bearer ${AccessToken}`,
-      };
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+
       // Simulated API response
-      await axios.delete(`http://www.sm-project-refrigerator.store/api/refrigerator/${id}`, { headers });
+      await axios.delete(`http://www.sm-project-refrigerator.store/api/refrigerator/${id}`, {
+        headers: { Authorization: `Bearer ${AccessToken}` }
+      });
       // Update local state after successful API call
       
     } catch (error) {
@@ -100,9 +100,10 @@ const HomeScreen = ({ route, navigation }) => {
   // Function to handle image press navigation
   const handleImagePress = (id) => {
     // Navigation parameters should be passed as an object
+
     console.log('id:', id);
-    //AsyncStorage.setItem('userRefId', id);
-    navigation.navigate("Ingredient", { id: id, AccessToken: AccessToken });
+    AsyncStorage.setItem('userRefId', id.toString());
+    navigation.navigate("Ingredient", { Id: id});
   };
 
   // Function to handle sharing alert

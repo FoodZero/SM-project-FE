@@ -1,19 +1,31 @@
 import React, { useState,useEffect } from 'react';
-import { SafeAreaView, StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Modal } from 'react-native';
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  Modal,
+  Dimensions,
+} from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import CheckBox from "expo-checkbox";
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Back from '../../assets/Icons/back.svg';
 
 const IngredientScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const [RecipeModalVisible, setRecipeModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [isSelected1, setIsSelected1] = useState(false);
-  const [isSelected2, setIsSelected2] = useState(false);
-  const [isSelected3, setIsSelected3] = useState(false);
-  const [isSelected4, setIsSelected4] = useState(false);
+  const [isSelectedAll, setisSelectedAll] = useState(true);
+  const [isSelectedCold, setisSelectedCold] = useState(false);
+  const [isSelectedFrozen, setisSelectedFrozen] = useState(false);
+  const [isSelectedOutside, setIsSelected4] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [editMode, setEditMode] = useState(false);
@@ -22,24 +34,25 @@ const IngredientScreen = () => {
    
   ]);
 
-  const AccessToken = route.params?.AccessToken;
-  const refrigeratorId = route.params?.id;
+  const {Id} = route.params;
+  const refrigeratorId = Id;
+  //const {params} = this.props.route;
   const filteredData = data.filter(item => item.name.includes(searchText));
 
   const filteredDatabytype = data.filter(item => {
-    if (isSelected1) {
+    if (isSelectedAll) {
       return true;
     } else {
       return (
-        (isSelected2 && item.foodType === 'COLD') ||
-        (isSelected3 && item.foodType === 'FROZEN') ||
-        (isSelected4 && item.foodType === 'OUTSIDE')
+        (isSelectedCold && item.foodType === 'COLD') ||
+        (isSelectedFrozen && item.foodType === 'FROZEN') ||
+        (isSelectedOutside && item.foodType === 'OUTSIDE')
       );
     }
   }).filter(item => item.name.includes(searchText));
 
   let filteredDataToShow = [];
-  if (isSelected1) {
+  if (isSelectedAll) {
     filteredDataToShow = filteredData;
   } else {
     filteredDataToShow = filteredDatabytype;
@@ -50,15 +63,16 @@ const IngredientScreen = () => {
   }, []);
   
 const GetFoodData = async () => {
-  const headers = {
-    Authorization: `Bearer ${AccessToken}`
-  };
-
   try {
-    const response = await axios.get(`http://www.sm-project-refrigerator.store/api/food/ ${refrigeratorId}`, { headers });
+    const AccessToken = await AsyncStorage.getItem('userAccessToken');
+    console.log('AccessToken:', AccessToken);
+    console.log('refrigeratorId:', refrigeratorId);
+    const response = await axios.get(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorId}`, {
+      headers: { Authorization: `Bearer ${AccessToken}` }
+    });
     console.log(response.data);
     const IngredientData = response.data.result.foodList;
-
+    console.log(IngredientData);
      // Calculate daysLeft for each item
      const now = new Date();
      const updatedData = IngredientData.map(item => {
@@ -87,16 +101,14 @@ const GetFoodData = async () => {
 };
 
 const DeleteFoodData = async (foodId) => {
-  const headers = {
-    Authorization: `Bearer ${AccessToken}`,
-    'Content-Type': 'application/json'
-  };
 
   try {
+    const AccessToken = await AsyncStorage.getItem('userAccessToken');
     const response = await axios.delete(
       `http://www.sm-project-refrigerator.store/api/food/${foodId}/${refrigeratorId}`, 
-      { headers }
-    );
+      {
+        headers: { Authorization: `Bearer ${AccessToken}` }
+      });
     console.log(response.data);
     // Update data after successful deletion
     GetFoodData();
@@ -115,10 +127,6 @@ const DeleteFoodData = async (foodId) => {
 };
 
 const AddFoodData = async (name, expire, foodType) => {
-  const headers = {
-    Authorization: `Bearer ${AccessToken}`,
-    'Content-Type': 'application/json'
-  };
   const data = {
     name: name,
     expire: expire,
@@ -127,7 +135,13 @@ const AddFoodData = async (name, expire, foodType) => {
   };
 
   try {
-    const response = await axios.post(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorId}`, data, { headers });
+    const AccessToken = await AsyncStorage.getItem('userAccessToken');
+    const response = await axios.post(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorId}`, data, {
+      headers: { 
+        Authorization: `Bearer ${AccessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
     console.log(response.data);
     GetFoodData(); // Refresh data after adding new food item
   } catch (error) {
@@ -137,13 +151,22 @@ const AddFoodData = async (name, expire, foodType) => {
 
 
   const handleItemPress = (id ,name, expire) => {
-    navigation.navigate('DetailIngredient', { FoodId:id, ingredient: name, date: expire ,refrigeratorId: refrigeratorId, AccessToken:AccessToken });
+    navigation.navigate('DetailIngredient', { FoodId:id, ingredient: name, date: expire ,refrigeratorId: refrigeratorId});
   };
 
-  const handleClose = () => {
-    console.log('Closing the screen...');
-    navigation.navigate("HomeMain", { AccessToken: AccessToken });
-  };
+  const handleClose = async () => {
+    try {
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+        
+        if (AccessToken) {
+          navigation.navigate("HomeMain", { AccessToken: AccessToken });
+        } else {
+            console.log('fridgeId is not available');
+        }
+    } catch (error) {
+        console.error('Error fetching fridgeId:', error);
+    }
+};
 
   const handleEdit = () => {
     setEditMode(!editMode);
@@ -154,10 +177,20 @@ const AddFoodData = async (name, expire, foodType) => {
     //navigation.navigate('RecipeTab'); // Adjust this to your actual screen name
   };
   const handleMoveToRecipeConfirm = () => {
+    // 선택된 항목들의 이름을 추출
+    const selectedFoodNames = selectedItems.map(id => {
+      const selectedItem = data.find(item => item.id === id);
+      return selectedItem ? selectedItem.name : null;
+    }).filter(name => name !== null); // null 값은 제거
+  
     setRecipeModalVisible(false);
-    navigation.navigate('RecipeTab'); // Navigate to Recipe tab
-    setSelectedItems([]); // Reset selected items
+  
+    // 선택된 항목의 이름 배열을 RecipeMain으로 
+    navigation.navigate('레시피', {screen: 'RecipeMain', params: { selectedFoodNames }});
+    
+    setSelectedItems([]); // 선택 항목 초기화
   };
+  
 
   const toggleItemSelection = (id) => {
     setSelectedItems(prevSelectedItems =>
@@ -198,32 +231,32 @@ const AddFoodData = async (name, expire, foodType) => {
   );
 
   const handleSelect1 = () => {
-    setIsSelected1(!isSelected1);
-    setIsSelected2(false);
-    setIsSelected3(false);
+    setisSelectedAll(!isSelectedAll);
+    setisSelectedCold(false);
+    setisSelectedFrozen(false);
     setIsSelected4(false);
     GetFoodData();
   };
 
   const handleSelect2 = () => {
-    setIsSelected2(!isSelected2);
-    setIsSelected1(false);
-    setIsSelected3(false);
+    setisSelectedCold(!isSelectedCold);
+    setisSelectedAll(false);
+    setisSelectedFrozen(false);
     setIsSelected4(false);
   };
 
   const handleSelect3 = () => {
-    setIsSelected3(!isSelected3);
-    setIsSelected1(false);
-    setIsSelected2(false);
+    setisSelectedFrozen(!isSelectedFrozen);
+    setisSelectedAll(false);
+    setisSelectedCold(false);
     setIsSelected4(false);
   };
 
   const handleSelect4 = () => {
-    setIsSelected4(!isSelected4);
-    setIsSelected1(false);
-    setIsSelected2(false);
-    setIsSelected3(false);
+    setIsSelected4(!isSelectedOutside);
+    setisSelectedAll(false);
+    setisSelectedCold(false);
+    setisSelectedFrozen(false);
   };
 
   const handleSort = () => setModalVisible(true);
@@ -274,11 +307,15 @@ const AddFoodData = async (name, expire, foodType) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={handleClose}>
-        <AntDesign name="left" size={25} color="black" />
-      </TouchableOpacity>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity style={styles.backButton} onPress={handleClose}>
+          <Back/>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.editModeButton} onPress={handleEdit}>
+          <Text >{editMode ? '완료' : '편집'}</Text>
+        </TouchableOpacity>
+      </View>
       <Text style={styles.headerText}>냉장고 {refrigeratorId}</Text>
-      
       <TextInput
         style={styles.searchInput}
         placeholder="이름으로 검색"
@@ -299,9 +336,6 @@ const AddFoodData = async (name, expire, foodType) => {
       <Text style={styles.EditButtonText}>레시피로 이동</Text>
       </TouchableOpacity>
      )}
-     <TouchableOpacity style={styles.EditButton} onPress={handleEdit}>
-     <Text style={styles.EditButtonText}>{editMode ? '완료' : '편집'}</Text>
-     </TouchableOpacity>
      
       </View>
      
@@ -309,28 +343,28 @@ const AddFoodData = async (name, expire, foodType) => {
       
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: isSelected1 ? '#3873EA' : 'white' }]}
+          style={[styles.button, { backgroundColor: isSelectedAll ? '#3873EA' : 'white' }]}
           onPress={handleSelect1}
         >
-          <Text style={[styles.buttonText, { color: isSelected1 ? 'white' : '#3873EA' }]}>전체</Text>
+          <Text style={[styles.buttonText, { color: isSelectedAll ? 'white' : '#3873EA' }]}>전체</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: isSelected2 ? '#3873EA' : 'white' }]}
+          style={[styles.button, { backgroundColor: isSelectedCold ? '#3873EA' : 'white' }]}
           onPress={handleSelect2}
         >
-          <Text style={[styles.buttonText, { color: isSelected2 ? 'white' : '#3873EA' }]}>냉장</Text>
+          <Text style={[styles.buttonText, { color: isSelectedCold ? 'white' : '#3873EA' }]}>냉장</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: isSelected3 ? '#3873EA' : 'white' }]}
+          style={[styles.button, { backgroundColor: isSelectedFrozen ? '#3873EA' : 'white' }]}
           onPress={handleSelect3}
         >
-          <Text style={[styles.buttonText, { color: isSelected3 ? 'white' : '#3873EA' }]}>냉동</Text>
+          <Text style={[styles.buttonText, { color: isSelectedFrozen ? 'white' : '#3873EA' }]}>냉동</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: isSelected4 ? '#3873EA' : 'white' }]}
+          style={[styles.button, { backgroundColor: isSelectedOutside ? '#3873EA' : 'white' }]}
           onPress={handleSelect4}
         >
-          <Text style={[styles.buttonText, { color: isSelected4 ? 'white' : '#3873EA' }]}>실외</Text>
+          <Text style={[styles.buttonText, { color: isSelectedOutside ? 'white' : '#3873EA' }]}>실외</Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -424,11 +458,30 @@ const AddFoodData = async (name, expire, foodType) => {
   );
 };
 
+const AllWidth = Dimensions.get("window").width;
+const AllHeight = Dimensions.get("window").height;
+
+const FigmaWidth = 390;
+const FigmaHeight = 844;
+
+const BasicWidth =(
+    AllWidth / FigmaWidth
+).toFixed(2);
+
+const BasicHeight =(
+    AllHeight / FigmaHeight
+).toFixed(2);
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
     paddingVertical: 10,
+  },
+  headerContainer:{
+    height: BasicHeight*50,
+    width: AllWidth,
+    flexDirection: 'row',
   },
   headerText: {
     fontSize: 24,
@@ -438,9 +491,15 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 20,
-    left: 10,
+    marginLeft: BasicWidth*25,
+    marginTop: BasicHeight*13,
   },
+  editModeButton: {
+    marginLeft: BasicWidth*287,
+    marginTop: BasicHeight*13,
+    fontSize: 16,
+  },
+  /*
   EditButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -460,6 +519,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
+  */
   recipeButton: {
     marginLeft: 10,
   },
@@ -477,6 +537,7 @@ const styles = StyleSheet.create({
   searchInput: {
     borderWidth: 1,
     borderColor: '#3873EA',
+    backgroundColor: '#FFFFFF',
     borderRadius: 5,
     padding: 10,
     marginTop: 10,

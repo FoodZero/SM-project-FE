@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Toast from 'react-native-toast-message';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import useTabBarVisibility from "../useTabBarVisibility";
 
 import GPTIcon from '../../assets/Icons/GPT.svg';
@@ -25,6 +25,10 @@ import Recommend from '../../assets/Icons/recommend.svg';
 const RecipeMain = () => {
   useTabBarVisibility(true);
   const navigation = useNavigation();
+  const route = useRoute();
+  
+  // 전달된 음식 이름 배열
+  const selectedFoodNames = route.params?.selectedFoodNames || [];
 
   const [UserQuestion, setUserQuestion] = useState("");
   const [resMsg, setResMsg] = useState([]);
@@ -49,24 +53,43 @@ const RecipeMain = () => {
   }, []);
 
   const getIngredients = async () => {
-    try {
-      const TOKEN = await AsyncStorage.getItem('userAccessToken');
-      const refrigeratorID = 125;
-
-      const response = await axios.get(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorID}`, {
-        headers: { Authorization: `Bearer ${TOKEN}` }
-      });
-
-      if (response.status === 200) {
-        const foodList = response.data.result.foodList || [];
-        console.log('foodList:', foodList);
-        const names = foodList.map(item => item?.name ? { name: item.name } : { name: 'Unknown' });
-        setIngredients(names);
-      }
-    } catch (error) {
-      console.error('Error fetching ingredients:', error);
-    }
-  };
+    /*
+        setIngredients(selectedFoodNames.map(name => ({ name })));
+        */
+        try {
+          const TOKEN = await AsyncStorage.getItem('userAccessToken');
+          const refrigeratorID = 125;
+      
+          const response = await axios.get(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorID}`, {
+            headers: { Authorization: `Bearer ${TOKEN}` }
+          });
+      
+          if (response.status === 200) {
+            const foodList = response.data.result.foodList || [];
+            const today = new Date();
+      
+            // 유통기한이 14일 이내로 남은 재료 필터링
+            const closeToExpireIngredients = foodList.filter(item => {
+              if (item?.expire) {
+                const expireDate = new Date(item.expire);
+                const diffTime = expireDate.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 14 && diffDays >= 0;  // 유통기한이 14일 이내인 재료만 반환
+              }
+              return false;
+            });
+      
+            const formattedIngredients = closeToExpireIngredients.map(item => ({
+              name: item.name || 'Unknown',
+              expire: item.expire ? new Date(item.expire).toLocaleDateString() : '정보 없음'  // 유통기한 날짜 포맷
+            }));
+      
+            setCloseIngredients(formattedIngredients);
+          }
+        } catch (error) {
+          console.error('Error fetching close ingredients:', error);
+        }
+      };
 
   const getCloseIngredients = async () => {
     try {
@@ -282,16 +305,7 @@ const RecipeMain = () => {
         <>
           <View style={Styles.findstyle}>
             <Text>총 <Text style={{ color: '#3873EA' }}>{lastIndex}</Text>개 검색결과</Text>
-            <DropDownPicker
-              open={open}
-              value={value}
-              items={items}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setItems}
-              placeholder="냉장고 재료 우선"
-              style={Styles.dropdown}
-            />
+           <Text>추천 순</Text>
           </View>
           <FlatList
             data={resMsg}
@@ -355,7 +369,7 @@ const BasicHeight = (AllHeight / FigmaHeight).toFixed(2);
 const Styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F6F6',
+    //backgroundColor: '#F6F6F6',
   },
   header: {
     height: 59 * BasicHeight,

@@ -115,7 +115,6 @@ const Login = () => {
       if (response.status === 200) {
         console.log(response.data);
         await AsyncStorage.setItem('userAccessToken', response.data.result.accessToken);
-        const AccessToken = response.data.result.accessToken
         navigation.navigate("Home");
       }
     } catch (error) {

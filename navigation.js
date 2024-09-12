@@ -95,34 +95,16 @@ function HomeTab() {
     >
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="SharingPeople" component={SharingPeople} />
-    </Stack.Navigator>
-  )
-}
-
-function FoodInputTab(){
-  return (
-    <Stack.Navigator
-      initialRouteName="FoodInputRoute"
-      screenOptions = {{ headerShown: false }}
-    >
       <Stack.Screen name="FoodInput" component={FoodInput} />
       <Stack.Screen name="FoodInputDetail" component={FoodInputDetail} />
       {/*<Stack.Screen name="CameraScreen" component={CameraScreen} />*/}
-    </Stack.Navigator>
-  )
-}
-
-function IngredientTab(){
-  return (
-    <Stack.Navigator
-      initialRouteName="IngredientRoute"
-      screenOptions = {{ headerShown: false }}
-    >
-       <Stack.Screen name="Ingredient" component={IngredientScreen} />
+      <Stack.Screen name="Ingredient" component={IngredientScreen} />
        <Stack.Screen name="DetailIngredient" component={DetailIngredientScreen} />
     </Stack.Navigator>
   )
 }
+
+
 
 function RecipeTab() {
   return (
@@ -168,7 +150,7 @@ function BottomStack() {
   return (
     <BottomTab.Navigator
       active
-      screenOptions = {{ headerShown: false }}
+      screenOptions = {{ headerShown: false, tabBarStyle:{backgroundColor: '#F6F6F6'} }}
     >
       <BottomTab.Screen
         name="홈"
