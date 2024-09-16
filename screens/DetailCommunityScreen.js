@@ -66,6 +66,36 @@ const DetailCommunityScreen = () => {
     }
   };
 
+  const DeletComment = async (commentId) => {
+    const headers = {
+      Authorization: `Bearer ${AccessToken}`,
+      'Content-Type': 'application/json'
+    };
+
+    try {
+      await axios.delete(`http://www.sm-project-refrigerator.store/api/comment/${commentId}`, { headers });
+      fetchPostComments(); // Refresh comments after posting
+    } catch (error) {
+      console.error('Error posting comment:', error.response ? error.response.data : error.message);
+    }
+  };
+
+  const DeletCommentChild = async (commentId) => {
+    const headers = {
+      Authorization: `Bearer ${AccessToken}`,  // Make sure AccessToken is defined and valid
+      'Content-Type': 'application/json'
+    };
+  
+    try {
+      // Pass headers as a separate argument
+      await axios.patch(`http://www.sm-project-refrigerator.store/api/comment/parent/${commentId}`, {}, { headers });
+      fetchPostComments(); // Refresh comments after deletion
+    } catch (error) {
+      console.error('Error deleting comment:', error.response ? error.response.data : error.message);
+    }
+  };
+
+
   const PostCommentChild = async (comment,id) => {
     const headers = {
       Authorization: `Bearer ${AccessToken}`,
@@ -261,26 +291,32 @@ const DetailCommunityScreen = () => {
   };
 
 
-  const handleCommentOptionSelect = (option, commentId, inputContent) => {
+  const handleCommentOptionSelect = (option) => {
     console.log("Option selected:", option);
-    console.log("Comment ID:", commentId);    
+    console.log("Comment ID:", selectedCommentId);    
+  
+    const comment = comments.find(c => c.commentId === selectedCommentId);
+    const hasChildren = comment && comment.childList && comment.childList.length > 0;
+  
     switch (option) {
-      
       case 'edit':
-        handleOpenCommentEditModal(selectedCommentId, inputContent);
+        handleOpenCommentEditModal(selectedCommentId, comment.content);
         break;
       case 'alarm':
         Alert.alert('알림켜기', '대댓글 알림이 켜졌습니다');
         break;
       case 'delete':
-        handleDeleteComment(id);
+        if (hasChildren) {
+          DeletCommentChild(selectedCommentId); // Ensure this function handles the delete correctly
+        } else {
+          DeletComment(selectedCommentId);
+        }
         break;  
       default:
         break;
     }
     handleCloseCommentModal();
   };
-
 
   const handleEditComment = async () => {
     if (inputContent.trim() && selectedCommentId) {
@@ -364,8 +400,8 @@ const DetailCommunityScreen = () => {
           <Text style={styles.time}>{time}</Text>
         </View>
         <Text style={styles.postTitle}>{title}</Text>
-        <Text style={styles.postContent}>{post?.content}</Text>
         {uri && <Image source={{ uri }} style={styles.image} />}
+        <Text style={styles.postContent}>{post?.content}</Text>
       </View>
       <FlatList
         data={comments}
@@ -523,7 +559,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   post: {
-    padding: 10,
+    padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
@@ -543,9 +579,9 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   postTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   postContent: {
     fontSize: 16,
@@ -585,7 +621,7 @@ const styles = StyleSheet.create({
   },
   comment: {
     padding: 10,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
     borderBottomColor: '#ddd',
   },
   commentHeader: {

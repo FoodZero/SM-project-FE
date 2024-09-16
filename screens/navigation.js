@@ -17,6 +17,7 @@ import Ingredient from './screens/IngredientScreen';
 import CreatePostScreen from './screens/CreatePostScreen';
 import DetailCommunityScreen from './screens/DetailCommunityScreen';
 import LocationScreen from './screens/LocationScreen';
+import AddIngredientScreen from './screens/AddIngrediantscreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -29,13 +30,14 @@ const HomeStack = () => {
       <Stack.Screen name="KaKaoLogin" component={KaKaoLogin} />
       <Stack.Screen name="Signup" component={signup} />
       <Stack.Screen name="HomeMain" component={HomeScreen} options={{ title: 'Home' }} />
-      <Stack.Screen name="DetailIngredient" component={DetailIngredientScreen} options={{ title: 'Detail' }} />
+      <Stack.Screen name="DetailIngredient" component={DetailIngredientScreen} />
       <Stack.Screen name="SharingPeople" component={SharingPeople} />
       <Stack.Screen name="Ingredient" component={Ingredient} />
       <Stack.Screen name="CreatePostScreen" component={CreatePostScreen} />
       <Stack.Screen name="CommunityScreen" component={CommunityScreen} />
       <Stack.Screen name="DetailCommunityScreen" component={DetailCommunityScreen} />
       <Stack.Screen name="LocationScreen" component={LocationScreen} />
+      <Stack.Screen name="AddIngredientScreen" component={AddIngredientScreen} />
     </Stack.Navigator>
   );
 };
@@ -60,7 +62,7 @@ const BottomTabNavigator = () => {
 
             return <AntDesign name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: 'tomato',
+          tabBarActiveTintColor: '#3873EA',
           tabBarInactiveTintColor: 'gray',
         })}
       >

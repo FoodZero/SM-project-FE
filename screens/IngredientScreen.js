@@ -1,9 +1,10 @@
 import React, { useState,useEffect } from 'react';
-import { SafeAreaView, StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Modal } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { SafeAreaView, StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Modal, Alert } from 'react-native';
+import { AntDesign,Fontisto, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import CheckBox from "expo-checkbox";
 import axios from 'axios';
+
 
 const IngredientScreen = () => {
   const route = useRoute();
@@ -134,6 +135,27 @@ const AddFoodData = async (name, expire, foodType) => {
     handleError(error);
   }
 };
+
+const ShareRefrigerator = async (email) => {
+  const headers = {
+    Authorization: `Bearer ${AccessToken}`,
+    'Content-Type': 'application/json'
+  };
+  const data = {
+    refrigeratorId: refrigeratorId,
+    email:email,
+  };
+
+  try {
+    const response = await axios.post(`http://www.sm-project-refrigerator.store/api/share`, data, { headers });
+    console.log(response.data);
+  
+  } catch (error) {
+    console.error('Error Invite failed:', error.response ? error.response.data : error.message);
+    Alert.alert('Error', 'Failed to send invite. Please try again later.');
+  }
+};
+
 
 
   const handleItemPress = (id ,name, expire) => {
@@ -272,11 +294,64 @@ const AddFoodData = async (name, expire, foodType) => {
     setModalVisible(false);
   };
 
+  const handleShowSharing = () => {
+    navigation.navigate('SharingPeople', { AccessToken: AccessToken, refrigeratorId:refrigeratorId });
+  };
+
+  const handleAddIngredient = () => {
+    navigation.navigate('AddIngredientScreen', { AccessToken: AccessToken, refrigeratorId:refrigeratorId });
+  };
+  
+  const showSharingAlert = () => {
+    Alert.alert(
+      '공유 옵션',
+      null,
+      [
+        { text: '취소', style: 'cancel' },
+        { text: '공유인원 보기', onPress: () => handleShowSharing(), style: 'default' }, // Changed to call handleShowSharing
+        {
+          text: '이메일로 초대하기',
+          onPress: handleInviteByEmail,
+          style: 'default',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const handleInviteByEmail = () => {
+    Alert.prompt(
+      '초대할 친구의 이메일 주소를 입력해주세요.',
+      null,
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '확인',
+          onPress: (email) => {
+            if (email) {
+              // Handle sending invitation via email (e.g., send API request)
+              ShareRefrigerator(email);
+              Alert.alert('이메일 전송', `이메일 ${email}로 초대를 전송했습니다.`);
+            }
+          },
+        },
+      ],
+      'plain-text' // Optional input type, can be 'plain-text', 'secure-text', or 'login-password'
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={handleClose}>
         <AntDesign name="left" size={25} color="black" />
       </TouchableOpacity>
+      
+      <TouchableOpacity style={styles.InviteButton} onPress={showSharingAlert}>
+          <MaterialIcons name="people-alt" size={30} color="black" />
+        </TouchableOpacity>
       <Text style={styles.headerText}>냉장고 {refrigeratorId}</Text>
       
       <TextInput
@@ -416,9 +491,12 @@ const AddFoodData = async (name, expire, foodType) => {
           </View>
         </View>
       </Modal>
+      <TouchableOpacity style={styles.AddButton} onPress={()=> handleAddIngredient()}>
+        <Text style={styles.AddButtonText}>+</Text>
+      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-        <Text style={styles.addButtonText}>+</Text>
+      <TouchableOpacity style={styles.QuickAddButton} onPress={handleAddItem}>
+        <Text style={styles.QuickAddButtonText}>빠른 추가</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -438,8 +516,13 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 20,
-    left: 10,
+    top: 5,
+    left: 20,
+  },
+  InviteButton: {
+    position: 'absolute',
+    top: 5,
+    left: 340,
   },
   EditButtonContainer: {
     flexDirection: 'row',
@@ -542,7 +625,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
   },
-  addButton: {
+  QuickAddButton: {
     position: 'absolute',
     bottom: 20,
     right: 20,
@@ -553,7 +636,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  addButtonText: {
+  QuickAddButtonText: {
+    fontSize: 15,
+    color: 'white',
+  },
+
+  AddButton: {
+    position: 'absolute',
+    bottom: 90,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#3873EA',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  AddButtonText: {
     fontSize: 30,
     color: 'white',
   },

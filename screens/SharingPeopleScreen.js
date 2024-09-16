@@ -1,51 +1,132 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import axios from 'axios'; // axios import 추가
 
-const SharingPeople = ({ navigation }) => {
+const SharingPeople = ({ navigation, route }) => {
+  const { AccessToken, refrigeratorId } = route.params;
+
   const [inputText, setInputText] = useState('');
-  const [peopleList, setPeopleList] = useState([
-    { id: 1, name: '닉네임1', selected: false },
-    { id: 2, name: '닉네임2', selected: false },
-    { id: 3, name: '닉네임3', selected: false },
-    { id: 4, name: '닉네임4', selected: false },
-    { id: 5, name: '닉네임5', selected: false },
-  ]);
+  const [peopleList, setPeopleList] = useState([]);
 
-  // Function to toggle selection of a person
+  // 데이터 패칭 함수
+  const GetUserData = async () => {
+    const headers = {
+      Authorization: `Bearer ${AccessToken}`,
+    };
+  
+    try {
+      const response = await axios.get(
+        `http://www.sm-project-refrigerator.store/api/share/${refrigeratorId}`,
+        { headers }
+      );
+      
+      console.log('response data:', response.data);
+      
+      // API 응답에서 데이터를 바로 가져옴
+      const fetchedPeople = response.data.result.map((user, index) => ({
+        id: user.id,
+        name: user.nickname,
+        selected: false,
+      }));
+      
+      setPeopleList(fetchedPeople);
+    } catch (error) {
+      if (error.response) {
+        console.log('Error response data:', error.response.data);
+        console.log('Error response status:', error.response.status);
+        console.log('Error response headers:', error.response.headers);
+      } else if (error.request) {
+        console.log('Error request:', error.request);
+      } else {
+        console.log('Error message:', error.message);
+      }
+      console.log('Error config:', error.config);
+    }
+  };
+
+  // 선택된 사용자를 삭제하는 함수
+  const DeleteUserData = async (id) => {
+    const headers = {
+      Authorization: `Bearer ${AccessToken}`,
+      'Content-Type': 'application/json'
+    };
+  
+    try {
+      const response = await axios.delete(
+        `http://www.sm-project-refrigerator.store/api/share/${refrigeratorId}/${id}`, 
+        { headers }
+      );
+      console.log(response.data);
+      // Update data after successful deletion
+      GetUserData(); // 삭제 후 사용자 리스트 새로고침
+    } catch (error) {
+      if (error.response) {
+        console.log('Error response data:', error.response.data);
+        console.log('Error response status:', error.response.status);
+        console.log('Error response headers:', error.response.headers);
+      } else if (error.request) {
+        console.log('Error request:', error.request);
+      } else {
+        console.log('Error message:', error.message);
+      }
+      console.log('Error config:', error.config);
+    }
+  };
+
+  // 컴포넌트가 처음 렌더링될 때 사용자 데이터를 가져옴
+  useEffect(() => {
+    GetUserData();
+  }, []);
+
+  // 선택 토글 함수
   const toggleSelect = (id) => {
-    const updatedList = peopleList.map(person =>
+    const updatedList = peopleList.map((person) =>
       person.id === id ? { ...person, selected: !person.selected } : person
     );
     setPeopleList(updatedList);
   };
 
-  // Function to handle filtering by name
+  // 이름으로 필터링 함수
   const handleFilter = (text) => {
     setInputText(text);
-    const filtered = peopleList.filter(person =>
+    const filtered = peopleList.filter((person) =>
       person.name.toLowerCase().includes(text.toLowerCase())
     );
     setPeopleList(filtered);
   };
 
-  // Function to handle deletion of selected items
+  // 선택된 항목 삭제 함수
   const deleteSelected = () => {
-    const updatedList = peopleList.filter(person => !person.selected);
-    setPeopleList(updatedList);
-    Alert.alert('알림', '선택된 항목이 삭제되었습니다.');
+    const selectedUsers = peopleList.filter((person) => person.selected);
+    
+    if (selectedUsers.length === 0) {
+      Alert.alert('알림', '삭제할 사용자를 선택하세요.');
+      return;
+    }
+
+    // 선택된 사용자들을 하나씩 삭제
+    selectedUsers.forEach((user) => {
+      DeleteUserData(user.id);
+    });
+
+    Alert.alert('알림', '선택된 사용자가 삭제되었습니다.');
   };
 
-  // Function to navigate back to the previous screen
+  // 완료 버튼을 눌렀을 때 이전 화면으로 돌아가는 함수
   const handleFinish = () => {
-    navigation.navigate("HomeMain");
+    navigation.navigate('Ingredient', { AccessToken: AccessToken, id: refrigeratorId });
   };
 
-  // Render item function for FlatList
+  // FlatList의 렌더링 아이템 함수
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <TouchableOpacity onPress={() => toggleSelect(item.id)}>
-        <MaterialCommunityIcons name={item.selected ? 'checkbox-marked-circle': 'checkbox-blank-circle-outline'} size={24} color='#3873EA' />
+        <MaterialCommunityIcons
+          name={item.selected ? 'checkbox-marked-circle' : 'checkbox-blank-circle-outline'}
+          size={24}
+          color="#3873EA"
+        />
       </TouchableOpacity>
       <Text style={styles.name}>{item.name}</Text>
     </View>
@@ -54,7 +135,7 @@ const SharingPeople = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.closeButton} onPress={handleFinish}>
-        <AntDesign name="close" size={30} color="black" />
+        <AntDesign name="close" size={33} color="black" />
       </TouchableOpacity>
       <Text style={styles.title}>공유인원</Text>
       <TextInput
@@ -66,7 +147,7 @@ const SharingPeople = ({ navigation }) => {
       <FlatList
         data={peopleList}
         renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         style={styles.list}
       />
       <View style={styles.buttonContainer}>

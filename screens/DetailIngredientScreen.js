@@ -50,7 +50,7 @@ const DetailIngrediant = () => {
 
   const handleClose = () => {
     console.log('Closing the screen...');
-    navigation.navigate('Ingredient', { AccessToken: AccessToken });
+    navigation.navigate('Ingredient', { AccessToken: AccessToken, id:refrigeratorId });
   };
 
   const handleSave = () => {
@@ -68,6 +68,7 @@ const DetailIngrediant = () => {
    // }
    // console.log(`음식타입: ${FoodType}`);
    ModifyFood();
+   navigation.navigate('Ingredient', { AccessToken: AccessToken, id:refrigeratorId })
   };
 
   const handleSelect1 = () => {

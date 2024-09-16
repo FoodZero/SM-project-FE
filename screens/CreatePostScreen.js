@@ -6,6 +6,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { launchCameraAsync, launchImageLibraryAsync, useCameraPermissions, PermissionStatus } from 'expo-image-picker';
 import ActionSheet from 'react-native-actionsheet';
+import * as FileSystem from 'expo-file-system'; // For handling file access
 
 const CreatePostScreen = () => {
   const [category, setCategory] = useState('');
@@ -18,7 +19,6 @@ const CreatePostScreen = () => {
   const navigation = useNavigation();
   const { AccessToken, address } = route.params;
   let actionSheet = null;
-
   const togglePicker = () => {
     setPickerVisible(!pickerVisible);
   };
@@ -73,58 +73,109 @@ const CreatePostScreen = () => {
     }
   };
 
+  // const handleSubmit = async () => {
+  //   try {
+  //     // 필수 입력 필드 확인
+  //     if (!category || !title || !content || !address) {
+  //       Alert.alert('Error', 'All fields are required!');
+  //       return;
+  //     }
+  
+  //     // Create request object (will be converted to JSON inside FormData)
+  //     const data = {
+  //       title: title,
+  //       content: content,
+  //       topic: category, // 나눔, 레시피 중 선택
+  //       address: address, // 위치 조회 결과의 주소 입력
+  //     };
+  
+  //     // // Initialize FormData
+  //     // const formData = new FormData();
+      
+  //     // // Append the request JSON object as a string
+  //     // formData.append('request', JSON.stringify(request));
+  
+  //     // // 이미지 파일 배열 추가 (있을 경우)
+  //     // if (selectedImage) {
+  //     //   const imageInfo = await FileSystem.getInfoAsync(selectedImage); // Get image file info
+  
+  //     //   if (!imageInfo.exists) {
+  //     //     throw new Error('Selected image does not exist.');
+  //     //   }
+  
+  //     //   const imageFile = {
+  //     //     uri: selectedImage,
+  //     //     type: 'image/jpeg', // Adjust if needed
+  //     //     name: selectedImage.split('/').pop() || 'image.jpg',
+  //     //   };
+  
+  //     //   formData.append('images', imageFile); // Append the image file to formData
+  //     // }
+  
+  //     const headers = {
+  //       Authorization: `Bearer ${AccessToken}`,
+        
+  //     };
+  
+  //     // Axios POST 요청
+  //     const response = await axios.post(
+  //       'http://www.sm-project-refrigerator.store/api/post/create',
+  //       data,
+  //       { headers }
+  //     );
+  
+  //     console.log('Server response:', response.data);
+  //     if (response.status !== 200) {
+  //       Alert.alert('Error', response.data.message || 'Something went wrong!');
+  //       return;
+  //     }
+  
+  //     Alert.alert('Success', 'Post created successfully!');
+  //     navigation.navigate('CommunityScreen', { AccessToken });
+  //   } catch (error) {
+  //     console.error('Error creating post:', error);
+  //     Alert.alert('Error', 'Failed to create post. Please try again later.');
+  //   }
+  // };
+
+
   const handleSubmit = async () => {
-    if (!category || !title || !content) {
+    if (!category || !title || !content || !address) {
       Alert.alert('Error', 'All fields are required!');
       return;
     }
-
+  
+    // Log the address before sending
+    console.log("Address being sent:", address);
+  
+    const headers = {
+      Authorization: `Bearer ${AccessToken}`,
+      'Content-Type': 'application/json',
+    };
+  
+    const data = {
+      title: title,
+      content: content,
+      topic: category,
+      address: address,
+    };
+  
     try {
-      const formData = new FormData();
-
-      // Append form data fields
-      formData.append('title', title);
-      formData.append('content', content);
-      formData.append('topic', category);
-      formData.append('address', address);
-
-      // Append the image, if selected
-      if (selectedImage) {
-        const uriParts = selectedImage.split('.');
-        const fileType = uriParts[uriParts.length - 1];
-        const mimeType = `image/jpeg`; // Set MIME type as 'image/jpeg'
-
-        formData.append('photo', {
-          uri: selectedImage,
-          type: mimeType,
-          name: `photo.${fileType}`,
-        });
-
-        console.log('Image URI:', selectedImage);
-        console.log('Image MIME Type:', mimeType);
-        console.log('Image Name:', `photo.${fileType}`);
+      const response = await axios.post(
+        `http://www.sm-project-refrigerator.store/api/post/create`,
+        data,
+        { headers }
+      );
+      
+      if (response.status === 200) {
+        Alert.alert('Success', 'Post created successfully!');
+        navigation.navigate('CommunityScreen', { AccessToken });
+      } else {
+        console.error('Error creating post:', response.data);
+        Alert.alert('Error', 'Something went wrong while creating the post.');
       }
-
-      // Use axios to make the POST request
-      const response = await axios.post('http://www.sm-project-refrigerator.store/api/post/create', formData, {
-        headers: {
-          Authorization: `Bearer ${AccessToken}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      console.log('Server response:', response.data);
-
-      if (response.status !== 200) {
-        Alert.alert('Error', response.data.message || 'Something went wrong!');
-        return;
-      }
-
-      Alert.alert('Success', 'Post created successfully!');
-      navigation.navigate('CommunityScreen', { AccessToken });
-
     } catch (error) {
-      console.error('Error creating post', error);
+      console.error('Error creating post:', error.response ? error.response.data : error.message);
       Alert.alert('Error', 'Failed to create post. Please try again later.');
     }
   };

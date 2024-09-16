@@ -93,6 +93,9 @@ const HomeScreen = ({ route, navigation }) => {
     }
   };
 
+
+
+
   // Function to handle deletion confirmation
   const handleDelete = (id) => {
     Alert.alert(
@@ -159,6 +162,8 @@ const HomeScreen = ({ route, navigation }) => {
     );
   };
 
+
+  
   // useLayoutEffect to set header left button
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -170,16 +175,16 @@ const HomeScreen = ({ route, navigation }) => {
     });
   }, [navigation]);
 
-  // useLayoutEffect to set header right button
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={showSharingAlert}>
-          <MaterialIcons name="people-alt" size={30} color="black" style={{ marginRight: 15 }} />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
+  // // useLayoutEffect to set header right button
+  // useLayoutEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: () => (
+  //       <TouchableOpacity onPress={showSharingAlert}>
+  //         <MaterialIcons name="people-alt" size={30} color="black" style={{ marginRight: 15 }} />
+  //       </TouchableOpacity>
+  //     ),
+  //   });
+  // }, [navigation]);
 
   // Rendering the component
   return (
@@ -190,7 +195,7 @@ const HomeScreen = ({ route, navigation }) => {
         horizontal
         renderItem={({ item }) => (
           <View style={styles.refrigerator}>
-            <Text style={styles.refrigeratorName}>{item.name}</Text>
+            <Text style={styles.refrigeratorName}>냉장고 {item.id}</Text>
             <TouchableOpacity onPress={() => handleImagePress(item.id)}>
               <Image
                 source={require('../assets/refrigerator.png')} // Ensure this path is correct
