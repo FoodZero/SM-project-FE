@@ -16,42 +16,42 @@ const AddIngredient = () => {
 
   const handlePress = (ingredientText) => {
     console.log('입력된 텍스트:', ingredientText);
-    handleAddItem(ingredientText)
+    navigation.navigate('DetailIngredient2', { AccessToken:AccessToken, refrigeratorId:refrigeratorId,ingredientText: ingredientText }); 
   };
 
-  const handleAddItem = (ingredientText) => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const name = `${ingredientText}`;
-    const expire = `${year}-${month}-${day}`;
-    const foodType = "COLD";
+  // const handleAddItem = (ingredientText) => {
+  //   const now = new Date();
+  //   const year = now.getFullYear();
+  //   const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  //   const day = now.getDate().toString().padStart(2, '0');
+  //   const name = `${ingredientText}`;
+  //   const expire = `${year}-${month}-${day}`;
+  //   const foodType = "COLD";
 
-    // Adding arbitrary data
-    AddFoodData(name, expire, foodType);
-  };
+  //   // Adding arbitrary data
+  //   AddFoodData(name, expire, foodType);
+  // };
 
-  const AddFoodData = async (name, expire, foodType) => {
-    const headers = {
-      Authorization: `Bearer ${AccessToken}`,
-      'Content-Type': 'application/json'
-    };
-    const data = {
-      name: name,
-      expire: expire,
-      count: 1,
-      foodType: foodType,
-    };
-    console.log(data);
-    try {
-      const response = await axios.post(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorId}`, data, { headers });
-      console.log(response.data);
-      //GetFoodData(); // Refresh data after adding new food item
-    } catch (error) {
-       console.error(error);
-    }
-  };
+  // const AddFoodData = async (name, expire, foodType) => {
+  //   const headers = {
+  //     Authorization: `Bearer ${AccessToken}`,
+  //     'Content-Type': 'application/json'
+  //   };
+  //   const data = {
+  //     name: name,
+  //     expire: expire,
+  //     count: 1,
+  //     foodType: foodType,
+  //   };
+  //   console.log(data);
+  //   try {
+  //     const response = await axios.post(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorId}`, data, { headers });
+  //     console.log(response.data);
+  //     //GetFoodData(); // Refresh data after adding new food item
+  //   } catch (error) {
+  //      console.error(error);
+  //   }
+  // };
   
 
 
@@ -142,7 +142,7 @@ const AddIngredient = () => {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity style={styles.inputButton} onPress={() => handlePress(name)}>
-                <Text style={styles.inputButtonText}>   저장</Text>
+                <Text style={styles.inputButtonText}>상세보기</Text>
               </TouchableOpacity>
             )}
           </View>

@@ -60,14 +60,18 @@ const GetFoodData = async () => {
     console.log(response.data);
     const IngredientData = response.data.result.foodList;
 
-     // Calculate daysLeft for each item
-     const now = new Date();
-     const updatedData = IngredientData.map(item => {
-       const expireDate = new Date(item.expire);
-       const timeDiff = expireDate - now;
-       const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
-       return { ...item, daysLeft };
-     });
+    const now = new Date();
+    const updatedData = IngredientData.map(item => {
+      const expireDate = new Date(item.expire);
+      const timeDiff = expireDate - now;
+      const daysLeftNumeric = Math.floor(timeDiff / (1000 * 3600 * 24)); // Math.floor 사용
+    
+      // 유효기간이 지나면 D+1, D+2처럼 표시
+      // 유효기간이 오늘인 경우 D-0으로 표시
+      const formattedDaysLeft = daysLeftNumeric === 0 ? `D-0` : (daysLeftNumeric < 0 ? `D+${Math.abs(daysLeftNumeric)}` : `D-${daysLeftNumeric}`);
+    
+      return { ...item, daysLeft: formattedDaysLeft, daysLeftNumeric }; // daysLeftNumeric 추가
+    });
 
      setData(updatedData);
   } catch (error) {
@@ -126,13 +130,13 @@ const AddFoodData = async (name, expire, foodType) => {
     count: 1,
     foodType: foodType,
   };
-
+  console.log(data);
   try {
     const response = await axios.post(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorId}`, data, { headers });
     console.log(response.data);
     GetFoodData(); // Refresh data after adding new food item
   } catch (error) {
-    handleError(error);
+    console.error('Error Save failed:', error.response ? error.response.data : error.message);
   }
 };
 
@@ -159,7 +163,7 @@ const ShareRefrigerator = async (email) => {
 
 
   const handleItemPress = (id ,name, expire) => {
-    navigation.navigate('DetailIngredient', { FoodId:id, ingredient: name, date: expire ,refrigeratorId: refrigeratorId, AccessToken:AccessToken });
+    navigation.navigate('DetailIngredient1', { FoodId:id, ingredient: name, date: expire ,refrigeratorId: refrigeratorId, AccessToken:AccessToken });
   };
 
   const handleClose = () => {
@@ -211,7 +215,7 @@ const ShareRefrigerator = async (email) => {
           onValueChange={() => toggleItemSelection(id)}
         />
       )}
-      <Text style={styles.daysLeft}>D-{daysLeft}</Text>
+      <Text style={styles.daysLeft}>{daysLeft}</Text>
       <View style={styles.itemText}>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.expire}>유통기한: {expire}</Text>
@@ -265,13 +269,13 @@ const ShareRefrigerator = async (email) => {
 
 
   const sortByDaysLeftAsc = () => {
-    const sortedData = [...data].sort((a, b) => a.daysLeft - b.daysLeft);
+    const sortedData = [...data].sort((a, b) => a.daysLeftNumeric - b.daysLeftNumeric);
     setData(sortedData);
     setModalVisible(false);
   };
-
+  
   const sortByDaysLeftDesc = () => {
-    const sortedData = [...data].sort((a, b) => b.daysLeft - a.daysLeft);
+    const sortedData = [...data].sort((a, b) => b.daysLeftNumeric - a.daysLeftNumeric);
     setData(sortedData);
     setModalVisible(false);
   };

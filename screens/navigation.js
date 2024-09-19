@@ -7,7 +7,8 @@ import HomeScreen from './screens/HomeScreen';
 import CommunityScreen from './screens/CommunityScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import RecipeScreen from './screens/RecipeScreen';
-import DetailIngredientScreen from './screens/DetailIngredientScreen';
+import DetailIngredientScreen1 from './screens/DetailIngredientScreen1';
+import DetailIngredientScreen2 from './screens/DetailIngredientScreen2';
 import Splash from './screens/splash';
 import signin from './screens/signin';
 import signup from './screens/signup';
@@ -30,7 +31,8 @@ const HomeStack = () => {
       <Stack.Screen name="KaKaoLogin" component={KaKaoLogin} />
       <Stack.Screen name="Signup" component={signup} />
       <Stack.Screen name="HomeMain" component={HomeScreen} options={{ title: 'Home' }} />
-      <Stack.Screen name="DetailIngredient" component={DetailIngredientScreen} />
+      <Stack.Screen name="DetailIngredient1" component={DetailIngredientScreen1} />
+      <Stack.Screen name="DetailIngredient2" component={DetailIngredientScreen2} />
       <Stack.Screen name="SharingPeople" component={SharingPeople} />
       <Stack.Screen name="Ingredient" component={Ingredient} />
       <Stack.Screen name="CreatePostScreen" component={CreatePostScreen} />
