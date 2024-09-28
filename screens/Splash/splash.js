@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Splashimage from '../../src/assets/splash.png';
+import Splashimage from '../../assets/Images/splashimg.png';
 import { useNavigation } from "@react-navigation/native";
 import PermissionModal from './PermissionModal';
 
@@ -18,7 +18,29 @@ const SplashScreen = ({navigation}) => {
   //State for ActivityIndicator animation
   const [animating, setAnimating] = useState(true);
   const [isModalVisible, setModalVisible] = useState(true);
+  /*
+  useEffect(() => {
+        setTimeout(() => {
+            AsyncStorage.getItem('user')
+                .then((value) => {
+                    console.log(value)
+                    if (value != null) {
+                        props.goMain(value)
 
+                        props.navigation.replace('Main');
+
+                    } else {
+                        props.navigation.replace('Auth');
+                        console.log(value);
+
+                    }
+                }
+                );
+
+        }, 3000);
+    }, []);
+  */
+  
   useEffect(() => {
     setTimeout(() => {
       setAnimating(false);

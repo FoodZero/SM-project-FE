@@ -42,7 +42,5 @@ const Styles = StyleSheet.create({
     fontSize: 15,
     color: 'white',
     textAlign: "center",
-    includeFontPadding: false,
-    fontFamily: 'NotoSansKR-Regular',
   }
 })

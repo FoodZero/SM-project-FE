@@ -1,11 +1,15 @@
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
-/**
- * Metro configuration
- * https://facebook.github.io/metro/docs/configuration
- *
- * @type {import('metro-config').MetroConfig}
- */
-const config = {};
+const defaultConfig = getDefaultConfig(__dirname);
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+const config = {
+  transformer: {
+    babelTransformerPath: require.resolve('react-native-svg-transformer'), // SVG 변환기를 설정
+  },
+  resolver: {
+    assetExts: defaultConfig.resolver.assetExts.filter(ext => ext !== 'svg'), // SVG를 asset에서 제외
+    sourceExts: [...defaultConfig.resolver.sourceExts, 'svg'], // SVG를 소스 확장자로 추가
+  },
+};
+
+module.exports = mergeConfig(defaultConfig, config);

@@ -9,46 +9,48 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  TouchableWithoutFeedback,
-  PermissionsAndroid,
-  AppState,
+  Alert,
+  BackHandler
 } from 'react-native';
-import CheckBox from 'expo-checkbox';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PermissionModal from '../Splash/PermissionModal';
-import EncryptedStorage from 'react-native-encrypted-storage';
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
+
+import X from '../../assets/Icons/X.svg';
+import Sector from '../../assets/Icons/Sector.svg';
+import CheckboxOff from '../../assets/Icons/CheckboxOff.svg';
+import CheckboxOn from '../../assets/Icons/CheckboxOn.svg';
+
 
 const Login = () => {
   const navigation = useNavigation();
   
   useEffect(() => {
+
+    //아이디 저장 했을때 하기 위함
+    const fetchStoredEmail = async () => {
+      try {
+        // AsyncStorage에서 저장된 이메일 가져오기
+        const storedEmail = await AsyncStorage.getItem('userEmail');
+        if (storedEmail) {
+          setUserEmail(storedEmail); // 이메일이 있을 경우 TextInput에 표시
+          setidSelection(true); // 체크박스 체크
+        }
+      } catch (error) {
+        console.error('Error fetching email from AsyncStorage', error);
+      }
+    };
+  
+    fetchStoredEmail();
+    
     console.log(`Open Modal`);
     setModalVisible(true);
+    
   }, []);
 
-  //Font 적용문제만 남음!!
-  /*
-  const [fontLoaded, setFontLoaded] = useState(false);
-  useEffect(() => {
-    async function loadFont() {
-      await Font.loadAsync({
-        'Notosans': require('../../assets/Fonts/NotoSansKR-Light.ttf'),
-      });
-      setFontLoaded(true);
-      
-    }
-    loadFont();
-  }, []);
-  */
-  
-  const onLogin = (data) =>{
-    console.log(data);
-    navigation.navigate("Login");
-  };
 
   // 이메일, 비밀번호 입력값받는 state
   const [UserEmail, setUserEmail] = useState("");
@@ -67,7 +69,7 @@ const Login = () => {
   const EmailInputRef = createRef(); 
   const PasswordInputRef = createRef();
   
-  // 이메일, 비밀번호 정규식
+  // 이메일 정규식
   const HandleEmailChk = (text) =>{
     let emailRegex = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,}$/i;
 
@@ -80,6 +82,7 @@ const Login = () => {
     }
   }
 
+  // 비밀번호 정규식
   const HandlePwChk = (text) =>{
     let passwordRegex = /^[A-Za-z0-9#?!@$%^&*-](?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-])[a-z0-9#?!@$%^&*-]{8,16}$/;
 
@@ -92,17 +95,47 @@ const Login = () => {
     }
   }
 
-  /*
-  const HandleUser = (text) =>{
-    setUserPassword(text)
-    if(passwordRegex.test(text) == false){
-      setValidPassword(true);
-    }
-    else{
-      setValidPassword(false);
-    }
+  //로그인 실패 토스트 메세지
+  const showToast = () => {
+    Toast.show({
+      type: 'errortoast',
+      position: 'top',
+      topOffset: BasicHeight*304,
+
+      visibilityTime: 2000,
+    });
   }
-*/
+
+  //토스트 메세지 커스텀 함수
+  const toastConfig = {
+    'errortoast': ({errtext}) => (
+      <View 
+        style={{
+          backgroundColor: '#AFAFAF',
+          flexDirection: 'row',
+          alignItems: 'center',
+          alignContent: 'center',
+          height: BasicWidth* 39,
+          width: BasicHeight* 294,
+          borderRadius: 10, 
+        }}>
+        <Text
+          style={{
+            width: BasicWidth* 248,
+            height: BasicHeight* 20,
+            color: '#FFFFFF',
+            alignSelf: 'center',
+            marginLeft: BasicWidth*16,
+            includeFontPadding: false,
+            fontFamily: 'NotoSansKR-Light',
+            fontSize: 14,
+          }}
+        >
+          아이디 또는 비밀번호가 일치하지 않습니다.
+        </Text>
+      </View>
+    ),
+  };
 
 //로그인 위한 데이터
   const data = {
@@ -110,49 +143,50 @@ const Login = () => {
     password: UserPassword,
   };
 
-  const HandleLogin = () =>{
-    HandleServer();
-    if(ValidUser == true){
-    console.log('홈화면으로 이동합니다');
-    const AccessToken = AsyncStorage.getItem("userAccessToken");
-    navigation.navigate("FoodInput", { AccessToken: AccessToken });
-    }
-    else{
+  //로그인 함수
+  const HandleLogin = async () => {
+    if (loading) return; // 이미 로딩 중이면 새로운 요청을 방지
+    try {
+      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/login',data);
+
+      if (response.status === 200) {
+        console.log(response.data);
+          await AsyncStorage.setItem('userAccessToken', response.data.result.accessToken);
+        if(idSelected){
+          await AsyncStorage.setItem('userEmail', UserEmail);
+        }
+        navigation.navigate("Home");
+      }
+    } catch (error) {
+      console.error('Error:', error);
       console.log('로그인에 문제가 있습니다.');
-    }
-  };
-
-  //로그인 위한 서버와 연결
-  const HandleServer = useCallback(async () => {
-
-    if(loading){
-      return;
-    }
-    try{
-      setLoading(true);
-      const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/login',data)
-      console.log(response);
-      await AsyncStorage.setItem('userAccessToken', response.data.result.accessToken);
-    }catch(error){
-      console.log(error);
-      console.log(data);
-      setValidUser(false);
-    }finally{
+      showToast();
+    } finally {
       setLoading(false);
-      setValidUser(true);
-      const AccessToken = await AsyncStorage.getItem("userAccessToken");
-      console.log(AccessToken);
     }
-  }, [loading,UserEmail,UserPassword]);
-
-  /*
-  const handleModal = () => {
-    // Add logic to find email using the entered phone number
-    // This could involve making an API call to your server, for example.
-    console.log(`Open Modal`);
-    setModalVisible(true);
   };
-  */
+
+  //X버튼 눌렀을때 앱 종료
+  const goBack = () => {
+    Alert.alert('잠시만요!', '정말 앱을 종료하시겠습니까?', [
+      {
+        text: '아니요',
+        onPress: () => null,
+        style: 'cancel',
+      },
+      {text: '네', onPress: () => BackHandler.exitApp()},
+    ]);
+    return true;
+  };
+  //자동로그인 체크
+  const loginbuttonpress = () => {
+    setloginSelection(!loginSelected);
+  };
+
+  //아이디 저장 체크
+  const idbuttonpress = () => {
+    setidSelection(!idSelected);
+  };
 
   return (
     //로그인
@@ -161,8 +195,8 @@ const Login = () => {
       <PermissionModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} />
       <View style = {Styles.BackContainer}>
         <View style = {Styles.IconContainer}>
-          <TouchableOpacity onPress={() => alert('뒤로가기')}>
-          <Icon name = "close" size = {20}/>
+          <TouchableOpacity onPress={() => goBack()}>
+          <X/>
           </TouchableOpacity>
         </View>
       <View style = {Styles.HomeContainer}>
@@ -173,7 +207,7 @@ const Login = () => {
         <Text style={Styles.Lables}>이메일*</Text>
         <TextInput
           style={Styles.TextForm}
-          placeholder = "이메일을 입력해주세요."
+          placeholder = "이메일을 입력해 주세요."
           onChangeText = {(text) => HandleEmailChk(text)}
           onChange={setUserEmail}
           value = {UserEmail}
@@ -185,7 +219,7 @@ const Login = () => {
           }
         />
         {
-          ValidEmail ? (<Text style= {Styles.Text}>이메일을 입력해주세요.</Text>) : (<Text style= {Styles.Text}> </Text>)
+          ValidEmail ? (<Text style= {Styles.Text}>이메일을 입력해 주세요.</Text>) : (<Text style= {Styles.Text}> </Text>)
         }
       </View>
 
@@ -197,6 +231,7 @@ const Login = () => {
           onChange={setUserPassword}
           value={UserPassword}
           placeholder = "8~16자리 영문+숫자+특수문자 조합"
+          secureTextEntry={true}
           onChangeText = {(text) => HandlePwChk(text)}
           returnKeyType= 'done'
           ref = {PasswordInputRef}
@@ -210,20 +245,16 @@ const Login = () => {
       <View style = {Styles.CheckboxesContainer}>
 
         <View style = {Styles.CheckboxContainer1}>
-          <CheckBox
-              value={loginSelected}
-              onValueChange={setloginSelection}
-              style={Styles.Checkbox}
-              color={loginSelected? '#CAF6FF': undefined}/>
+          <TouchableOpacity onPress={loginbuttonpress} style={{marginTop:BasicHeight*5}}>
+            {loginSelected? <CheckboxOn/> : <CheckboxOff/>}
+          </TouchableOpacity>
           <Text style={Styles.CheckboxText}>자동 로그인</Text>
         </View>
 
         <View style = {Styles.CheckboxContainer2}>
-          <CheckBox
-              value={idSelected}
-              onValueChange={setidSelection}
-              style={Styles.Checkbox}
-              color={idSelected? '#CAF6FF': undefined}/>
+          <TouchableOpacity style={{marginTop:BasicHeight*5}} onPress={idbuttonpress}>
+            {idSelected? <CheckboxOn/> : <CheckboxOff/>}
+          </TouchableOpacity>
           <Text style={Styles.CheckboxText}>아이디 저장</Text>
         </View>
 
@@ -244,13 +275,13 @@ const Login = () => {
           onPress={() => navigation.navigate("Terms", { screen: 'Terms' })}>
           <Text style = {Styles.MiniText}> 회원가입 </Text>
         </TouchableOpacity>
-        <Text> | </Text>
+        <Sector style={{marginLeft:BasicWidth*5, marginRight:BasicWidth*5}}/>
 
         <TouchableOpacity
           onPress={() => navigation.navigate("FindEmail", { screen: 'FindEmail' })}>
           <Text style = {Styles.MiniText}> 이메일 찾기 </Text>
         </TouchableOpacity>
-        <Text> | </Text>
+        <Sector style={{marginLeft:BasicWidth*5, marginRight:BasicWidth*5}}/>
         <TouchableOpacity
           onPress={() => navigation.navigate("FindPassword", { screen: 'FindPassword' })}>
           <Text style = {Styles.MiniText}> 비밀번호 찾기 </Text>
@@ -266,6 +297,7 @@ const Login = () => {
         </TouchableOpacity>
       </View>
       </View>
+      <Toast config={toastConfig} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -299,23 +331,20 @@ const Styles = StyleSheet.create({
       backgroundColor: '#FFFFFF',
     },
     IconContainer:{
-      backgroundColor: '#FFFFFF',
-      width: BasicWidth*390,
-      height: BasicHeight*20,
       alignItems: 'flex-end',
+      marginTop: BasicHeight*13,
       paddingRight : BasicWidth*25,
     },
 
     HomeContainer :{
       width: BasicWidth*83,
       height: BasicHeight*45,
-      marginTop : BasicHeight*54,
+      marginTop : BasicHeight*26,
       marginLeft: BasicWidth*20,
       marginBottom: BasicHeight*55,
     },
 
     HomeText : {
-      width: BasicWidth*83,
       height: BasicHeight*45,
       fontSize: 30,
       includeFontPadding: false,
@@ -328,14 +357,14 @@ const Styles = StyleSheet.create({
       height: BasicHeight*114,
       marginRight: BasicWidth*32,
       marginLeft : BasicWidth*32,
-      marginBottom : BasicHeight*40,
+      marginBottom : BasicHeight*10,
     },
 
     InputArea2 : {
       width: BasicWidth*325,
       height: BasicHeight*114,
-      marginRight: BasicWidth*32,
       marginLeft : BasicWidth*32,
+      marginBottom : BasicHeight*5,
     },
 
     Lables : {
@@ -349,17 +378,17 @@ const Styles = StyleSheet.create({
     TextForm : {
       width: BasicWidth*325,
       height: BasicHeight*50,
+      paddingLeft : BasicWidth*10,
       fontSize : 20,
       borderColor : "#E2E2E2",
       borderWidth : 1,
-      paddingHorizontal : 10,
       includeFontPadding: false,
       fontFamily: 'NotoSansKR-Regular',
     },
     Text : {
-        width: BasicWidth*141,
         height: BasicHeight*30,
         marginLeft: BasicWidth*10,
+        paddingTop: BasicHeight*5,
         color: '#E82323',
         fontSize: 13,
         includeFontPadding: false,
@@ -368,17 +397,14 @@ const Styles = StyleSheet.create({
 
     CheckboxesContainer : {
       flexDirection: 'row',
-      width: BasicWidth*267,
       height: BasicHeight*26,
-      marginRight: BasicWidth*58,
-      marginLeft : BasicWidth*65,
       marginBottom : BasicHeight*30,
       justifyContent: 'center',
+      alignItems: 'center',
     },
 
     CheckboxContainer1 : {
       flexDirection: 'row',
-      alignSelf: 'center',
       alignContent: 'center',
       justifyContent: 'center',
 
@@ -388,53 +414,42 @@ const Styles = StyleSheet.create({
       flexDirection: 'row',
       alignSelf: 'center',
       alignContent: 'center',
-      justifyContent: 'center',
       marginLeft : BasicWidth*33,
     },
-
-    Checkbox : {
-      alignSelf: 'center',
-    },
-
     CheckboxText : {
-      width: BasicWidth*87,
       height: BasicHeight*26,
-      paddingLeft : BasicWidth*10,
-      flexWrap: 'wrap',
-      fontSize: 16,
+      marginLeft : BasicWidth*10,
+      fontSize: 18,
       includeFontPadding: false,
       fontFamily: 'NotoSansKR-Regular',
       color: '#000000',
     },
 
     MiniButtonContainer : {
-      width: BasicWidth*264,
       height: BasicHeight*23,
-      marginRight: BasicWidth*65,
-      marginLeft : BasicWidth*61,
       marginTop: BasicHeight*25,
-      marginBottom: BasicHeight*25,
+      marginBottom: BasicHeight*30,
       flexDirection: 'row',
       justifyContent: 'center',
+      alignContent: 'center',
+      alignItems: 'center',
     },
 
     MiniText : {
       includeFontPadding: false,
+      fontSize: 16,
       fontFamily: 'NotoSansKR-Regular',
       color: '#000000',
     },
 
     ButtonArea : {
-
-      paddingRight: 32,
-      paddingLeft : 32,
+      marginLeft : BasicWidth*32,
     },
 
     FastButtonArea : {
       width: BasicWidth*325,
       height: BasicHeight*104,
-      marginRight: BasicWidth*32,
-      marginLeft : BasicWidth*33,
+      marginLeft : BasicWidth*32,
     },
 
     Button : {
@@ -458,6 +473,7 @@ const Styles = StyleSheet.create({
     FastButton : {
       width: BasicWidth*325,
       height: BasicHeight*65,
+      marginTop: BasicHeight*10,
       justifyContent: 'center',
       alignItems: 'center',
       borderColor : '#F9E000',
@@ -465,8 +481,6 @@ const Styles = StyleSheet.create({
       
     },
 
-    
-    
     FastButtonText :{
       alignSelf : 'center',
       fontSize : 20,
@@ -476,10 +490,7 @@ const Styles = StyleSheet.create({
     },
     
     FastLables : {
-      
       fontSize : 20,
-      marginTop : 25,
-      marginBottom : 5,
       textAlign : 'center',
       includeFontPadding: false,
       fontFamily: 'NotoSansKR-Regular',

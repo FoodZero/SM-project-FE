@@ -1,9 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet,TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Dimensions,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-
+import OK from '../../../assets/Icons/OK.svg';
 
 
 const EmailNotice = () => {
@@ -12,20 +20,17 @@ const navigation = useNavigation();
 const route = useRoute();
 const { Email } = route.params;
 const handlelogin = () => {
-  // Add logic to close the screen, navigate back, or perform any other action
-  console.log('login botton');
+  navigation.navigate('Login');
 };
 const handleRetrievePassword = () => {
-  // Add logic to retrieve password
-  console.log('Retrieving password...');
   navigation.navigate('FindPassword');
 };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
     <Text style={styles.headerText}>이메일 안내</Text>
-    <Icon name="checkcircleo" size={50} color="#3873EA" style={styles.icon}/>
-    <Text style={styles.EmailinfoText}>회원님의 이메일 주소는 {Email} 입니다</Text>
+    <OK style={{alignSelf: 'center', marginTop: BasicHeight*95}}/>
+    <Text style={styles.EmailinfoText}>회원님의 이메일 주소는 {'\n'}{Email} 입니다</Text>
 
     <TouchableOpacity style={styles.findButton} onPress={handlelogin}>
         <Text style={styles.buttonText}>로그인</Text>
@@ -38,51 +43,55 @@ const handleRetrievePassword = () => {
   );
 };
 
+const AllWidth = Dimensions.get("window").width;
+const AllHeight = Dimensions.get("window").height;
+
+const FigmaWidth = 390;
+const FigmaHeight = 844;
+
+const BasicWidth = (AllWidth / FigmaWidth).toFixed(2);
+const BasicHeight = (AllHeight / FigmaHeight).toFixed(2);
 
 const styles = StyleSheet.create({
   container: {
-    marginTop:40,
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    marginLeft:30,
   },
   headerText: {
     fontSize: 30,
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Bold',
-    marginBottom: 10,
-
-    marginBottom: 100,
+    marginLeft: BasicWidth * 20,
+    marginTop: BasicHeight * 53,
+    color: '#000000',
   },
   EmailinfoText: {
     fontSize: 20,
-    marginTop: 60,
-    marginBottom: 60,
     includeFontPadding: false,
+    alignSelf: 'center',
+    textAlign: 'center',
     fontFamily: 'NotoSansKR-Regular',
+    color: '#000000',
+    marginTop: BasicHeight * 45,
+    marginBottom: BasicHeight * 90,
   },
   findButton: {
+    width: BasicWidth * 325,
+    height: BasicHeight * 65,
+    marginLeft: BasicWidth * 33,
     backgroundColor: '#3873EA',
-    padding: 10,
     alignItems: 'center',
-    width: '90%',
-    marginBottom: 10,
-    marginTop:10,
-    height: 40,
+    justifyContent: 'center',
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 20,
     includeFontPadding: false,
-    fontFamily: 'NotoSansKR-Regular',
+    fontFamily: 'NotoSansKR-Bold',
   },
   retrieveButton: {
-    padding: 5,
-    marginBottom:200,
-    marginTop:20,
-    marginLeft:115,
+    marginTop: BasicHeight * 25,
+    alignContent: 'center',
+    alignItems: 'center',
   },
   retrieveButtonText: {
     textDecorationLine: 'underline',
@@ -90,12 +99,6 @@ const styles = StyleSheet.create({
     color: 'black',
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Regular',
-  },
-  icon: {
-    position: 'absolute',
-    marginLeft: 135,
-    marginTop:110 ,
-  },
-  
+  },  
 });
 export default EmailNotice;

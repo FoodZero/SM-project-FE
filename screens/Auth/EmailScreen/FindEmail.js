@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+  Dimensions,
+  Modal,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
+import X from '../../../assets/Icons/X.svg';
 
 
 const FindEmail = () => {
@@ -11,6 +23,20 @@ const FindEmail = () => {
   const navigation = useNavigation();
   const [timer, setTimer] = useState(180); // Initial timer value in seconds
   const [timerActive, setTimerActive] = useState(false);
+  const [isResend, setIsResend] = useState(false);
+  const [error, setError] = useState(false);
+  const [ModalVisible, setModalVisible] = useState(false);
+  
+
+  const intervalIdRef = useRef(null);
+
+  const backAction = () => {
+    setModalVisible(true);
+};
+const backYes = () =>{
+  setModalVisible(false);
+  navigation.navigate("Login");
+};
 
   const handleFindEmail = () => {
     // Add logic to find email using the entered phone number
@@ -20,21 +46,34 @@ const FindEmail = () => {
     startTimer();
   };
 
+  const timerReset = () => {
+    setTimer(180);
+  };
+
+  // 타이머 세팅 (다시 눌렀을 때 시간이 2배로 빨리가고, reset안되는 문제 해결해야함!!!!!!!)
   const startTimer = () => {
     // Set up a timer that updates every second
-    const intervalId = setInterval(() => {
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
+    }
+    timerReset();
+  
+    // Set up a new interval
+    intervalIdRef.current = setInterval(() => {
       setTimer((prevTimer) => {
         if (prevTimer > 0) {
-          // If the timer is greater than 0, decrement it
-          return prevTimer - 1;
+          return prevTimer - 1;  // Decrement the timer by 1 second
         } else {
-          // If the timer reaches 0, stop the timer
-          clearInterval(intervalId);
-          setTimerActive(false);
-          return 0;
+          clearInterval(intervalIdRef.current);  // Stop the timer when it reaches 0
+          setTimerActive(false);  // Disable the timer
+          timerReset;  // Reset the timer
         }
       });
     }, 1000);
+
+    setTimerActive(true);  // Set timer as active
+    setIsResend(true);  // Update the button to show "재전송" after first send
+
   };
   
   const handlecertificationNumber = () => {
@@ -50,14 +89,9 @@ const FindEmail = () => {
     navigation.navigate('FindPassword');
   };
 
-  const handleClose = () => {
-    // Add logic to close the screen, navigate back, or perform any other action
-    console.log('Closing the screen...');
-  };
-
  var REQ_PARAM1 ={"phone" : phoneNumber }
   const certificationrequest = async () => {
-    var AccessToken = "none";
+
     axios ({
       method: 'POST',
       url:'http://www.sm-project-refrigerator.store/api/members/send',
@@ -68,11 +102,13 @@ const FindEmail = () => {
   }) .catch (function (error) {
   console.log('error', error);
   });
+
 };
 //이메일 찾기 인증코드 보내는 api
 var REQ_PARAM2 = {
   "phone": phoneNumber,
-  "certificationCode":certificationNumber};
+  "certificationCode":certificationNumber
+};
 
   const certificationsend = async () => {
     var AccessToken = "none";
@@ -85,47 +121,86 @@ var REQ_PARAM2 = {
       if (response.data.isSuccess) {
         const Email = response.data.result.email;
         navigation.navigate('EmailNotice', { Email }); // 이메일 주소를 함께 전달
-      } else {
-        console.log("Email not found or an error occurred.");
       }
     }).catch(function (error) {
       console.log('error', error);
+      setError(true);
     });
   };
+  
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-      <Text style={styles.headerText}>이메일 찾기</Text>
-      <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-        <Text style={styles.closeButtonText}>X</Text>
+      
+      <TouchableOpacity style={styles.closeButton} onPress={backAction}>
+        <X/>
       </TouchableOpacity>
-      <Text style={styles.label}>휴대폰 번호*</Text>
-      <View style={styles.phoneNumberContainer}>
-      <TextInput
-        style={styles.phoneNumberinput}
-        placeholder="숫자만 입력"
-        keyboardType="numeric"
-        value={phoneNumber}
-        onChangeText={(text) => setPhoneNumber(text)}
-      />
-        <TouchableOpacity style={styles.sendButton} onPress={handleFindEmail}>
-        <Text style={styles.buttonText}>전송</Text>
-      </TouchableOpacity>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={ModalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalHeader}>잠시만요!</Text>
+            <Text style={styles.modalText}>입력내용이 저장되지 않습니다.{'\n'}이전 단계로 돌아갈까요?</Text>
+            <View style={styles.ButtonContainer}>
+              <TouchableOpacity style={styles.NoButton} onPress={() => setModalVisible(false)}>
+                <Text style={styles.NoButtonText}>아니오</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.YesButton} onPress={backYes}>
+                <Text style={styles.YesButtonText}>네</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <View style={styles.Body}>
+        <Text style={styles.headerText}>이메일 찾기</Text>
+
+        <View style={styles.PnumInputArea}>
+          <Text style={styles.label}>휴대폰 번호*</Text>
+          <View style = {styles.MiniArea}>
+          <TextInput
+            style={styles.PnumForm}
+            placeholder = "숫자만 입력"
+            keyboardType="numeric"
+            value={phoneNumber}
+            onChangeText={(text) => setPhoneNumber(text)}
+          />
+          <TouchableOpacity
+            style={styles.MiniButton}
+            activeOpacity={0.8}
+            onPress={handleFindEmail}
+            >
+            {isResend ? <Text style={styles.MiniButtonText}>재전송</Text> : <Text style={styles.MiniButtonText}>전송</Text>}
+          </TouchableOpacity>
+          </View>
+          <View style={styles.AuthForm}>
+            <TextInput
+              style={styles.AuthText}
+              textColor= {"#AFAFAF"}
+              placeholder="인증번호 입력"
+              keyboardType="numeric"
+              value={certificationNumber}
+              onChangeText={(text) => setcertificationNumber(text)}
+            />
+            <Text style={styles.PnumTime}>{Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}</Text>
+          </View>
+          {
+            error ? <Text style={styles.ValidText}>잘못된 인증번호입니다. 인증번호를 다시 입력해주세요.</Text> : null
+          }
+        </View>
+      
+      
+        <TouchableOpacity style={styles.findButton} onPress={handlecertificationNumber}>
+          <Text style={styles.buttonText}>이메일 찾기</Text>
+        </TouchableOpacity>
       </View>
-     
-      <TextInput
-        style={styles.certificationNumberinput}
-        placeholder="인증번호 입력"  
-        keyboardType="numeric"
-        value={certificationNumber}
-        onChangeText={(text) => setcertificationNumber(text)}
-      /><Text style={styles.timerText}>인증시간 {Math.floor(timer / 60)}:{timer % 60}</Text>
-     
-     
-      <TouchableOpacity style={styles.findButton} onPress={handlecertificationNumber}>
-        <Text style={styles.buttonText}>이메일 찾기</Text>
-      </TouchableOpacity>
       <TouchableOpacity style={styles.retrieveButton} onPress={handleRetrievePassword}>
         <Text style={styles.retrieveButtonText}>비밀번호 찾기</Text>
       </TouchableOpacity>
@@ -133,109 +208,142 @@ var REQ_PARAM2 = {
     </SafeAreaView>
   );
 };
+const AllWidth = Dimensions.get("window").width;
+const AllHeight = Dimensions.get("window").height;
+
+const FigmaWidth = 390;
+const FigmaHeight = 844;
+
+const BasicWidth = (AllWidth / FigmaWidth).toFixed(2);
+const BasicHeight = (AllHeight / FigmaHeight).toFixed(2);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    marginLeft:30,
-    marginTop:40,
+    backgroundColor: '#FFFFFF',
   },
   headerText: {
     fontSize: 30,
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Bold',
-    marginBottom: 90,
-    marginRight: 200,
+    marginTop: BasicHeight*25,
+    marginBottom: BasicHeight*55,
+    color: '#000000',
   },
   closeButton: {
-    position: 'absolute',
-    top: 0,
-    right: 10,
-    padding: 10,
-   
+    marginTop: BasicHeight * 13,
+    marginLeft: BasicWidth * 350,
   },
-  closeButtonText: {
-    fontSize: 25,
-    color: 'black',
-    includeFontPadding: false,
-    fontFamily: 'NotoSansKR-Regular',
+  Body: {
+    marginLeft: BasicWidth*20,
   },
   label: {
-    marginBottom: 10,
-    fontSize: 16,
-    marginRight:240,
+    fontSize : 20,
+    marginBottom : BasicHeight*5,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+    color: '#000000',
+  },
+  PnumInputArea : {
+    height: BasicHeight*174,
+    marginBottom : BasicHeight*35,
+    marginLeft: BasicWidth*13,
+  },
+  PnumTime:{
+    width: BasicWidth*39,
+    height: BasicHeight*29,
+    fontSize : 20,
+    color: "#AFAFAF",
+    marginLeft: BasicWidth*160,
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Regular',
   },
-  certificationNumberinput: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 0,
-    padding: 10,
-    width: '90%',
+
+  PnumForm : {
+    width: BasicWidth*225,
+    height: BasicHeight*50,
+    marginRight: BasicWidth*10,
+    fontSize : 20,
+    borderColor : "#E2E2E2",
+    borderWidth : 1,
+    paddingHorizontal : 10,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+    color: '#000000',
   },
-  timerText: {
-    fontSize: 18,
-    marginTop: 10,
+  ValidText : {
+    height: BasicHeight*30,
+    marginLeft: BasicWidth*10,
+    marginTop: BasicHeight*5,
+    color: '#E82323',
+    fontSize: 13,
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Regular',
   },
-  phoneNumberinput: {
-
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    padding: 10,
-    width: '75%',
-  },
-
-  phoneNumberContainer: {
+  MiniArea:{
+    width: BasicWidth*325,
+    height: BasicHeight*50,
+    marginBottom: BasicHeight*10,
     flexDirection: 'row',
+  },
+  MiniButton : {
+    width: BasicWidth*90,
+    height: BasicHeight*50,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
-    width: '90%',
+    borderColor : '#3873EA',
+    backgroundColor : '#3873EA',
+  },
+  MiniButtonText :{
+    alignSelf : 'center',
+    fontSize : 20,
+    color : '#FFFFFF',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+  },
+  MiniArea:{
+    width: BasicWidth*325,
+    height: BasicHeight*50,
+    marginBottom: BasicHeight*10,
+    flexDirection: 'row',
+  },
+  AuthForm : {
+    width: BasicWidth*325,
+    height: BasicHeight*50,
+    borderColor : "#E2E2E2",
+    borderWidth : 1,
+    paddingHorizontal : 10,
+    flexDirection: "row",
+    alignItems: "center",
   },
 
-
+  AuthText:{
+    width: BasicWidth*115,
+    height: BasicHeight*50,
+    fontSize : 20,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+    color: '#000000',
+  },
   findButton: {
     backgroundColor: '#808080',
-    padding: 10,
-    borderRadius: 100,
+    borderRadius: 60,
+    width: BasicWidth*325,
+    height: BasicHeight*58,
     alignItems: 'center',
-    width: '90%',
-    marginBottom: 10,
-    marginTop: 40,
-    
-  },
-
-  sendButton: {
-    backgroundColor: '#3873EA',
-    padding: 10,
-    borderRadius:0,
-    alignItems: 'center',
-    width: '20%',
-    marginBottom: 10,
-    marginLeft: 10,
-    height: 40,
-    
+    justifyContent: 'center',
+    marginLeft: BasicWidth*13,
   },
 
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 20,
     includeFontPadding: false,
-    fontFamily: 'NotoSansKR-Regular',
+    fontFamily: 'NotoSansKR-SemiBold',
   },
   retrieveButton: {
-    padding: 5,
-    marginBottom:200,
-    marginTop:20,
-    marginLeft:106,
+    alignItems: 'center',
+    marginTop: BasicHeight*25,
   },
   retrieveButtonText: {
     textDecorationLine: 'underline',
@@ -245,14 +353,68 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansKR-Regular',
   },
 
-  timerText: {
-    fontSize: 12,
-    marginTop: 10,
-    color: 'gray',
-    marginLeft:120,
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  modalView: {
+    width: BasicWidth*325,
+    height: BasicHeight*212,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingLeft: BasicWidth*27,
+    paddingTop: BasicHeight*19,
+  },
+  modalHeader: {
+    fontSize: 25,
+    color: '#000000',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-SemiBold',
+    marginBottom: BasicHeight*5,
+  },
+  modalText: {
+    fontSize: 18,
+    color: '#808080',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+    marginBottom: BasicHeight*15,
+  },
+  ButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '60%',
+  },
+  NoButtonText: {
+    color: '#000000',
+    fontSize: 16,
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Regular',
   },
+  YesButtonText: {
+    color: 'white',
+    fontSize: 16,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+  },
+  NoButton: {
+    width: BasicWidth*130,
+    height: BasicHeight*49,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: '#E2E2E280',
+  },
+  YesButton: {
+    width: BasicWidth*130,
+    height: BasicHeight*49,
+    marginLeft: BasicWidth*15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: '#3873EA',
+  }, 
 
 });
 
