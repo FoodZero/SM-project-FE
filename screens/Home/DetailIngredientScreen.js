@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -27,11 +28,56 @@ const DetailIngredientScreen = () => {
   const AccessToken = route.params?.AccessToken;
   const ingredient = route.params?.ingredient;
   const [FoodType, setFoodType] = useState('');
+=======
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Calendar } from 'react-native-calendars';
+import axios from 'axios';
+
+
+
+const QuantityInput = ({ quantity, onIncrease, onDecrease }) => {
+  return (
+    <View style={styles.quantityContainer}>
+      
+      <View style={styles.quantityInputContainer}>
+      <Text style={styles.labelText}>수량 </Text>
+        <TouchableOpacity onPress={onDecrease}>
+          <AntDesign name="minus" size={24} color="#3873EA" />
+        </TouchableOpacity>
+        <TextInput
+          style={styles.quantityInput}
+          value={quantity.toString()}
+          keyboardType="numeric"
+          onChangeText={value => onQuantityChange(value)}
+        />
+        <TouchableOpacity onPress={onIncrease}>
+          <AntDesign name="plus" size={24} color="#3873EA" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const DetailIngrediant = () => {
+
+ 
+  const navigation = useNavigation();
+  const route = useRoute();
+  const AccessToken = route.params?.AccessToken;
+  const refrigeratorId = route.params?.refrigeratorId;
+  const ingredient = route.params?.ingredient;
+  const FoodId = route.params?.FoodId;
+  const date = route.params?.date;
+>>>>>>> origin-flit/cli
   const [isSelected1, setIsSelected1] = useState(false);
   const [isSelected2, setIsSelected2] = useState(false);
   const [isSelected3, setIsSelected3] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+<<<<<<< HEAD
   const [Foodid, setFoodid] = useState(0);
   const [quantity, setQuantity] = useState(1); // Initialize quantity state
   const [ingredientName, setIngredientName] = useState(ingredient || '');
@@ -65,11 +111,22 @@ const DetailIngredientScreen = () => {
   const handleClose = () => {
     console.log('Closing the screen...');
     navigation.goBack();
+=======
+  const [quantity, setQuantity] = useState(1); // Initialize quantity state
+  const [textInputValue, setTextInputValue] = useState('');
+
+  const handleClose = () => {
+    console.log('Closing the screen...');
+    navigation.navigate('Ingredient', { AccessToken: AccessToken });
+>>>>>>> origin-flit/cli
   };
 
   const handleSave = () => {
     console.log('Save button pressed');
+<<<<<<< HEAD
     console.log('AccessToken:', AccessToken );
+=======
+>>>>>>> origin-flit/cli
    //console.log(`제품명: ${ingredient}`);
    //console.log(`유통기한: ${selectedDate}`);
    // console.log(`수량: ${quantity}`);
@@ -82,6 +139,7 @@ const DetailIngredientScreen = () => {
    //   FoodType = 'OUTSIDE';
    // }
    // console.log(`음식타입: ${FoodType}`);
+<<<<<<< HEAD
     addfood();
   };
 
@@ -119,15 +177,37 @@ const DetailIngredientScreen = () => {
       setIsSelected3(true);
       setFoodType('OUTSIDE');
     }
+=======
+   ModifyFood();
+  };
+
+  const handleSelect1 = () => {
+    setIsSelected1(!isSelected1);
+  };
+
+  const handleSelect2 = () => {
+    setIsSelected2(!isSelected2);
+  };
+
+  const handleSelect3 = () => {
+    setIsSelected3(!isSelected3);
+>>>>>>> origin-flit/cli
   };
 
   const handleDayPress = (day) => {
     setSelectedDate(day.dateString);
+<<<<<<< HEAD
     setIsCalendarOpen(false);
   };
 
   const toggleCalendar = () => {
     setIsCalendarOpen(true);
+=======
+  };
+
+  const toggleCalendar = () => {
+    setIsCalendarOpen(!isCalendarOpen);
+>>>>>>> origin-flit/cli
   };
 
   const increaseQuantity = () => {
@@ -139,6 +219,7 @@ const DetailIngredientScreen = () => {
       setQuantity(prevQuantity => prevQuantity - 1);
     }
   };
+<<<<<<< HEAD
   const handleIngredientNameChange = (text) => {
     setIngredientName(text); // Update state
   };
@@ -175,10 +256,32 @@ const DetailIngredientScreen = () => {
     const name = await AsyncStorage.getItem('userRefName');
     const data = {
       name: ingredient,
+=======
+  
+
+
+
+  const ModifyFood = async () => {
+  
+    let FoodType = '';
+    if (isSelected1) {
+      FoodType = 'COLD';
+    } else if (isSelected2) {
+      FoodType = 'FROZEN';
+    } else if (isSelected3) {
+      FoodType = 'OUTSIDE';
+    }
+    const headers = {
+      Authorization: `Bearer ${AccessToken}`
+    };
+    const data = {
+      name: textInputValue,
+>>>>>>> origin-flit/cli
       expire: selectedDate,
       count: quantity,
       foodType: FoodType,
     };
+<<<<<<< HEAD
     console.log(data);
     console.log(refrigeratorld);
     console.log(Foodid);
@@ -197,17 +300,29 @@ const DetailIngredientScreen = () => {
             ],
           });
         }
+=======
+    
+    try {
+        const response = await axios.put(`http://www.sm-project-refrigerator.store/api/food/${FoodId}/${refrigeratorId}`, data, { headers });
+        console.log(response.data);
+        
+>>>>>>> origin-flit/cli
   
     } catch (error) {
         console.error(error);
     }
    
+<<<<<<< HEAD
   }
+=======
+  };
+>>>>>>> origin-flit/cli
   
 
 
   return (
     <SafeAreaView style={styles.container}>
+<<<<<<< HEAD
       <ScrollView style={styles.Scroll}>
         <View style={styles.Header}>
           <TouchableOpacity
@@ -220,6 +335,24 @@ const DetailIngredientScreen = () => {
           <Text style={styles.headerText}>상세 보기</Text>
         </View>
         
+=======
+      <ScrollView>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={handleClose}>
+          <AntDesign name="left" size={25} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>상세 보기</Text>
+        
+        {/* ingrediant name input */}
+        <TextInput
+          style={styles.textInput}
+          value={textInputValue}
+          onChangeText={setTextInputValue}
+          placeholder={ingredient||""}
+        />
+    
+>>>>>>> origin-flit/cli
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
             style={[styles.button, {backgroundColor: isSelected1 ? '#3873EA' : 'white'}]} 
@@ -244,6 +377,7 @@ const DetailIngredientScreen = () => {
           </TouchableOpacity>
         </View>
 
+<<<<<<< HEAD
         <View style={styles.InputContainer}>
           <TextInput
             style={styles.ingredientInput}
@@ -282,12 +416,36 @@ const DetailIngredientScreen = () => {
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>저장</Text>
+=======
+        <TouchableOpacity onPress={toggleCalendar}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputText}>{`유통기한: ${selectedDate}`}</Text>
+          </View>
+        </TouchableOpacity>
+
+        {isCalendarOpen && (
+          <Calendar
+            onDayPress={handleDayPress}
+          />
+        )}
+
+        {/* Render QuantityInput component */}
+        <QuantityInput
+          quantity={quantity}
+          onIncrease={increaseQuantity}
+          onDecrease={decreaseQuantity}
+        />
+
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.buttonText}>저장</Text>
+>>>>>>> origin-flit/cli
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
+<<<<<<< HEAD
 const AllWidth = Dimensions.get("window").width;
 const AllHeight = Dimensions.get("window").height;
 
@@ -407,10 +565,87 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'NotoSansKR-Regular',
     color: '#000000',
+=======
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 40,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    marginLeft: 30,
+  },
+  headerText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginTop: 70,
+    marginBottom: 50,
+    marginRight: 190,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '90%',
+    marginBottom: 10,
+    marginTop:20,
+  },
+  button: {
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    marginHorizontal: 5,
+    height: 40,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#3873EA',
+  },
+  saveButton: {
+    backgroundColor: '#3873EA',
+    padding: 10,
+    alignItems: 'center',
+    width: '90%',
+    marginTop: 200,
+    height: 40,
+  },
+  buttonText: {
+    fontSize: 16,
+    color: 'white',
+  },
+  inputContainer: {
+    borderWidth: 1,
+    borderColor: '#3873EA',
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 20,
+    width: '90%',
+  },
+  inputText: {
+    color: '#000', // Set text color here
+    fontSize: 16,
+  },
+  labelText: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  quantityContainer: {
+    borderWidth: 1,
+    borderColor: '#3873EA',
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 30,
+    width: '90%',
+>>>>>>> origin-flit/cli
   },
   quantityInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+<<<<<<< HEAD
     marginLeft: BasicWidth*120,
   },
   quantityInput: {
@@ -457,3 +692,26 @@ const styles = StyleSheet.create({
   },
 });
 export default DetailIngredientScreen;
+=======
+  },
+  quantityInput: {
+    borderWidth: 1,
+    borderColor: '#3873EA',
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 5,
+    width: 50,
+    textAlign: 'center',
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#3873EA',
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 20,
+    width: '90%',
+  },
+});
+
+export default DetailIngrediant;
+>>>>>>> origin-flit/cli

@@ -18,6 +18,7 @@ const SplashScreen = ({navigation}) => {
   //State for ActivityIndicator animation
   const [animating, setAnimating] = useState(true);
   const [isModalVisible, setModalVisible] = useState(true);
+<<<<<<< HEAD
   /*
   useEffect(() => {
         setTimeout(() => {
@@ -41,6 +42,9 @@ const SplashScreen = ({navigation}) => {
     }, []);
   */
   
+=======
+
+>>>>>>> origin-flit/cli
   useEffect(() => {
     setTimeout(() => {
       setAnimating(false);

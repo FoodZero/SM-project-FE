@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+<<<<<<< HEAD
 import CheckBox from 'expo-checkbox';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,6 +23,12 @@ import CheckboxOn from '../../assets/Icons/CheckboxOn.svg';
 import Back from '../../assets/Icons/back.svg';
 import DropDown from '../../assets/Icons/drop-down.svg';
 import CircleAdd from '../../assets/Icons/CircleAdd.svg';
+=======
+import CheckBox from "expo-checkbox";
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Back from '../../assets/Icons/back.svg';
+>>>>>>> origin-flit/cli
 
 const IngredientScreen = () => {
   const route = useRoute();
@@ -41,9 +48,13 @@ const IngredientScreen = () => {
   ]);
 
   const {Id} = route.params;
+<<<<<<< HEAD
   const {Name}= route.params;
   const refrigeratorId = Id;
   const refrigeratorName = Name;
+=======
+  const refrigeratorId = Id;
+>>>>>>> origin-flit/cli
   //const {params} = this.props.route;
   const filteredData = data.filter(item => item.name.includes(searchText));
 
@@ -112,7 +123,10 @@ const DeleteFoodData = async (foodId) => {
 
   try {
     const AccessToken = await AsyncStorage.getItem('userAccessToken');
+<<<<<<< HEAD
     console.log('refrigeratorId:', refrigeratorId);
+=======
+>>>>>>> origin-flit/cli
     const response = await axios.delete(
       `http://www.sm-project-refrigerator.store/api/food/${foodId}/${refrigeratorId}`, 
       {
@@ -135,6 +149,7 @@ const DeleteFoodData = async (foodId) => {
   }
 };
 
+<<<<<<< HEAD
 
 
 const handleItemPress = (id, name, expire, count, foodType) => {
@@ -148,12 +163,46 @@ const handleItemPress = (id, name, expire, count, foodType) => {
 };
 
 
+=======
+const AddFoodData = async (name, expire, foodType) => {
+  const data = {
+    name: name,
+    expire: expire,
+    count: 1,
+    foodType: foodType,
+  };
+
+  try {
+    const AccessToken = await AsyncStorage.getItem('userAccessToken');
+    const response = await axios.post(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorId}`, data, {
+      headers: { 
+        Authorization: `Bearer ${AccessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log(response.data);
+    GetFoodData(); // Refresh data after adding new food item
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+
+  const handleItemPress = (id ,name, expire) => {
+    navigation.navigate('DetailIngredient', { FoodId:id, ingredient: name, date: expire ,refrigeratorId: refrigeratorId});
+  };
+
+>>>>>>> origin-flit/cli
   const handleClose = async () => {
     try {
       const AccessToken = await AsyncStorage.getItem('userAccessToken');
         
         if (AccessToken) {
+<<<<<<< HEAD
           navigation.navigate("HomeScreen");
+=======
+          navigation.navigate("HomeMain", { AccessToken: AccessToken });
+>>>>>>> origin-flit/cli
         } else {
             console.log('fridgeId is not available');
         }
@@ -171,6 +220,7 @@ const handleItemPress = (id, name, expire, count, foodType) => {
     //navigation.navigate('RecipeTab'); // Adjust this to your actual screen name
   };
   const handleMoveToRecipeConfirm = () => {
+<<<<<<< HEAD
     // Extract the names of the selected items using their IDs from the selectedItems array
     const selectedFoodNames = selectedItems.map(id => {
       const selectedItem = data.find(item => item.id === id);
@@ -196,6 +246,22 @@ const handleItemPress = (id, name, expire, count, foodType) => {
   };
   
   
+=======
+    // 선택된 항목들의 이름을 추출
+    const selectedFoodNames = selectedItems.map(id => {
+      const selectedItem = data.find(item => item.id === id);
+      return selectedItem ? selectedItem.name : null;
+    }).filter(name => name !== null); // null 값은 제거
+  
+    setRecipeModalVisible(false);
+  
+    // 선택된 항목의 이름 배열을 RecipeMain으로 
+    navigation.navigate('레시피', {screen: 'RecipeMain', params: { selectedFoodNames }});
+    
+    setSelectedItems([]); // 선택 항목 초기화
+  };
+  
+>>>>>>> origin-flit/cli
 
   const toggleItemSelection = (id) => {
     setSelectedItems(prevSelectedItems =>
@@ -203,7 +269,10 @@ const handleItemPress = (id, name, expire, count, foodType) => {
         ? prevSelectedItems.filter(item => item !== id)
         : [...prevSelectedItems, id]
     );
+<<<<<<< HEAD
     
+=======
+>>>>>>> origin-flit/cli
   };
 
   const handleDelete = () => {
@@ -220,17 +289,29 @@ const handleItemPress = (id, name, expire, count, foodType) => {
   };
 
 
+<<<<<<< HEAD
   const Item = ({ id, name, expire, daysLeft, count, foodType }) => (
     <TouchableOpacity 
       style={styles.item} 
       onPress={() => handleItemPress(id, name, expire, count, foodType)} // 필요한 파라미터 전달
       disabled={editMode}
     >
+=======
+  const Item = ({ id, name, expire, daysLeft }) => (
+    <TouchableOpacity style={styles.item} onPress={() => handleItemPress(id,name, expire)} disabled={editMode}>
+      {editMode && (
+        <CheckBox
+          value={selectedItems.includes(id)}
+          onValueChange={() => toggleItemSelection(id)}
+        />
+      )}
+>>>>>>> origin-flit/cli
       <Text style={styles.daysLeft}>D-{daysLeft}</Text>
       <View style={styles.itemText}>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.expire}>유통기한: {expire}</Text>
       </View>
+<<<<<<< HEAD
       {editMode && (
         <CheckBox
         value={selectedItems.includes(id)}
@@ -242,6 +323,10 @@ const handleItemPress = (id, name, expire, count, foodType) => {
   );
   
   
+=======
+    </TouchableOpacity>
+  );
+>>>>>>> origin-flit/cli
 
   const handleSelect1 = () => {
     setisSelectedAll(!isSelectedAll);
@@ -275,7 +360,20 @@ const handleItemPress = (id, name, expire, count, foodType) => {
   const handleSort = () => setModalVisible(true);
 
   const handleAddItem = () => {
+<<<<<<< HEAD
     navigation.navigate('FoodInput', { refrigeratorId });
+=======
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const name = `새 항목 ${data.length + 1}`;
+    const expire = `${year}-${month}-${day}`;
+    const foodType = "COLD";
+
+    // Adding arbitrary data
+    AddFoodData(name, expire, foodType);
+>>>>>>> origin-flit/cli
   };
 
 
@@ -316,16 +414,42 @@ const handleItemPress = (id, name, expire, count, foodType) => {
           <Back/>
         </TouchableOpacity>
         <TouchableOpacity style={styles.editModeButton} onPress={handleEdit}>
+<<<<<<< HEAD
           <Text style={styles.editModeText}>{editMode ? '완료' : '편집'}</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.headerText}>{refrigeratorName}</Text>
+=======
+          <Text >{editMode ? '완료' : '편집'}</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.headerText}>냉장고 {refrigeratorId}</Text>
+>>>>>>> origin-flit/cli
       <TextInput
         style={styles.searchInput}
         placeholder="이름으로 검색"
         value={searchText}
         onChangeText={setSearchText}
       />
+<<<<<<< HEAD
+=======
+       <TouchableOpacity style={styles.sortButton} onPress={handleSort}>
+        <Text style={styles.sortButtonText}>정렬</Text>
+      </TouchableOpacity>
+      <View style={styles.EditButtonContainer}>
+         {editMode && (
+      <TouchableOpacity style={styles.EditButton} onPress={handleDelete}>
+      <Text style={styles.EditButtonText}>삭제</Text>
+      </TouchableOpacity>
+            )}
+       {editMode && (
+      <TouchableOpacity style={styles.EditButton} onPress={handleRecipeNavigation}>
+      <Text style={styles.EditButtonText}>레시피로 이동</Text>
+      </TouchableOpacity>
+     )}
+     
+      </View>
+>>>>>>> origin-flit/cli
      
       
       
@@ -355,6 +479,7 @@ const handleItemPress = (id, name, expire, count, foodType) => {
           <Text style={[styles.buttonText, { color: isSelectedOutside ? 'white' : '#3873EA' }]}>실외</Text>
         </TouchableOpacity>
       </View>
+<<<<<<< HEAD
       <TouchableOpacity style={styles.sortButton} onPress={handleSort}>
         <Text style={styles.sortButtonText}>정렬</Text>
         <DropDown/>
@@ -375,6 +500,14 @@ const handleItemPress = (id, name, expire, count, foodType) => {
         keyExtractor={(item) => item.id.toString()} // ID를 문자열로 변환
       />
 
+=======
+      <FlatList
+        style={styles.itemContainer}
+        data={filteredDataToShow}
+        renderItem={({ item }) => <Item id={item.id} name={item.name} expire={item.expire} daysLeft={item.daysLeft} />}
+        keyExtractor={(item) => item.id}
+      />
+>>>>>>> origin-flit/cli
             
            <Modal
         animationType="slide"
@@ -386,6 +519,7 @@ const handleItemPress = (id, name, expire, count, foodType) => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+<<<<<<< HEAD
             <Text style={styles.modalText}>선택한 재료를 이동하시겠습니까?</Text>
             <View style={styles.RecipeMovemodalButtonContainer}>
               <TouchableOpacity style={[styles.RecipeMovemodalButton,{backgroundColor:'#E2E2E280', marginRight:BasicWidth*15}]} onPress={() => setRecipeModalVisible(false)}>
@@ -393,6 +527,15 @@ const handleItemPress = (id, name, expire, count, foodType) => {
               </TouchableOpacity>
               <TouchableOpacity style={[styles.RecipeMovemodalButton,{backgroundColor:'#3873EA'}]} onPress={handleMoveToRecipeConfirm}>
                 <Text style={[styles.modalButtonText,,{color:'#FFFFFF'}]}>네</Text>
+=======
+            <Text style={styles.modalText}>선택한 항목을 레시피 탭으로 이동하시겠습니까?</Text>
+            <View style={styles.RecipeMovemodalButtonContainer}>
+              <TouchableOpacity style={styles.RecipeMovemodalButton} onPress={handleMoveToRecipeConfirm}>
+                <Text style={styles.modalButtonText}>네</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.RecipeMovemodalButton} onPress={() => setRecipeModalVisible(false)}>
+                <Text style={styles.modalButtonText}>아니오</Text>
+>>>>>>> origin-flit/cli
               </TouchableOpacity>
             </View>
           </View>
@@ -409,12 +552,21 @@ const handleItemPress = (id, name, expire, count, foodType) => {
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>선택한 항목을 삭제하시겠습니까?</Text>
+<<<<<<< HEAD
               <View style={styles.RecipeMovemodalButtonContainer}>
                 <TouchableOpacity style={[styles.RecipeMovemodalButton,{backgroundColor:'#E2E2E280', marginRight:BasicWidth*15}]} onPress={() => setDeleteModalVisible(false)}>
                   <Text style={[styles.modalButtonText,{color:'#000000'}]}>아니요</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.RecipeMovemodalButton,{backgroundColor:'#3873EA'}]} onPress={handleConfirmDelete}>
                   <Text style={[styles.modalButtonText,,{color:'#FFFFFF'}]}>네</Text>
+=======
+              <View style={styles.DeletemodalButtonContainer}>
+                <TouchableOpacity style={styles.DeletemodalButton} onPress={handleConfirmDelete}>
+                  <Text style={styles.modalButtonText}>네</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.DeletemodalButton} onPress={() => setDeleteModalVisible(false)}>
+                  <Text style={styles.modalButtonText}>아니요</Text>
+>>>>>>> origin-flit/cli
                 </TouchableOpacity>
               </View>
             </View>
@@ -428,6 +580,7 @@ const handleItemPress = (id, name, expire, count, foodType) => {
           setModalVisible(!modalVisible);
         }}
       >
+<<<<<<< HEAD
         <View style={styles.filteredContainer}>
           <View style={styles.filteredmodalView}>
             <View style={{alignItems: 'center',justifyContent: 'center',height:BasicHeight*46.49,}}>
@@ -473,6 +626,36 @@ const handleItemPress = (id, name, expire, count, foodType) => {
       <CircleAdd/>
     </TouchableOpacity>
      )}
+=======
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>정렬 방식 선택</Text>
+            <TouchableOpacity style={styles.modalButton} onPress={sortByDaysLeftAsc}>
+              <Text style={styles.modalButtonText}>유통기한 빠른 순</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={sortByDaysLeftDesc}>
+              <Text style={styles.modalButtonText}>유통기한 느린 순</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={sortByTitleAsc}>
+              <Text style={styles.modalButtonText}>이름 가나다 순</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={sortByDateAsc}>
+              <Text style={styles.modalButtonText}>등록일 오래된 순</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={sortByDateDesc}>
+              <Text style={styles.modalButtonText}>등록일 최신 순</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(!modalVisible)}>
+              <Text style={styles.modalButtonText}>취소</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
+        <Text style={styles.addButtonText}>+</Text>
+      </TouchableOpacity>
+>>>>>>> origin-flit/cli
     </SafeAreaView>
   );
 };
@@ -494,6 +677,7 @@ const BasicHeight =(
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+<<<<<<< HEAD
   },
   headerContainer:{
     height: BasicHeight*50,
@@ -542,6 +726,53 @@ ButtonText: {
     color: '#3873EA',
 },
   
+=======
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  headerContainer:{
+    height: BasicHeight*50,
+    width: AllWidth,
+    flexDirection: 'row',
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    marginLeft: BasicWidth*25,
+    marginTop: BasicHeight*13,
+  },
+  editModeButton: {
+    marginLeft: BasicWidth*287,
+    marginTop: BasicHeight*13,
+    fontSize: 16,
+  },
+  /*
+  EditButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    marginTop: 10,
+  },
+  EditButton: {
+    flex: 1,
+    backgroundColor: '#3873EA',
+    paddingVertical:10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginHorizontal: 2,
+    
+  },
+  EditButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  */
+>>>>>>> origin-flit/cli
   recipeButton: {
     marginLeft: 10,
   },
@@ -557,6 +788,7 @@ ButtonText: {
     color: '#EA3838',
   },
   searchInput: {
+<<<<<<< HEAD
     borderWidth: 1.5,
     borderColor: '#3873EA',
     backgroundColor: '#FFFFFF',
@@ -581,16 +813,43 @@ ButtonText: {
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Regular',
     
+=======
+    borderWidth: 1,
+    borderColor: '#3873EA',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 10,
+  },
+  sortButton: {
+    backgroundColor: '#3873EA',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  sortButtonText: {
+    color: 'white',
+    fontSize: 16,
+>>>>>>> origin-flit/cli
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+<<<<<<< HEAD
     marginTop: BasicHeight*20,
     marginLeft: BasicWidth*30,
     marginRight: BasicWidth*30,
   },
   button: {
 
+=======
+    marginVertical: 10,
+  },
+  button: {
+    padding: 10,
+>>>>>>> origin-flit/cli
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
@@ -601,6 +860,7 @@ ButtonText: {
     borderColor: '#3873EA',
   },
   buttonText: {
+<<<<<<< HEAD
     fontSize: 16,
     fontFamily: 'NotoSansKR-Light',
     includeFontPadding: false,
@@ -647,16 +907,63 @@ ButtonText: {
     includeFontPadding: false,
     color: '#000000',
     marginTop: BasicHeight*10,
+=======
+    fontSize: 14,
+  },
+  itemContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  item: {
+    flexDirection: 'row',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 5,
+    marginVertical: 5,
+  },
+  daysLeft: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3873EA',
+    marginRight: 16,
+  },
+  itemText: {
+    justifyContent: 'center',
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  expire: {
+    fontSize: 14,
+    color: '#555',
+>>>>>>> origin-flit/cli
   },
   addButton: {
     position: 'absolute',
     bottom: 20,
     right: 20,
+<<<<<<< HEAD
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
+=======
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#3873EA',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addButtonText: {
+    fontSize: 30,
+    color: 'white',
+  },
+>>>>>>> origin-flit/cli
   centeredView: {
     flex: 1,
     justifyContent: 'center',
@@ -664,8 +971,12 @@ ButtonText: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
+<<<<<<< HEAD
     width: BasicWidth*305,
     height: BasicHeight*149,
+=======
+    width: 300,
+>>>>>>> origin-flit/cli
     padding: 20,
     backgroundColor: 'white',
     borderRadius: 10,
@@ -673,9 +984,14 @@ ButtonText: {
   },
   modalText: {
     fontSize: 18,
+<<<<<<< HEAD
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Regular',
     marginBottom: BasicHeight*23,
+=======
+    fontWeight: 'bold',
+    marginBottom: 20,
+>>>>>>> origin-flit/cli
   },
   modalButton: {
     width: '100%',
@@ -686,9 +1002,14 @@ ButtonText: {
     backgroundColor: '#3873EA',
   },
   modalButtonText: {
+<<<<<<< HEAD
     fontSize: 15,
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Regular',
+=======
+    color: 'white',
+    fontSize: 16,
+>>>>>>> origin-flit/cli
   },
 
   DeletemodalButtonContainer: {
@@ -708,6 +1029,7 @@ ButtonText: {
 
   RecipeMovemodalButtonContainer: {
     flexDirection: 'row',
+<<<<<<< HEAD
     
   },
   RecipeMovemodalButton: {
@@ -763,6 +1085,19 @@ ButtonText: {
     fontSize: 20,
     includeFontPadding: false,
     fontFamily: 'NotoSansKR-Regular',
+=======
+    justifyContent: 'space-between',
+    width: '60%',
+    
+  },
+  RecipeMovemodalButton: {
+    width: '40%',
+    padding: 10,
+    marginVertical: 5,
+    alignItems: 'center',
+    borderRadius: 5,
+    backgroundColor: '#3873EA',
+>>>>>>> origin-flit/cli
   },
 
 });
