@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createRef, useState} from 'react';
@@ -14,7 +14,9 @@ import {
     BackHandler,
     Alert,
     SafeAreaView,
+    Modal,
 } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 import Back from '../../assets/Icons/back.svg';
 import axios from "axios";
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
@@ -22,48 +24,13 @@ import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 const Register = () => {
   const navigation = useNavigation();
 
-  const checkToken = async () => {
-    const fcmToken = await messaging().getToken();
-    if (fcmToken) {
-       console.log(fcmToken);
-    } 
-   };
-   
-   const requestUserPermission = async () => {
-    await notifee.requestPermission();
-  
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-  
-    return enabled;
-  };
-
-/*
-const App = () => {
-  const foregroundListener = useCallback(() => {
-    messaging().onMessage(async message => {
-      console.log(message)
-    })
-  }, [])
-      
-  useEffect(() => {
-    foregroundListener()  
-  }, [])
-}
-*/
-
   // 뒤로가기 액션함수 >>>modal창으로 수정필요<<<
   const backAction = () => {
-  Alert.alert('잠시만요!', '입력내용이 저장되지 않습니다.\n이전 단계로 돌아갈까요?', [
-    {
-      text: '아니오',
-      onPress: () => null,
-      style: 'cancel',
-    },
-    {text: '네', onPress: () => navigation.navigate("Login")},
-  ]);
-  return true;
+    setModalVisible(true);
+};
+const backYes = () =>{
+  setModalVisible(false);
+  navigation.navigate("Login");
 };
 
 //안드로이드 기기 자체 뒤로가기 눌렀을 때 작동하는 함수
@@ -79,11 +46,12 @@ const App = () => {
     };
 
     //FCM토큰값 가져오기
-    const checkToken = async () => {
+    const getFcmToken = async() => {
       const fcmToken = await messaging().getToken();
       console.log(fcmToken);
       setUserFCMtoken(fcmToken);
-     };
+    };
+  
     
      //뒤로가기 버튼 이벤트
     const backHandler = BackHandler.addEventListener(
@@ -91,9 +59,9 @@ const App = () => {
       backAction,
     );
     getData();
-    checkToken();
-    //console.log(ismessage);
-    //console.log(isinfo);
+    getFcmToken();
+    console.log(ismessage);
+    console.log(isinfo);
     return () => backHandler.remove();
   }, [UserFCMtoken]);
 
@@ -108,8 +76,8 @@ const App = () => {
 
   //유효성 검사와 같은 boolean으로 표기해야 하는 함수들
   const [loading, setLoading] = useState(false);
-  const [ismessage, setismessage] = useState(false);
-  const [isinfo, setisinfo] = useState(false);
+  const [ismessage, setismessage] = useState(true);
+  const [isinfo, setisinfo] = useState(true);
   const [isRegistraionSuccess, setIsRegistraionSuccess] = useState(false);
   const [ValidEmail, setValidEmail] = useState(false);
   const [ValidPassword, setValidPassword] = useState(false);
@@ -118,6 +86,8 @@ const App = () => {
   const [isFirstButton, setIsFirstButton] = useState(false);
   const [timerActive, setTimerActive] = useState(false);
   const [timer, setTimer] = useState(180);
+  const [isResend, setIsResend] = useState(false);
+  const [ModalVisible, setModalVisible] = useState(false);
 
   //이어서 쓰기 편하기 위해 Ref만들어 준 함수들
   const EmailInputRef = createRef();
@@ -125,7 +95,7 @@ const App = () => {
   const PhonenumberInputRef = createRef();
   const PhonenumberchkInputRef = createRef();
   const NicknameInputRef = createRef();
-  const TimerRef = createRef();
+  const intervalIdRef = useRef(null);
 
   //이메일 유효성 검사
   const HandleEmailChk = (text) =>{
@@ -180,30 +150,33 @@ const App = () => {
 
   //타이머 초기화 함수
   const timerReset = () => {
-    setTimer = 180;
+    setTimer(180);
   };
-
   // 타이머 세팅 (다시 눌렀을 때 시간이 2배로 빨리가고, reset안되는 문제 해결해야함!!!!!!!)
   const startTimer = () => {
-    // Set up a timer that updates every second
-    const intervalId = setInterval(() => {
-      setTimer((prevTimer) => {
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
+    }
+    
+    setTimer(180);  // Reset the timer
+  
+    intervalIdRef.current = setInterval(() => {
+      setTimer(prevTimer => {
         if (prevTimer > 0) {
-          // If the timer is greater than 0, decrement it
           return prevTimer - 1;
-        }
-        if(prevTimer = 0){
-          return timerReset();
-        }
-        else {
-          // If the timer reaches 0, stop the timer
-          clearInterval(intervalId);
+        } else {
+          clearInterval(intervalIdRef.current);
           setTimerActive(false);
-          return 0;
+          setTimer(180);  // Reset the timer when it reaches 0
+          return 180;
         }
       });
     }, 1000);
+  
+    setTimerActive(true);  // Enable timer
+    setIsResend(true);  // Enable resend functionality
   };
+  
 
   //닉네임 중복검사(버튼 클릭시 작동)
   const NickFind = useCallback(async () => {
@@ -247,10 +220,14 @@ const App = () => {
     }
     try{
       setLoading(true);
+      console.log(data);
       const response = await axios.post('http://www.sm-project-refrigerator.store/api/members/register',data)
+      console.log(response);
+      if(response.status === 200){
+        navigation.navigate("Login");
+      }
     }catch(error){
       console.log(error);
-      console.log(data);
       showToast();
 
     }finally{
@@ -260,7 +237,7 @@ const App = () => {
   }, [loading,UserEmail,UserPassword]);
 
 
-  //본인인증 문자 검사 (비용나가는거 방지하기 위해 연결 끊어둠)
+  //본인인증 문자 검사
   const ValidPnum = useCallback(async () => {
     setTimerActive(true);
     startTimer();
@@ -297,22 +274,21 @@ const App = () => {
     'errortoast': ({errtext}) => (
       <View 
         style={{
-          backgroundColor: '#A2A2A2',
+          backgroundColor: '#31313173',
           flexDirection: 'row',
           alignItems: 'center',
           alignContent: 'center',
           height: BasicWidth* 39,
           width: BasicHeight* 190,
-          padding: 5,
+          paddingLeft: BasicWidth*19,
           borderRadius: 10, 
         }}>
         <Text
           style={{
             color: '#FFFFFF',
-            alignSelf: 'center',
-            marginLeft: BasicWidth*15,
             includeFontPadding: false,
             fontFamily: 'NotoSansKR-Regular',
+            fontSize:14,
           }}
         >
           회원가입에 실패했습니다.
@@ -329,6 +305,29 @@ const App = () => {
             <TouchableOpacity onPress={backAction}>
             <Back/>
             </TouchableOpacity>
+            <Modal
+        animationType="fade"
+        transparent={true}
+        visible={ModalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
+      >
+        <View style={Styles.centeredView}>
+          <View style={Styles.modalView}>
+            <Text style={Styles.modalHeader}>잠시만요!</Text>
+            <Text style={Styles.modalText}>입력내용이 저장되지 않습니다.{'\n'}이전 단계로 돌아갈까요?</Text>
+            <View style={Styles.ButtonContainer}>
+              <TouchableOpacity style={Styles.NoButton} onPress={() => setModalVisible(false)}>
+                <Text style={Styles.NoButtonText}>아니오</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={Styles.YesButton} onPress={backYes}>
+                <Text style={Styles.YesButtonText}>네</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
           </View>
           <View style = {Styles.HomeContainer}>
             <Text style={Styles.HomeText}> 회원가입 </Text>
@@ -391,7 +390,7 @@ const App = () => {
           activeOpacity={0.8}
           onPress={ValidPnum}
           >
-          <Text style={Styles.MiniButtonText}>전송</Text>
+            {isResend ? <Text style={Styles.MiniButtonText}>재전송</Text> : <Text style={Styles.MiniButtonText}>전송</Text>}
         </TouchableOpacity>
         </View>
         <View style={Styles.AuthForm}>
@@ -510,7 +509,7 @@ const Styles = StyleSheet.create({
       height: BasicHeight*50,
       fontSize: 30,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Bold',
+      fontFamily: 'NotoSansKR-Bold',
       color: '#000000',
     },
 
@@ -524,7 +523,7 @@ const Styles = StyleSheet.create({
       fontSize : 20,
       marginBottom : BasicHeight*5,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
       color: '#000000',
     },
 
@@ -552,7 +551,7 @@ const Styles = StyleSheet.create({
       borderWidth : 1,
       paddingHorizontal : 10,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
     },
 
     AuthForm : {
@@ -570,7 +569,7 @@ const Styles = StyleSheet.create({
       height: BasicHeight*50,
       fontSize : 20,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
       color: '#000000',
     },
 
@@ -581,7 +580,7 @@ const Styles = StyleSheet.create({
       color: "#AFAFAF",
       marginLeft: BasicWidth*160,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
     },
 
     PnumForm : {
@@ -593,7 +592,7 @@ const Styles = StyleSheet.create({
       borderWidth : 1,
       paddingHorizontal : 10,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
       color: '#000000',
     },
 
@@ -606,7 +605,7 @@ const Styles = StyleSheet.create({
       borderWidth : 1,
       paddingHorizontal : 10,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
       color: '#000000',
     },
 
@@ -617,7 +616,7 @@ const Styles = StyleSheet.create({
       color: '#E82323',
       fontSize: 13,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
     },
 
     ValidText : {
@@ -627,7 +626,7 @@ const Styles = StyleSheet.create({
       color: '#3873EA',
       fontSize: 13,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
     },
 
     ButtonArea : {
@@ -651,7 +650,7 @@ const Styles = StyleSheet.create({
       fontSize : 20,
       color : '#FFFFFF',
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Bold',
+      fontFamily: 'NotoSansKR-Bold',
     },
 
     MiniButton : {
@@ -667,7 +666,7 @@ const Styles = StyleSheet.create({
       fontSize : 20,
       color : '#FFFFFF',
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
     },
     MiniArea:{
       width: BasicWidth*325,
@@ -690,13 +689,75 @@ const Styles = StyleSheet.create({
       fontSize : 20,
       color : '#FFFFFF',
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
     },
     NickArea:{
       width: BasicWidth*325,
       height: BasicHeight*50,
       flexDirection: 'row',
-    }
+    },
+    centeredView: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    },
+    modalView: {
+      width: BasicWidth*325,
+      height: BasicHeight*212,
+      backgroundColor: 'white',
+      borderRadius: 10,
+      paddingLeft: BasicWidth*27,
+      paddingTop: BasicHeight*19,
+    },
+    modalHeader: {
+      fontSize: 25,
+      color: '#000000',
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-SemiBold',
+      marginBottom: BasicHeight*5,
+    },
+    modalText: {
+      fontSize: 18,
+      color: '#808080',
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
+      marginBottom: BasicHeight*15,
+    },
+    ButtonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '60%',
+    },
+    NoButtonText: {
+      color: '#000000',
+      fontSize: 16,
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
+    },
+    YesButtonText: {
+      color: 'white',
+      fontSize: 16,
+      includeFontPadding: false,
+      fontFamily: 'NotoSansKR-Regular',
+    },
+    NoButton: {
+      width: BasicWidth*130,
+      height: BasicHeight*49,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 20,
+      backgroundColor: '#E2E2E280',
+    },
+    YesButton: {
+      width: BasicWidth*130,
+      height: BasicHeight*49,
+      marginLeft: BasicWidth*15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 20,
+      backgroundColor: '#3873EA',
+    }, 
   });
 export default Register;
 

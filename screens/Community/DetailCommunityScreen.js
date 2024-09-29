@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Alert, Image, Modal } from 'react-native';
+import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Alert, Image, Modal,ScrollView,Dimensions } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import Send from '../../assets/Icons/Send.svg';
 
 const DetailCommunityScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { id, user, category, time, title, uri, status, userarea, AccessToken } = route.params;
-
+  const { id, user, category, time, title, uri, status ,userarea, AccessToken } = route.params;
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -24,20 +27,31 @@ const DetailCommunityScreen = () => {
 
 
   useEffect(() => {
-    
+    console.log(status);
     fetchPostDetails();
     fetchPostComments();
-  }, [id]);
+  }, [id,status]);
+
+  const gotoCommunity = () => {
+    navigation.reset({
+      index: 1, // 두 번째 화면이 포커스되도록 설정
+      routes: [
+          { name: '커뮤니티' }, // Top2 스택을 초기화하여 '레시피'의 초기 화면으로 만듦
+          { name: '커뮤니티', params: { screen: 'CommunityScreen'} }
+      ],
+  });
+  };
 
   const fetchPostComments = async (page = 0) => {
-    const headers = {
-      Authorization: `Bearer ${AccessToken}`,
-      Accept: 'application/json',
-    };
 
     try {
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
       const url = `http://www.sm-project-refrigerator.store/api/comment/${id}?page=${page}`;
-      const response = await axios.get(url, { headers });
+      const response = await axios.get(url, {
+        headers: {
+        Authorization: `Bearer ${AccessToken}`,
+        Accept: 'application/json',
+      }, });
       
       if (response.status === 200) {
         const postCommentData = response.data.result;
@@ -51,45 +65,104 @@ const DetailCommunityScreen = () => {
     }
   };
 
-  const PostComment = async (comment) => {
+  const PostComment = async () => {
+    const data = {
+      content: newComment,  // Check if 'newComment' is properly set
+      isPrivate: false,  // Adjust this if needed
+    };
+  
+    try {
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      const response = await axios.post(`http://www.sm-project-refrigerator.store/api/comment/${id}`, data, {
+        headers: {
+          'Authorization': `Bearer ${AccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      console.log('Post comment response:', response.data);
+      fetchPostComments(); // Refresh the comments after posting
+  
+      // Clear input after successful post
+      setNewComment('');
+    } catch (error) {
+      console.error('Error posting comment:', error.response ? error.response.data : error.message);
+    }
+  };
+
+  const DeletComment = async (commentId) => {
     const headers = {
       Authorization: `Bearer ${AccessToken}`,
       'Content-Type': 'application/json'
     };
-    const data = { content: comment };
 
     try {
-      await axios.post(`http://www.sm-project-refrigerator.store/api/comment/${id}`, data, { headers });
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      await axios.delete(`http://www.sm-project-refrigerator.store/api/comment/${commentId}`, {
+        headers: {
+          'Authorization': `Bearer ${AccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
       fetchPostComments(); // Refresh comments after posting
     } catch (error) {
       console.error('Error posting comment:', error.response ? error.response.data : error.message);
     }
   };
 
-  const PostCommentChild = async (comment,id) => {
-    const headers = {
-      Authorization: `Bearer ${AccessToken}`,
-      'Content-Type': 'application/json'
-    };
-    const data = { content: comment };
-
+  const DeletCommentChild = async (commentId) => {
     try {
-      await axios.post(`http://www.sm-project-refrigerator.store/api/comment/${id}/child`, data, { headers });
-      fetchPostComments(); // Refresh comments after posting
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      // Pass headers as a separate argument
+      await axios.patch(`http://www.sm-project-refrigerator.store/api/comment/parent/${commentId}`,{
+        headers: {
+          'Authorization': `Bearer ${AccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      fetchPostComments(); // Refresh comments after deletion
+    } catch (error) {
+      console.error('Error deleting comment:', error.response ? error.response.data : error.message);
+    }
+  };
+
+
+  const PostCommentChild = async (comment, parentId) => {
+    const data = {
+      content: comment,
+    };
+  
+    try {
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      const response = await axios.post(`http://www.sm-project-refrigerator.store/api/comment/${parentId}/child`, data, {
+        headers: {
+          'Authorization': `Bearer ${AccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      console.log('Post child comment response:', response.data);
+      fetchPostComments(); // Refresh comments after posting a reply
+  
+      // Clear input after successful post
+      setNewComment('');
+      setSelectedCommentId(null);
     } catch (error) {
       console.error('Error posting child comment:', error.response ? error.response.data : error.message);
     }
   };
 
   const handleDeletePost = async (id) => {
-    const headers = {
-      Authorization: `Bearer ${AccessToken}`,
-      Accept: 'application/json',
-    };
 
     try {
-      await axios.delete(`http://www.sm-project-refrigerator.store/api/post/delete/${id}`, { headers });
-      Alert.alert('게시글 삭제', '게시글이 삭제되었습니다.', [{ text: '확인', onPress: () => navigation.navigate("CommunityScreen", { AccessToken }) }]);
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      await axios.delete(`http://www.sm-project-refrigerator.store/api/post/delete/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${AccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      Alert.alert('게시글 삭제', '게시글이 삭제되었습니다.', [{ text: '확인', onPress: () => gotoCommunity() }]);
     } catch (error) {
       console.error('Error deleting post:', error.response ? error.response.data : error.message);
       Alert.alert('삭제 오류', '게시글을 삭제하는 중 오류가 발생했습니다.');
@@ -97,16 +170,17 @@ const DetailCommunityScreen = () => {
   };
 
   const updatePost = async (id, content, status) => {
-    const headers = {
-      Authorization: `Bearer ${AccessToken}`,
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    };
-
     const data = { content, status };
 
     try {
-      await axios.patch(`http://www.sm-project-refrigerator.store/api/post/update/${id}`, data, { headers });
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      await axios.patch(`http://www.sm-project-refrigerator.store/api/post/update/${id}`, data, {
+        headers: {
+          'Authorization': `Bearer ${AccessToken}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
       fetchPostDetails();
     } catch (error) {
       console.error('Error updating post:', error.response ? error.response.data : error.message);
@@ -123,7 +197,14 @@ const DetailCommunityScreen = () => {
     const data = { content };
 
     try {
-      await axios.patch(`http://www.sm-project-refrigerator.store/api/comment/${id}`, data, { headers });
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      await axios.patch(`http://www.sm-project-refrigerator.store/api/comment/${id}`, data, {
+        headers: {
+          'Authorization': `Bearer ${AccessToken}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
       
     } catch (error) {
       console.error('Error updating post:', error.response ? error.response.data : error.message);
@@ -132,15 +213,18 @@ const DetailCommunityScreen = () => {
 
 
   const fetchPostDetails = async () => {
-    const headers = {
-      Authorization: `Bearer ${AccessToken}`,
-      Accept: 'application/json',
-    };
+
 
     try {
-      
-      const response = await axios.get(`http://www.sm-project-refrigerator.store/api/post/${id}`, { headers });
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      const response = await axios.get(`http://www.sm-project-refrigerator.store/api/post/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${AccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
       const postData = response.data.result;
+      console.log('Post details:', postData);
       setPost(postData);
       setUpdatedContent(postData.content || '');
       console.log('Post details:', response.data);
@@ -261,26 +345,32 @@ const DetailCommunityScreen = () => {
   };
 
 
-  const handleCommentOptionSelect = (option, commentId, inputContent) => {
+  const handleCommentOptionSelect = (option) => {
     console.log("Option selected:", option);
-    console.log("Comment ID:", commentId);    
+    console.log("Comment ID:", selectedCommentId);    
+  
+    const comment = comments.find(c => c.commentId === selectedCommentId);
+    const hasChildren = comment && comment.childList && comment.childList.length > 0;
+  
     switch (option) {
-      
       case 'edit':
-        handleOpenCommentEditModal(selectedCommentId, inputContent);
+        handleOpenCommentEditModal(selectedCommentId, comment.content);
         break;
       case 'alarm':
         Alert.alert('알림켜기', '대댓글 알림이 켜졌습니다');
         break;
       case 'delete':
-        handleDeleteComment(id);
+        if (hasChildren) {
+          DeletCommentChild(selectedCommentId); // Ensure this function handles the delete correctly
+        } else {
+          DeletComment(selectedCommentId);
+        }
         break;  
       default:
         break;
     }
     handleCloseCommentModal();
   };
-
 
   const handleEditComment = async () => {
     if (inputContent.trim() && selectedCommentId) {
@@ -314,15 +404,21 @@ const DetailCommunityScreen = () => {
     handleCloseInputModal();
   };
 
-  const close = () => navigation.navigate("CommunityScreen", { AccessToken: AccessToken });
+  const close =async() => {
+    navigation.reset({
+      routes: [
+          { name: '커뮤니티' }, // Top2 스택을 초기화하여 '레시피'의 초기 화면으로 만듦
+      ],
+  });
+  };
 
   const renderComment = (comment) => (
     <View key={comment.commentId} style={styles.comment}>
+      
       <View style={styles.commentHeader}>
         <Text style={styles.user}>
-          {comment.writerName} <Text style={styles.area}>{comment.address || userarea}</Text>
+          {comment.writerName}
         </Text>
-        <Text style={styles.time}>{comment.createdAt}</Text>
         <View style={styles.commentActions}>
           <TouchableOpacity onPress={() => handleReply(comment.commentId)}>
           <Icon name="chatbubble-outline" size={15} color="#000" />
@@ -334,6 +430,9 @@ const DetailCommunityScreen = () => {
       </View>
       {comment.uri && <Image source={{ uri: comment.uri }} style={styles.image} />}
       <Text style={styles.content}>{comment.content}</Text>
+      <Text style={styles.area}>
+          {comment.address || userarea} | <Text style={styles.time}>{comment.createdAt}</Text>
+          </Text>
       {comment.childList && comment.childList.length > 0 && (
         <FlatList
           data={comment.childList}
@@ -346,7 +445,7 @@ const DetailCommunityScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={close}>
           <Icon name="chevron-back" size={24} color="black" />
@@ -356,32 +455,52 @@ const DetailCommunityScreen = () => {
           <Icon name="ellipsis-vertical" size={24} color="black" />
         </TouchableOpacity>
       </View>
+
       <View style={styles.post}>
-        <View style={styles.postHeader}>
-          <Text style={styles.user}>
-            {user} <Text style={styles.area}>{post?.address}</Text>
+      <ScrollView>
+      <Text style={styles.user}>
+            {user}
           </Text>
-          <Text style={styles.time}>{time}</Text>
+        <View style={styles.postHeader}>
+          <Text style={styles.area}>
+            {post?.address} | <Text style={styles.time}>{time}</Text>
+            </Text>
         </View>
-        <Text style={styles.postTitle}>{title}</Text>
+        <View style={{flexDirection: 'row'}}>
+          <Text style={styles.postTitle}>{title}</Text>
+          <Text
+            style={[
+              styles.status,
+              { color: status === '진행 중' ? '#FF3B30' : status === '마감' ? 'blue' : 'black' }
+            ]}
+          >
+            {status}
+          </Text>
+        </View>
+
         <Text style={styles.postContent}>{post?.content}</Text>
-        {uri && <Image source={{ uri }} style={styles.image} />}
+        </ScrollView>
       </View>
       <FlatList
         data={comments}
         renderItem={({ item }) => renderComment(item)}
         keyExtractor={item => item.commentId}
       />
+
       <View style={styles.commentInputContainer}>
-        <TextInput
-          style={styles.input}
-          value={newComment}
-          onChangeText={setNewComment}
-          placeholder="댓글을 입력하세요."
-        />
-        <TouchableOpacity onPress={handlePostComment} style={styles.sendButton}>
-        <Text style={styles.buttonText}>등록</Text>
-        </TouchableOpacity>
+        <View style={styles.input}>
+          <TextInput
+            value={newComment}
+            onChangeText={setNewComment}
+            placeholder="댓글을 입력하세요."
+            placeholderTextColor={'#808080'}
+            style={styles.newinput}
+          />
+          <TouchableOpacity onPress={()=>handlePostComment()} style ={styles.sendButton}>
+          <Send/>
+          </TouchableOpacity>
+
+        </View>
       </View>
 
       <Modal
@@ -501,10 +620,18 @@ const DetailCommunityScreen = () => {
 
 
 
-
-    </View>
+    </SafeAreaView>
   );
 };
+const AllWidth = Dimensions.get("window").width;
+const AllHeight = Dimensions.get("window").height;
+
+const FigmaWidth = 390;
+const FigmaHeight = 844;
+
+const BasicWidth = (AllWidth / FigmaWidth).toFixed(2);
+const BasicHeight = (AllHeight / FigmaHeight).toFixed(2);
+
 
 const styles = StyleSheet.create({
   container: {
@@ -519,36 +646,48 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 19,
+    color: '#000000',
+    fontFamily: 'NotoSansKR-Bold',
+    includeFontPadding: false,
   },
   post: {
-    padding: 10,
+    height: BasicHeight*329,
+    paddingLeft: BasicWidth*34,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
   postHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
+    marginBottom: BasicHeight *25,
   },
   user: {
-    fontWeight: 'bold',
+    fontSize: 14,
+        color: '#000000',
+        fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
   },
   area: {
-    fontWeight: 'normal',
-    color: '#888',
+    fontSize: 13,
+    color: '#808080',
+    fontFamily: 'NotoSansKR-Regular',
+    includeFontPadding: false,
   },
   time: {
-    color: '#888',
+    color: '#808080',
   },
   postTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    fontSize: 20,
+    color: '#000000',
+    fontFamily: 'NotoSansKR-SemiBold',
+    includeFontPadding: false,
+    marginBottom: BasicHeight*21,
   },
   postContent: {
-    fontSize: 16,
+    fontSize: 15,
+    color: '#000000',
+    fontFamily: 'NotoSansKR-Regular',
+    includeFontPadding: false,
     marginBottom: 10,
   },
   image: {
@@ -558,43 +697,56 @@ const styles = StyleSheet.create({
     borderRadius: 0,
   },
   commentInputContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
+
+    marginBottom: BasicHeight*29,
   },
   input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    marginRight: 10,
-    height:40,
+    height: BasicHeight*50,
+    width: BasicWidth*352,
+    backgroundColor: '#E2E2E2',
+    borderRadius: 20,
+    marginLeft: BasicWidth*19,
+    flexDirection: 'row',
+    //justifyContent: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
   },
   sendButton: {
-    backgroundColor: '#007AFF',
-    padding: 10,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: 'absolute',
+    marginLeft: BasicWidth*315,
+    //marginTop: BasicHeight*10,
   },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
+  newinput: {
+    fontSize: 16,
+    color: '#000000',
+    fontFamily: 'NotoSansKR-Regular',
+    includeFontPadding: false,
+    width: BasicWidth*250,
+  },
   comment: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    marginLeft: BasicWidth*29,
+    marginBottom: BasicHeight*13,
   },
   commentHeader: {
+    marginTop: BasicHeight*13,
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  Line:{
+    width:BasicHeight*700,
+    height:BasicHeight*3,
+    marginTop: BasicHeight*25,
+    backgroundColor: '#E2E2E2',
+    alignSelf:'center'
   },
   commentActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: BasicWidth*27,
   },
   content: {
     marginTop: 5,
@@ -648,6 +800,14 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: 'white',
     fontSize: 16,
+  },
+  status: {
+    color: 'red',
+    fontSize: 11,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+    color: '#FF3B30',
+    marginLeft:BasicWidth*5,
   },
 });
 

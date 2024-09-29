@@ -8,6 +8,10 @@ import {
     Button,
     ScrollView,
     ActivityIndicator,
+<<<<<<< HEAD
+    Share,
+=======
+>>>>>>> origin-flit/cli
   } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from 'axios';
@@ -110,13 +114,22 @@ const GPTRecipeDetail = () => {
     // toastConfig에 reload 타입 정의
     const toastConfig = {
         'error': ({ text1 }) => (
+<<<<<<< HEAD
+          <View style={Styles.toastContainer2}>
+            <Text style={{ color: '#000000',  fontFamily: 'NotoSansKR-Regular', includeFontPadding: false, fontSize: 15, }}>{text1}</Text>
+=======
           <View style={Styles.toastContainer}>
             <Text style={{ color: '#000000' }}>{text1}</Text>
+>>>>>>> origin-flit/cli
           </View>
         ),
         'bookmark': ({ text1 }) => (
           <View style={Styles.toastContainer}>
+<<<<<<< HEAD
+            <Text style={{ color: '#FFFFFF',  fontFamily: 'NotoSansKR-Regular', includeFontPadding: false, fontSize: 14, }}>{text1}</Text>
+=======
             <Text style={{ color: '#FFFFFF' }}>{text1}</Text>
+>>>>>>> origin-flit/cli
           </View>
         ),
       };
@@ -322,7 +335,11 @@ const GPTRecipeDetail = () => {
             index: 1, // 두 번째 화면이 포커스되도록 설정
             routes: [
               { name: '레시피' }, // Top2 스택을 초기화하여 '레시피'의 초기 화면으로 만듦
+<<<<<<< HEAD
+              { name: '홈', params: { screen: 'IngredientScreen' } } // 화면을 'IngredientScreen'으로 유지
+=======
               { name: '커뮤니티', params: { screen: 'IngredientScreen' } } // 화면을 'IngredientScreen'으로 유지
+>>>>>>> origin-flit/cli
             ],
           });
           Reset();
@@ -336,6 +353,10 @@ const GPTRecipeDetail = () => {
     
           if (response.status === 200) {
             console.log('Reset log:', response);
+<<<<<<< HEAD
+            await AsyncStorage.removeItem('selectedFoodNames');
+=======
+>>>>>>> origin-flit/cli
           } else {
             console.error('Server returned non-200 status code:', response.status);
           }
@@ -353,7 +374,11 @@ const GPTRecipeDetail = () => {
                     style={{marginLeft:BasicWidth*31, marginTop: BasicHeight*15}}>
                     <Reload/>
                 </TouchableOpacity>
+<<<<<<< HEAD
+                <Text style={Styles.HeaderText}>AI 추천 레시피</Text>
+=======
                 <Text style={Styles.HeaderText}>레시피</Text>
+>>>>>>> origin-flit/cli
                 <TouchableOpacity
                     onPress={LoadList}>
                     <Text style={Styles.NavList}>목록</Text>
@@ -423,6 +448,22 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
     },
     HeaderText: {
+<<<<<<< HEAD
+        fontSize: 19,
+        marginLeft: BasicWidth * 86,
+        marginTop: BasicHeight * 16,
+        includeFontPadding: false,
+        fontFamily: 'NotoSansKR-Bold',
+        color: '#000000',
+    },
+    NavList:{
+        fontSize: 20,
+        marginLeft: BasicWidth * 75,
+        marginTop: BasicHeight * 14,
+        includeFontPadding: false,
+        fontFamily: 'NotoSansKR-Regular',
+        color: '#000000',
+=======
         fontSize: 16,
         marginLeft: BasicWidth * 121,
         marginTop: BasicHeight * 16,
@@ -432,6 +473,7 @@ const Styles = StyleSheet.create({
         fontSize: 16,
         marginLeft: BasicWidth * 116,
         marginTop: BasicHeight * 14,
+>>>>>>> origin-flit/cli
     },
     Bookmark:{
         position: 'absolute',
@@ -456,16 +498,33 @@ const Styles = StyleSheet.create({
     recipeName: {
         fontSize: 20,
         color: '#000000',
+<<<<<<< HEAD
+        fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
+=======
+>>>>>>> origin-flit/cli
     },
     ingredienttitle: {
         marginLeft: BasicWidth * 16,
         color: '#000000',
+<<<<<<< HEAD
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
+        fontSize: 16,
+        
+=======
+>>>>>>> origin-flit/cli
     },
     ingredient: {
         fontSize: 16,
         marginLeft: BasicWidth * 30,
         marginBottom: BasicHeight * 49,
         color: '#000000',
+<<<<<<< HEAD
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
+=======
+>>>>>>> origin-flit/cli
     },
     description: {
         fontSize: 16,
@@ -473,6 +532,11 @@ const Styles = StyleSheet.create({
         marginRight: BasicWidth * 22,
         marginBottom: BasicHeight * 139,
         color: '#000000',
+<<<<<<< HEAD
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
+=======
+>>>>>>> origin-flit/cli
     },
     recommendContainer:{
         position: 'absolute',
@@ -488,6 +552,11 @@ const Styles = StyleSheet.create({
     question: {
         fontSize: 16,
         color: '#000000',
+<<<<<<< HEAD
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
+=======
+>>>>>>> origin-flit/cli
     },
     Line:{
         width:BasicHeight*700,
@@ -514,6 +583,11 @@ const Styles = StyleSheet.create({
     ButtonText:{
         fontSize: 16,
         color: '#3873EA',
+<<<<<<< HEAD
+        fontFamily: 'NotoSansKR-Bold',
+        includeFontPadding: false,
+=======
+>>>>>>> origin-flit/cli
     },
     toastContainer: {
         backgroundColor: '#AFAFAF',
@@ -523,4 +597,26 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
       },
+<<<<<<< HEAD
+      toastContainer2: {
+        backgroundColor: '#BECFF3',
+        height: BasicHeight * 80,
+        width: BasicWidth * 300,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      scrollDescription: {
+        maxHeight: BasicHeight * 254,
+        width: BasicWidth * 277,
+        marginLeft: BasicWidth * 31,
+        color: '#000000',
+    },
+    scrollIngredient: {
+        maxHeight: BasicHeight * 95,
+        width: BasicWidth * 277,
+        marginLeft: BasicWidth * 31,
+    },
+=======
+>>>>>>> origin-flit/cli
 });

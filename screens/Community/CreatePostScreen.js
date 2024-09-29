@@ -1,133 +1,104 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Image, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, ScrollView,Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
-import { launchCameraAsync, launchImageLibraryAsync, useCameraPermissions, PermissionStatus } from 'expo-image-picker';
-import ActionSheet from 'react-native-actionsheet';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 const CreatePostScreen = () => {
   const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [pickerVisible, setPickerVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [cameraPermissionInformation, requestPermission] = useCameraPermissions();
   const route = useRoute();
   const navigation = useNavigation();
-  const { AccessToken, address } = route.params;
-  let actionSheet = null;
+  const { address } = route.params;
 
   const togglePicker = () => {
     setPickerVisible(!pickerVisible);
   };
 
   const close = () => {
-    navigation.navigate('CommunityScreen', { AccessToken });
-  };
-
-  const verifyPermissions = async () => {
-    if (cameraPermissionInformation.status === PermissionStatus.UNDETERMINED) {
-      const permissionResponse = await requestPermission();
-      return permissionResponse.granted;
-    }
-    if (cameraPermissionInformation.status === PermissionStatus.DENIED) {
-      Alert.alert('Insufficient Permissions!', 'You need to grant camera permissions to use this app.');
-      return false;
-    }
-    return true;
-  };
-
-  const takeImageHandler = async () => {
-    const hasPermission = await verifyPermissions();
-    if (!hasPermission) {
-      return;
-    }
-    actionSheet.show();
-  };
-
-  const pickImageFromCamera = async () => {
-    const image = await launchCameraAsync({
-      allowsEditing: true,
-      aspect: [16, 9],
-      quality: 0.5,
-    });
-    if (!image.canceled) {
-      const imageUri = image.assets[0].uri;
-      console.log('Selected Image URI from Camera:', imageUri);
-      setSelectedImage(imageUri);
-    }
-  };
-
-  const pickImageFromGallery = async () => {
-    const image = await launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [16, 9],
-      quality: 0.5,
-    });
-    if (!image.canceled) {
-      const imageUri = image.assets[0].uri;
-      console.log('Selected Image URI from Gallery:', imageUri);
-      setSelectedImage(imageUri);
-    }
+    navigation.navigate('CommunityScreen');
   };
 
   const handleSubmit = async () => {
-    if (!category || !title || !content) {
-      Alert.alert('Error', 'All fields are required!');
+    if (!content) {
+      showToast('내용을 입력하세요')
       return;
     }
-
-    try {
-      const formData = new FormData();
-
-      // Append form data fields
-      formData.append('title', title);
-      formData.append('content', content);
-      formData.append('topic', category);
-      formData.append('address', address);
-
-      // Append the image, if selected
-      if (selectedImage) {
-        const uriParts = selectedImage.split('.');
-        const fileType = uriParts[uriParts.length - 1];
-        const mimeType = `image/jpeg`; // Set MIME type as 'image/jpeg'
-
-        formData.append('photo', {
-          uri: selectedImage,
-          type: mimeType,
-          name: `photo.${fileType}`,
+    else if (!title) {
+      showToast('제목을 입력하세요')
+    }
+    else if (!category) {
+      showToast('분류를 선택해주세요')
+    }
+    else{
+      try {
+        const AccessToken = await AsyncStorage.getItem('userAccessToken');
+        const data ={
+          title: title,
+          content: content,
+          topic: category,
+          address: address,
+        }
+        console.log(data);
+        const response = await axios.post(
+          `http://www.sm-project-refrigerator.store/api/post/create`,
+          data,
+          {
+            headers: {  // 'headers' 속성으로 지정해야 합니다.
+              'Authorization': `Bearer ${AccessToken}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        
+        
+        if (response.status === 200 || response.status === 201) {
+          Alert.alert('Success', 'Post created successfully!');
+          navigation.reset({
+            index: 1, // 두 번째 화면이 포커스되도록 설정
+            routes: [
+                { name: '커뮤니티' }, // Top2 스택을 초기화하여 '레시피'의 초기 화면으로 만듦
+                { name: '커뮤니티', params: { screen: 'CommunityScreen'} }
+            ],
         });
-
-        console.log('Image URI:', selectedImage);
-        console.log('Image MIME Type:', mimeType);
-        console.log('Image Name:', `photo.${fileType}`);
+          navigation.navigate('CommunityScreen');
+        } else {
+          console.error('Error creating post:', response.data);
+          showToast('Error');
+        }
+      } catch (error) {
+        if (error.response) {
+          console.error('Error creating post:', error.response.data);
+          showToast('Error');
+        } else {
+          console.error('Error creating post:', error.message);
+          showToast('Error');
+        }
       }
-
-      // Use axios to make the POST request
-      const response = await axios.post('http://www.sm-project-refrigerator.store/api/post/create', formData, {
-        headers: {
-          Authorization: `Bearer ${AccessToken}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      console.log('Server response:', response.data);
-
-      if (response.status !== 200) {
-        Alert.alert('Error', response.data.message || 'Something went wrong!');
-        return;
-      }
-
-      Alert.alert('Success', 'Post created successfully!');
-      navigation.navigate('CommunityScreen', { AccessToken });
-
-    } catch (error) {
-      console.error('Error creating post', error);
-      Alert.alert('Error', 'Failed to create post. Please try again later.');
     }
   };
+  const toastConfig = {
+    'bookmark': ({ text1 }) => (
+      <View style={styles.toastContainer}>
+        <Text style={{color:"#FFFFFF"}}>{text1}</Text> 
+      </View>
+    ),
+  };
+
+  const showToast = (text) => {
+    Toast.show({
+      type: 'bookmark',
+      position: 'bottom',
+      bottomOffset: BasicHeight*202,
+      text1: text,  // text1으로 텍스트 전달
+      visibilityTime: 2000,
+    });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -179,32 +150,20 @@ const CreatePostScreen = () => {
           value={content}
           onChangeText={setContent}
         />
-        {selectedImage && (
-          <View style={styles.imagePreview}>
-            <Image source={{ uri: selectedImage }} style={styles.image} />
-          </View>
-        )}
-        <TouchableOpacity style={styles.cameraButton} onPress={takeImageHandler}>
-          <Icon name="camera-outline" size={30} color="#007AFF" />
-        </TouchableOpacity>
-        <ActionSheet
-          ref={o => (actionSheet = o)}
-          title={'Select Image'}
-          options={['Take Photo', 'Choose from Gallery', 'Cancel']}
-          cancelButtonIndex={2}
-          destructiveButtonIndex={2}
-          onPress={index => {
-            if (index === 0) {
-              pickImageFromCamera();
-            } else if (index === 1) {
-              pickImageFromGallery();
-            }
-          }}
-        />
+        <Toast config={toastConfig}/>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+const AllWidth = Dimensions.get("window").width;
+const AllHeight = Dimensions.get("window").height;
+
+const FigmaWidth = 390;
+const FigmaHeight = 844;
+
+const BasicWidth = (AllWidth / FigmaWidth).toFixed(2);
+const BasicHeight = (AllHeight / FigmaHeight).toFixed(2);
 
 const styles = StyleSheet.create({
   container: {
@@ -223,17 +182,25 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 19,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Bold',
+    color: '#000000',
   },
   doneButton: {
-    padding: 10,
-    backgroundColor: '#FFA500',
-    borderRadius: 5,
+    height: BasicHeight*35,
+    width:BasicWidth* 65,
+    backgroundColor: '#F26D228F',
+    borderRadius: 25,
+    alignContent: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   doneButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontSize: 15,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Light',
+    color: '#000000',
   },
   form: {
     padding: 20,
@@ -246,6 +213,9 @@ const styles = StyleSheet.create({
   label: {
     width: 60,
     fontSize: 16,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+    color: '#000000',
   },
   inputContainer: {
     flex: 1,
@@ -286,6 +256,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
+    fontSize: 15,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Light',
   },
   textarea: {
     height: 300,
@@ -295,23 +268,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
     textAlignVertical: 'top',
+    fontSize: 15,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Light',
   },
-  cameraButton: {
-    marginTop: 20,
-    alignSelf: 'flex-end',
-  },
-  imagePreview: {
-    width: '100%',
-    height: 300,
-    marginVertical: 8,
-    justifyContent: 'center',
+  toastContainer: {
+    backgroundColor: '#AFAFAF',
+    height: BasicHeight * 39,
+    width: BasicWidth * 190,
+    borderRadius: 10,
     alignItems: 'center',
-    backgroundColor: '#ccc',
-    borderRadius: 4,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
+    justifyContent: 'center',
   },
 });
 

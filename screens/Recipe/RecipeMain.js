@@ -12,7 +12,10 @@ import {
 import axios from 'axios';
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+<<<<<<< HEAD
+=======
 import DropDownPicker from 'react-native-dropdown-picker';
+>>>>>>> origin-flit/cli
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import useTabBarVisibility from "../useTabBarVisibility";
@@ -21,6 +24,10 @@ import GPTIcon from '../../assets/Icons/GPT.svg';
 import X from '../../assets/Icons/X.svg';
 import Magnifier from '../../assets/Icons/Magnifier.svg';
 import Recommend from '../../assets/Icons/recommend.svg';
+<<<<<<< HEAD
+import DropDown from '../../assets/Icons/drop-down.svg';
+=======
+>>>>>>> origin-flit/cli
 
 const RecipeMain = () => {
   useTabBarVisibility(true);
@@ -40,6 +47,8 @@ const RecipeMain = () => {
   const [searchPerformed, setSearchPerformed] = useState(false); // 검색 여부 상태 변수
   const [loadingGPT, setLoadingGPT] = useState(false);
 
+<<<<<<< HEAD
+=======
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
@@ -47,12 +56,29 @@ const RecipeMain = () => {
     {label: '추천 순', value: 'recommendfirst'}
   ]);
 
+>>>>>>> origin-flit/cli
   useEffect(() => {
     getIngredients();
     getCloseIngredients();
   }, []);
 
   const getIngredients = async () => {
+<<<<<<< HEAD
+        //const selectedFoodNames = awaitt AsyncStorage.getItem('selectedFoodNames');
+        if (selectedFoodNames.length === 0) {
+          const item = await AsyncStorage.getItem('selectedFoodNames');
+          const selectedFood = item ? JSON.parse(item) : [];
+          setIngredients(selectedFood.map(name => ({ name })));
+        }
+        else {
+          setIngredients(selectedFoodNames.map(name => ({ name })));
+        }
+        await AsyncStorage.setItem('selectedFoodNames', JSON.stringify(selectedFoodNames));
+        /*
+        const item = await AsyncStorage.getItem('selectedFoodNames');
+        console.log('Selected food names:', item);
+        */
+=======
     /*
         setIngredients(selectedFoodNames.map(name => ({ name })));
         */
@@ -89,13 +115,18 @@ const RecipeMain = () => {
         } catch (error) {
           console.error('Error fetching close ingredients:', error);
         }
+>>>>>>> origin-flit/cli
       };
 
   const getCloseIngredients = async () => {
     try {
       const TOKEN = await AsyncStorage.getItem('userAccessToken');
+<<<<<<< HEAD
+      const refrigeratorID = await AsyncStorage.getItem('userRefId');
+=======
       const refrigeratorID = 125;
   
+>>>>>>> origin-flit/cli
       const response = await axios.get(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorID}`, {
         headers: { Authorization: `Bearer ${TOKEN}` }
       });
@@ -119,7 +150,12 @@ const RecipeMain = () => {
           name: item.name || 'Unknown',
           expire: item.expire ? new Date(item.expire).toLocaleDateString() : '정보 없음'  // 유통기한 날짜 포맷
         }));
+<<<<<<< HEAD
+
+        console.log('Close ingredients:', formattedIngredients);
+=======
   
+>>>>>>> origin-flit/cli
         setCloseIngredients(formattedIngredients);
       }
     } catch (error) {
@@ -207,7 +243,11 @@ const RecipeMain = () => {
       style={Styles.recipeContainer}>
         <View style={Styles.recommendContainer}>
         <Recommend />
+<<<<<<< HEAD
+        <Text style={{marginLeft : BasicWidth*3, color: '#AFAFAF',fontFamily:'NotoSansKR-Light', includeFontPadding:false}}>{item.recommendCount}</Text>
+=======
         <Text style={{marginLeft : BasicWidth*3, color: '#AFAFAF'}}>{item.recommendCount}</Text>
+>>>>>>> origin-flit/cli
       </View>
       <Text style={Styles.recipeName}>{item.name}</Text>
       <Text style={Styles.recipeIngredient}> 필요한 재료: {item.ingredient}</Text>
@@ -256,7 +296,13 @@ const RecipeMain = () => {
         }}>
         <Text
             style={{
+<<<<<<< HEAD
+              color: '#000000',
+              includeFontPadding: false,
+              fontFamily: 'NotoSansKR-Regular',
+=======
             color: '#000000',
+>>>>>>> origin-flit/cli
             marginTop: BasicHeight* 17,
             }}
         >
@@ -264,7 +310,13 @@ const RecipeMain = () => {
         </Text>
         <Text
             style={{
+<<<<<<< HEAD
+              color: '#000000',
+              includeFontPadding: false,
+              fontFamily: 'NotoSansKR-Regular',
+=======
             color: '#000000',
+>>>>>>> origin-flit/cli
             }}
         >
             맛있는 요리 레시피를 찾아드리고 있습니다!
@@ -282,13 +334,39 @@ const RecipeMain = () => {
     });
   }
 
+<<<<<<< HEAD
+  const handleClose = async() => {
+    await AsyncStorage.removeItem('selectedFoodNames');
+    navigation.goBack();
+  };
+  
+  const BasicScreen = () =>{
+    navigation.reset({
+      routes: [
+        { name: '레시피', params: { screen: 'RecipeMain'} } // 두 번째 화면을 'Ingredient'로 설정
+      ],
+    });
+  }
+  
+
+=======
+>>>>>>> origin-flit/cli
   return (
     <SafeAreaView style={Styles.container}>
       <View style={Styles.header}>
         <Text style={Styles.HomeText}>레시피</Text>
+<<<<<<< HEAD
+        <TouchableOpacity 
+          onPress={searchPerformed ? BasicScreen : handleClose}  // Change onPress based on searchPerformed
+        >
+          <X style={{ marginLeft: BasicWidth * 128, marginTop: BasicHeight * 12 }} />
+        </TouchableOpacity>
+
+=======
         <TouchableOpacity onPress={() => alert('뒤로가기')}>
           <X style={{marginLeft: BasicWidth*128, marginTop: BasicHeight * 12,}}/>
         </TouchableOpacity>
+>>>>>>> origin-flit/cli
       </View>
 
       <View style={Styles.TextForm}>
@@ -304,8 +382,14 @@ const RecipeMain = () => {
       {searchPerformed ? (
         <>
           <View style={Styles.findstyle}>
+<<<<<<< HEAD
+            <Text style={{fontSize: 16, fontFamily: 'NotoSansKR-SemiBold', includeFontPadding: false, color: '#000000',}}>총 <Text style={{ color: '#3873EA' }}>{lastIndex}</Text>개 검색결과</Text>
+            <Text style={{fontSize: 16, fontFamily: 'NotoSansKR-SemiBold', includeFontPadding: false, color: '#000000',marginLeft:BasicWidth*140}}>추천 순</Text>
+            <DropDown/>
+=======
             <Text>총 <Text style={{ color: '#3873EA' }}>{lastIndex}</Text>개 검색결과</Text>
            <Text>추천 순</Text>
+>>>>>>> origin-flit/cli
           </View>
           <FlatList
             data={resMsg}
@@ -327,8 +411,15 @@ const RecipeMain = () => {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={Styles.ingredientList}
+<<<<<<< HEAD
+            style={{ height: BasicHeight * 33, flexGrow: 0, marginTop: BasicHeight * 10 }}
+            ListFooterComponent={<View style={{ width: BasicWidth * 30 }} />}  // Add a footer for extra spacing
+          />
+
+=======
             style={{height: BasicHeight*33, flexGrow: 0, marginTop: BasicHeight*10}}
           />
+>>>>>>> origin-flit/cli
           <Text style={Styles.ingredient}>유통기한 임박한 재료</Text>
           <FlatList
               data={closeingredients}  // 유통기한 임박 재료
@@ -338,6 +429,10 @@ const RecipeMain = () => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={Styles.ingredientList}
               style={{ height: BasicHeight * 33, flexGrow: 0, marginTop: BasicHeight * 10 }}
+<<<<<<< HEAD
+              ListFooterComponent={<View style={{ width: BasicWidth * 30 }} />} 
+=======
+>>>>>>> origin-flit/cli
           />
           {loadingGPT && (
           <ActivityIndicator size="medium" color="#3873EA" />
@@ -378,9 +473,18 @@ const Styles = StyleSheet.create({
     justifyContent: 'center',
   },
   HomeText: {
+<<<<<<< HEAD
+    marginTop: BasicHeight * 16,
+    marginLeft: BasicWidth * 168,
+    fontSize: 15,
+    fontFamily: 'NotoSansKR-Bold',
+    includeFontPadding: false,
+    color: '#000000',
+=======
     marginTop: BasicHeight * 12,
     marginLeft: BasicWidth * 174,
     fontSize: 15,
+>>>>>>> origin-flit/cli
   },
   TextForm: {
     width: BasicWidth * 330,
@@ -392,15 +496,32 @@ const Styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginLeft: BasicWidth * 30,
     flexDirection: 'row',
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin-flit/cli
   },
   Text: {
     marginLeft: BasicWidth * 17,
     width: BasicWidth * 276,
+<<<<<<< HEAD
+    fontSize: 16,
+    fontFamily: 'NotoSansKR-Regular',
+    includeFontPadding: false,
+=======
+>>>>>>> origin-flit/cli
     
   },
   ingredient: {
     marginLeft: BasicWidth * 33,
     marginTop: BasicHeight * 25,
+<<<<<<< HEAD
+    fontSize: 14,
+    fontFamily: 'NotoSansKR-SemiBold',
+    includeFontPadding: false,
+    color: '#000000',
+=======
+>>>>>>> origin-flit/cli
   },
   Icon: {
     alignSelf: 'center',
@@ -420,6 +541,11 @@ const Styles = StyleSheet.create({
     marginRight: BasicHeight * 10,
     fontSize: 13,
     color: '#3873EA',
+<<<<<<< HEAD
+    fontFamily: 'NotoSansKR-Regular',
+    includeFontPadding: false,
+=======
+>>>>>>> origin-flit/cli
   },
   recipeContainer: {
     width: BasicWidth * 330,
@@ -432,11 +558,24 @@ const Styles = StyleSheet.create({
   },
   recipeName: {
     fontSize: 16,
+<<<<<<< HEAD
+    fontFamily: 'NotoSansKR-SemiBold',
+    includeFontPadding: false,
+    color: '#000000',
+    width: BasicWidth * 270,
+  },
+  recipeIngredient: {
+    fontSize: 14,
+    fontFamily: 'NotoSansKR-Regular',
+    includeFontPadding: false,
+    color: '#000000',
+=======
     fontWeight: 'bold',
   },
   recipeIngredient: {
     fontSize: 14,
     color: '#555',
+>>>>>>> origin-flit/cli
     width: BasicWidth * 299,
   },
   ingredientList: {
@@ -471,7 +610,10 @@ const Styles = StyleSheet.create({
   },
   recommendContainer:{
     flexDirection: 'row',
+<<<<<<< HEAD
+=======
     alignItems: 'center',
+>>>>>>> origin-flit/cli
     position: 'absolute',
     marginLeft: BasicWidth*275,
     marginTop: BasicHeight*10,

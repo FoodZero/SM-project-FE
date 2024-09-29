@@ -1,4 +1,3 @@
-
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { WebView } from 'react-native-webview';
@@ -48,9 +47,10 @@ const KaKaoLogin = () => {
     } else {
       // If isSuccess is true, proceed with storing the access token
       storeData(AccessToken);
-      console.log("accesstoken:",AccessToken);
-      navigation.navigate("screen1", { screen: "screen1" });
-      navigation.navigate("screen1", { AccessToken: AccessToken });
+      navigation.navigate("CommunityTab",{ AccessToken: AccessToken });
+      navigation.navigate("HomeMain", { screen: "HomeMain" });
+      navigation.navigate("HomeMain", { AccessToken: AccessToken });
+      
     }
   }) .catch (function (error) {
     console.log('error', error);

@@ -1,157 +1,183 @@
-import React from 'react';
-import { Alert, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import {
-  getCurrentPositionAsync,
-  useForegroundPermissions,
-  PermissionStatus,
-} from 'expo-location';
+    StyleSheet,
+    Text,
+    View,
+    Dimensions,
+} from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons'; // Ensure to import the right icon library
+import { useNavigation } from '@react-navigation/native';
 
-function LocationPicker() {
-  const navigation = useNavigation();
-  const route = useRoute();
-  const AccessToken = route.params?.AccessToken;
-  const [locationPermissionInformation, requestPermission] =
-    useForegroundPermissions();
+import Back from '../../assets/Icons/back.svg';
 
-  const close = () => {
-    navigation.navigate("CommunityScreen", { AccessToken: AccessToken });
-  };
+const GeoLocationAPI = () => {
+    const navigation = useNavigation();
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLogitude] = useState(0);
+    const [address1, setAddress1] = useState(false);
+    const [add1, setAdd1] = useState('');
+    const geoLocation = async () => {
+        Geolocation.getCurrentPosition(
+            (position) => {
+               const {latitude, longitude} = position.coords;
 
-  async function verifyPermissions() {
-    if (
-      locationPermissionInformation.status === PermissionStatus.UNDETERMINED
-    ) {
-      const permissionResponse = await requestPermission();
-      return permissionResponse.granted;
-    }
+               console.log('Latitude:', latitude);
+                console.log('Longitude:', longitude);
 
-    if (locationPermissionInformation.status === PermissionStatus.DENIED) {
-      Alert.alert(
-        'Insufficient Permissions!',
-        'You need to grant location permissions to use this app.'
-      );
-      return false;
-    }
-
-    return true;
-  }
-
-  async function getLocationHandler() {
-    const hasPermission = await verifyPermissions();
-
-    if (!hasPermission) {
-      return;
-    }
-
-    try {
-      const location = await getCurrentPositionAsync();
-      const { latitude, longitude } = location.coords;
-
-      console.log('Latitude:', latitude);
-      console.log('Longitude:', longitude);
-
-      // API request to save location
-      const response = await axios.post(
-        'http://www.sm-project-refrigerator.store/api/post/location',
-        {
-          latitude,
-          longitude,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${AccessToken}`,
-            'Content-Type': 'application/json',
-          },
+                setLatitude(latitude);
+                setLogitude(longitude);
+            },
+            error => { console.log(error.code, error.message); },
+            {enableHighAccuracy:true, timeout: 15000, maximumAge: 10000 },
+        )
+    };
+    const LocationHandler= async() => {
+        try {
+          const AccessToken = await AsyncStorage.getItem('userAccessToken');
+          const Latitude = latitude;
+            const Longitude = longitude;
+            const data ={
+                latitude: Latitude,
+                longitude: Longitude,
+            }
+          // API request to save location
+          const response = await axios.post(
+            'http://www.sm-project-refrigerator.store/api/post/location',
+           data,
+              {
+                headers: {
+                  'Authorization': `Bearer ${AccessToken}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+    
+          if (response.status === 200) {
+            console.log('Success', 'Location saved successfully!');
+            console.log('Response Data:', response.data);
+          } else {
+            console.log('Error', 'Failed to save location.');
+          }
+        } catch (error) {
+          console.error('Error:', error.response ? error.response.data : error.message);
         }
-      );
-
-      if (response.status === 200) {
-        Alert.alert('Success', 'Location saved successfully!');
-        console.log('Response Data:', response.data);
-      } else {
-        Alert.alert('Error', 'Failed to save location.');
       }
-    } catch (error) {
-      console.error('Error:', error.response ? error.response.data : error.message);
-      Alert.alert('Error', 'An error occurred while fetching location or saving it.');
-    }
-  }
 
-  async function SaveLocationHandler() {
-    try {
-      // API request to retrieve saved location
-      const response = await axios.get(
-        'http://www.sm-project-refrigerator.store/api/post/location',
-        {
-          headers: {
-            'Authorization': `Bearer ${AccessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
 
-      if (response.status === 200) {
-        const locationList = response.data.result.locationList;
-        if (locationList.length > 0) {
-          const savedLocation = locationList[0];
-          const address = savedLocation.address; // Extract the address
+    // Update map style to force a re-render to make sure the geolocation button appears
+    useEffect(() => {
+        geoLocation();
+        //LocationHandler();
+        const address = AsyncStorage.getItem('address1');
+        setAdd1(address);
+    
+    }, [latitude, longitude]);
 
-          Alert.alert(
-            'Saved Location',
-            `Address: ${address}`
-          );
-          console.log('Response Data:', response.data);
-          console.log('Saved Location:', savedLocation);
 
-          // Navigate to CommunityScreen with the address
-          navigation.navigate("CommunityScreen", {
-            AccessToken: AccessToken,
-            address: address,
-          });
-        } else {
-          Alert.alert('No Saved Locations', 'No location data found.');
-        }
-      } else {
-        Alert.alert('Error', 'Failed to retrieve saved location.');
-      }
-    } catch (error) {
-      console.error('Error:', error.response ? error.response.data : error.message);
-      Alert.alert('Error', 'An error occurred while retrieving saved location.');
-    }
-  }
-
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={close} style={styles.icon}>
-        <Icon name="chevron-back" size={24} color="#000" />
-      </TouchableOpacity>
-      <View style={styles.actions}>
-        <Button title="Locate User" onPress={getLocationHandler} />
-        <Button title="Save the Location" onPress={SaveLocationHandler} />
-      </View>
-    </View>
-  );
+    return (
+        <View>
+            <View style={styles.header}>
+                <Text style={{fontSize: 18,
+        color: '#000000',
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
+        marginRight:BasicWidth*115}}> 내 위치 설정 </Text>
+                <TouchableOpacity>
+                <Back/>
+                </TouchableOpacity>
+            </View>
+            <MapView
+                provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+                style={styles.map}
+                region={{
+                    latitude: latitude,
+                    longitude: longitude,
+                    latitudeDelta: 0.010,
+                    longitudeDelta: 0.011,
+                }}
+                showsUserLocation={true}
+                >
+            </MapView>
+  
+            <View style={styles.SavedLocView}>
+                {address1 ? ( <TouchableOpacity style={styles.detailButton}>
+                    <Text style={styles.Text}> {add1} </Text>
+                </TouchableOpacity>) : (<TouchableOpacity style={{width: BasicWidth*145,
+        height: BasicHeight*58,
+        backgroundColor: '#3873EA',
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: BasicWidth*10}}>
+                    <Text style={styles.Text}> 홍지동 </Text>
+                </TouchableOpacity>)}
+               
+                <TouchableOpacity style={styles.detailButton}>
+                    <Text style={styles.Text}> 위치 2 </Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    )
 }
+const AllWidth = Dimensions.get("window").width;
+const AllHeight = Dimensions.get("window").height;
 
-export default LocationPicker;
+const FigmaWidth = 390;
+const FigmaHeight = 844;
+
+const BasicWidth = (AllWidth / FigmaWidth).toFixed(2);
+const BasicHeight = (AllHeight / FigmaHeight).toFixed(2);
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    position: 'relative',
-  },
-  icon: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-});
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    map: {
+        width: AllWidth,
+        height: BasicHeight*400,
+    },
+    header:{
+        flexDirection: 'row',
+        marginTop: BasicHeight*17,
+        marginLeft: BasicWidth*146,
+        marginBottom: BasicHeight*30,
+    },
+    LocationButton:{
+        width: BasicWidth*300,
+        height: BasicHeight*58,
+        backgroundColor: '#3873EA',
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginLeft: BasicWidth*45,
+        marginTop: BasicHeight*130,
+    },
+    SavedLocView:{
+        flexDirection: 'row',
+        marginTop: BasicHeight*228,
+        marginLeft: BasicWidth*45,
+    },
+    detailButton:{
+        width: BasicWidth*145,
+        height: BasicHeight*58,
+        backgroundColor: '#808080',
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: BasicWidth*10,
+    },
+    Text:{
+        fontSize: 18,
+        color: '#FFFFFF',
+        fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
+    }
+})
+
+export default GeoLocationAPI;

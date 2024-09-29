@@ -15,6 +15,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import X from '../../assets/Icons/X.svg';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import SelectOff from '../../assets/Icons/SelectOff.svg';
+import SelectOn from '../../assets/Icons/SelectOn.svg';
+import Term from '../../assets/Icons/Term.svg';
+
 const Terms = () => {
   const navigation = useNavigation();
   
@@ -65,81 +69,89 @@ const Terms = () => {
     setLocachk(!Locachk);
   };
 
-  const storeData = async (Termchk) => {
-    try {
-      // 'tasks' 라는 항목에 tasks 저장
-      await AsyncStorage.setItem('terms', JSON.stringify(Termchk));
-    } catch (e) {
-      // saving error
-    }
-    finally{
+  const storeData =() => {
       navigation.navigate("Register", { screen: 'Register' })
-    }
+  };
+
+  const TermAll = () =>{
+    navigation.navigate("TermDetail", { screen: 'TermDetail' })   
+  };
+  const Term1 = () =>{
+    navigation.navigate("Term1", { screen: 'Term1' })   
+  };
+  const Term2 = () =>{
+    navigation.navigate("Term2", { screen: 'Term2' })   
+  };
+  const Term3 = () =>{
+    navigation.navigate("Term3", { screen: 'Term3' })   
   };
 
     return (
       <SafeAreaView style={Styles.Container}>
         <ScrollView style = {Styles.Scroll}>
+
         <View style = {Styles.IconContainer}>
           <TouchableOpacity onPress={backAction}>
             <X />
           </TouchableOpacity>
         </View>
+
           <View style={Styles.HometextArea}>
             <Text style={Styles.HomeText}>
               이용약관에{"\n"}동의해주세요
             </Text>
           </View>
+
           <View style={Styles.TermAreaAll}>
             <TouchableOpacity onPress={Allcheck}>
-              <Icon name = "check-circle-outline" size = {22} color= {Termchk && Privchk && Locachk? "#3873EA" :"#AFAFAF"}/>
+              {Termchk && Privchk && Locachk  ? <SelectOn/> : <SelectOff/>}
             </TouchableOpacity>
             <Text style={Styles.TermText}>
               약관 전체동의
             </Text>
             <View style = {Styles.Termicons}>
-              <TouchableOpacity>
-                <Icon name = "chevron-right" size = {22} color="#C5C5C5"/>
+              <TouchableOpacity onPress={TermAll}>
+                <Term/>
               </TouchableOpacity>
             </View>
           </View>
           <View style={Styles.Line}/>
           <View style={Styles.TermArea}>
             <TouchableOpacity onPress={Termcheck}>
-              <Icon name = "check-circle-outline" size = {22} color= {Termchk? "#3873EA" :"#AFAFAF"}/>
+              {Termchk? <SelectOn/> : <SelectOff/>}
             </TouchableOpacity>
             <Text style={Styles.TermText}>
               이용약관(필수)
             </Text>
             <View style = {Styles.Termicons}>
-              <TouchableOpacity>
-                  <Icon name = "chevron-right" size = {22} color="#C5C5C5"/>
+              <TouchableOpacity onPress={Term1}>
+                <Term/>
                 </TouchableOpacity>
             </View>
           </View>
           <View style={Styles.TermArea}>
             <TouchableOpacity onPress={Privcheck}>
-              <Icon name = "check-circle-outline" size = {22} color= {Privchk? "#3873EA" :"#AFAFAF"}/>
+              {Privchk? <SelectOn/> : <SelectOff/>}
             </TouchableOpacity>
             <Text style={Styles.TermText}>
               개인정보 수집 및 이용(필수)
             </Text>
             <View style = {Styles.Termicons}>
-              <TouchableOpacity>
-                <Icon name = "chevron-right" size = {22} color="#C5C5C5"/>
+              <TouchableOpacity onPress={Term2}>
+                <Term/>
               </TouchableOpacity>
             </View>
           </View>
           <View style={Styles.TermArea}>
             <TouchableOpacity onPress={Locacheck}>
-              <Icon name = "check-circle-outline" size = {22} color= {Locachk? "#3873EA" :"#AFAFAF"}/>
+             {Locachk? <SelectOn/> : <SelectOff/>}
             </TouchableOpacity>
             <Text style={Styles.TermText}>
               위치기반 서비스 이용약관(필수)
             </Text>
             <View style = {Styles.Termicons}>
-              <TouchableOpacity>
-                <Icon name = "chevron-right" size = {22} color="#C5C5C5"/>
+              <TouchableOpacity onPress={Term3}>
+                <Term/>
               </TouchableOpacity>
             </View>
           </View>
@@ -197,25 +209,21 @@ const Styles = StyleSheet.create({
       flex: 1,
     },
     IconContainer:{
-      backgroundColor: '#FFFFFF',
-      width: BasicWidth*390,
       height: BasicHeight*20,
       marginTop: BasicHeight*13,
       alignItems: 'flex-end',
       paddingRight : BasicWidth*25,
     },
     HometextArea: {
-      width: BasicWidth*166,
       height: BasicHeight*90,
       marginLeft: BasicWidth*20,
-      marginTop: BasicHeight*53,
+      marginTop: BasicHeight*25,
     },
-    HomeText: {
-      width: BasicWidth*166,
-      height: BasicHeight*90,
+
+    HomeText: { 
       fontSize: 30,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Bold',
+      fontFamily: 'NotoSansKR-Bold',
       color: '#000000',
     },
     Button : {
@@ -240,7 +248,7 @@ const Styles = StyleSheet.create({
     ButtonText :{
       alignSelf : 'center',
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Bold',
+      fontFamily: 'NotoSansKR-Bold',
       fontSize : 20,
       color : '#FFFFFF',
     },
@@ -248,19 +256,16 @@ const Styles = StyleSheet.create({
       marginLeft : BasicWidth*33,
     },
     TermAreaAll:{
-      width: BasicWidth*299.67,
-      height: BasicHeight*23,
+      height: BasicHeight*22,
       marginLeft: BasicWidth*33,
       marginTop: BasicHeight*45,
       flexDirection: 'row',
     },
     TermArea:{
-      width: BasicWidth*299.67,
       height: BasicHeight*23,
       marginLeft: BasicWidth*33,
-      marginTop: BasicHeight*25,
+      marginTop: BasicHeight*25, 
       flexDirection: 'row',
-      alignItems: 'flex-start'
     },
     EmailArea:{
       width: BasicWidth*390,
@@ -275,7 +280,7 @@ const Styles = StyleSheet.create({
 
       textDecorationLine: 'underline',
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
       color: '#000000',
     },
     TermText:{
@@ -284,7 +289,7 @@ const Styles = StyleSheet.create({
       marginLeft: BasicWidth*15,
       fontSize: 15,
       includeFontPadding: false,
-      //fontFamily: 'NotoSansKR-Regular',
+      fontFamily: 'NotoSansKR-Regular',
       color: '#000000',
     },
     Termicons:{

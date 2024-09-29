@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, Image, TextInput, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  TextInput,
+  Alert,
+  Dimensions,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const initialData = [];
 
-const Community = () => {
+const CommunityScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { AccessToken } = route.params || {};
-  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [data, setData] = useState(initialData);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -18,42 +29,28 @@ const Community = () => {
   const [lastIndex, setLastIndex] = useState(null); // Initialize lastIndex for pagination
 
   useEffect(() => {
-
-    if (AccessToken) {
-     
       FetchPost();
       FetchLocationHandler(); // Fetch location on component mount
-    }
-  }, [AccessToken, selectedCategory]); // Refetch data when AccessToken or selectedCategory changes
+
+  }, [selectedCategory]); // Refetch data when AccessToken or selectedCategory changes
+
 
   const FetchPost = async () => {
-    if (!AccessToken) {
-      console.error('Error fetching posts: AccessToken is missing or invalid');
-      return;
-    }
-
-    const headers = {
-      Authorization: `Bearer ${AccessToken}`,
-      Accept: 'application/json'
-    };
-
-    // Determine postType based on selectedCategory
-    let postType = '';
-    if (selectedCategory === '나눔') {
-      postType = 'SHARE';
-    } else if (selectedCategory === '레시피') {
-      postType = 'RECIPE';
-    }
-
-    const params = {
-      lastIndex,
-      postType: postType || undefined, // Send postType only if it is set
-      locationId: null // Adjust if you have a specific locationId
-    };
 
     try {
-      const response = await axios.get('http://www.sm-project-refrigerator.store/api/post/', { headers, params });
-      console.log('API response:', response.data);
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      const response = await axios.get('http://www.sm-project-refrigerator.store/api/post/', {
+        headers: {
+          'Authorization': `Bearer ${AccessToken}`,
+          'Content-Type': 'application/json',
+        },
+        params:{
+          lastIndex,
+          postType: selectedCategory || undefined,
+          locationId: null,
+        }
+      });
+      console.log('API response:', response.data.result);
 
       const posts = response.data.result.postDTOList.map(post => ({
         id: String(post.id),
@@ -64,7 +61,6 @@ const Community = () => {
         time: new Date(post.createdAt).toLocaleString(), // Adjust date formatting as needed
         user: post.nickname,
         comments: post.commentCount,
-        uri: post.itemImgUrlList[0]?.itemImgUrl || 'https://example.com/default.jpg' // Default image if none provided
       }));
 
       setData(posts);
@@ -79,56 +75,61 @@ const Community = () => {
     }
   };
 
-async function FetchLocationHandler() {
-  try {
-    const response = await axios.get(
-      'http://www.sm-project-refrigerator.store/api/post/location',
-      {
-        headers: {
-          'Authorization': `Bearer ${AccessToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+  async function FetchLocationHandler() {
+    try {
+      const AccessToken = await AsyncStorage.getItem('userAccessToken');
+      const response = await axios.get(
+        'http://www.sm-project-refrigerator.store/api/post/location',
+        {
+          headers: {
+            'Authorization': `Bearer ${AccessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      ); 
 
-    console.log('API Response:', response); // Log the entire response object
+      console.log('API Response:', response.result); // Log the entire response object
 
-    if (response.status === 200) {
-      const locationList = response.data?.result?.locationList || []; // Use optional chaining and default to an empty array
-      if (locationList.length > 0) {
-        const savedLocation = locationList[0];
-        const fetchedAddress = savedLocation.address; // Extract the address
+      if (response.status === 200) {
+        const locationList = response.data?.result?.locationList || []; // Use optional chaining and default to an empty array
+        if (locationList.length > 0) {
+          const savedLocation = locationList[0];
+          const fetchedAddress = savedLocation.address; // Extract the address
 
-        console.log('Saved Location:', savedLocation);
-        console.log('Fetched Address:', fetchedAddress);
+          console.log('Saved Location:', savedLocation);
+          console.log('Fetched Address:', fetchedAddress);
 
-        // Update address state
-        setAddress(fetchedAddress);
+          // Update address state
+          setAddress(fetchedAddress);
+        } else {
+          Alert.alert('저장된 위치가 없습니다', '위치인증을 해주세요.');
+        }
       } else {
-        Alert.alert('No Saved Locations', 'No location data found.');
+        Alert.alert('Error', 'Failed to retrieve saved location.');
       }
-    } else {
-      Alert.alert('Error', 'Failed to retrieve saved location.');
+    } catch (error) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      Alert.alert('Error', 'An error occurred while retrieving saved location.');
     }
-  } catch (error) {
-    console.error('Error:', error.response ? error.response.data : error.message);
-    Alert.alert('Error', 'An error occurred while retrieving saved location.');
   }
-}
 
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.item} onPress={() => PostPress(item)}>
-      <Image source={{ uri: item.uri }} style={styles.image} />
       <View style={styles.itemContent}>
         <View style={styles.itemHeader}>
           <Text style={styles.title}>{item.title}</Text>
-          {item.status && <Text style={styles.status}>{item.status}</Text>}
+          {item.status && (
+            <Text style={[styles.status, item.status === '진행 중' ? styles.inProgress : styles.completed]}>
+              {item.status}
+            </Text>
+          )}
         </View>
-        <Text style={styles.details}>{item.user} • {item.area} • {item.time}</Text>
-        <Text style={styles.comments}>댓글 {item.comments}</Text>
+        <Text style={styles.details}>{item.area} | {item.time}</Text>
+        <Text style={styles.comments}>{item.user}</Text>
       </View>
     </TouchableOpacity>
   );
+  
 
   const filterData = () => {
     let filteredData = data;
@@ -151,7 +152,6 @@ async function FetchLocationHandler() {
       status: item.status,
       time: item.time,
       user: item.user,
-      uri: item.uri,
       AccessToken: AccessToken, 
       userarea: address,
     });
@@ -160,7 +160,7 @@ async function FetchLocationHandler() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate("LocationScreen", { AccessToken: AccessToken })}>
+        <TouchableOpacity onPress={() => navigation.navigate("GeoLocationAPI")}>
           <Text style={styles.headerTitle}>{address || '주소를 로딩 중...'}<Icon name="chevron-down" size={20} /></Text>
         </TouchableOpacity>
         <View style={styles.icons}>
@@ -184,20 +184,20 @@ async function FetchLocationHandler() {
       )}
       <View style={styles.tabs}>
         <TouchableOpacity 
-          style={[styles.tab, selectedCategory === '전체' && styles.selectedTab]}
-          onPress={() => setSelectedCategory('전체')}
+          style={[styles.tab, selectedCategory === '' && styles.selectedTab]}
+          onPress={() => setSelectedCategory('')}
         >
           <Text style={styles.tabText}>전체</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tab, selectedCategory === '나눔' && styles.selectedTab]}
-          onPress={() => setSelectedCategory('나눔')}
+          style={[styles.tab, selectedCategory === 'SHARE' && styles.selectedTab]}
+          onPress={() => setSelectedCategory('SHARE')}
         >
           <Text style={styles.tabText}>나눔</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tab, selectedCategory === '레시피' && styles.selectedTab]}
-          onPress={() => setSelectedCategory('레시피')}
+          style={[styles.tab, selectedCategory === 'RECIPE' && styles.selectedTab]}
+          onPress={() => setSelectedCategory('RECIPE')}
         >
           <Text style={styles.tabText}>레시피</Text>
         </TouchableOpacity>
@@ -205,7 +205,7 @@ async function FetchLocationHandler() {
           <Text style={styles.writeButtonText}>+ 글쓰기</Text>
         </TouchableOpacity>
       </View>
-      <FlatList
+      <FlatList 
         data={filterData()}
         renderItem={renderItem}
         keyExtractor={item => item.id} // Ensure 'id' is unique
@@ -215,10 +215,20 @@ async function FetchLocationHandler() {
   );
 };
 
+const AllWidth = Dimensions.get("window").width;
+const AllHeight = Dimensions.get("window").height;
+
+const FigmaWidth = 390;
+const FigmaHeight = 844;
+
+const BasicWidth = (AllWidth / FigmaWidth).toFixed(2);
+const BasicHeight = (AllHeight / FigmaHeight).toFixed(2);
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
@@ -229,8 +239,10 @@ const styles = StyleSheet.create({
     borderBottomColor: '#DDDDDD',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 19,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Bold',
+    color: '#000000',
   },
   icons: {
     flexDirection: 'row',
@@ -251,28 +263,42 @@ const styles = StyleSheet.create({
   },
   tabs: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    padding: 10,
-    justifyContent: 'space-between',
+    marginLeft: BasicWidth*19,
+    marginTop: BasicHeight*5,
   },
   tab: {
-    padding: 10,
+    height:BasicHeight* 40,
+    width:BasicWidth*70,
+    borderRadius: 10,
+    backgroundColor: '#E6E6E8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: BasicWidth*16,
   },
   selectedTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#FFA500',
+    borderRadius: 10,
+    backgroundColor: '#CAF6FF',
   },
   tabText: {
-    fontSize: 16,
+    fontSize: 14,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Light',
+    color: '#000000',
   },
   writeButton: {
+    height:BasicHeight* 40,
+    width:BasicWidth*90,
+    borderRadius: 10,
+    backgroundColor: '#F26D228F',
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#FFA500',
-    padding: 10,
-    borderRadius: 5,
   },
   writeButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontSize: 14,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Light',
+    color: '#000000',
   },
   list: {
     padding: 10,
@@ -286,34 +312,53 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#DDDDDD',
   },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    marginRight: 15,
-  },
   itemContent: {
     flex: 1,
   },
   itemHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+
   },
   title: {
     fontSize: 18,
-    fontWeight: 'bold',
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+    color: '#000000',
   },
   status: {
     color: 'red',
+    fontSize: 11,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+    color: '#FF3B30',
+    marginLeft:BasicWidth*5,
   },
   details: {
-    marginTop: 5,
-    color: '#888888',
+    marginTop: BasicHeight*5,
+    color: '#808080',
+    fontSize: 13,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Light',
   },
   comments: {
-    marginTop: 5,
-    color: '#888888',
+    marginTop: BasicHeight*5,
+    color: '#000000',
+    fontSize: 13,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Light',
+  },
+  status: {
+    fontSize: 11,
+    includeFontPadding: false,
+    fontFamily: 'NotoSansKR-Regular',
+    marginLeft: BasicWidth * 5,
+  },
+  inProgress: {
+    color: '#FF3B30', // Red color for '진행 중'
+  },
+  completed: {
+    color: '#3873EA', // Blue color for '마감'
   },
 });
 
-export default Community;
+export default CommunityScreen;
