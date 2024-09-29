@@ -18,33 +18,6 @@ const SplashScreen = ({navigation}) => {
   //State for ActivityIndicator animation
   const [animating, setAnimating] = useState(true);
   const [isModalVisible, setModalVisible] = useState(true);
-<<<<<<< HEAD
-  /*
-  useEffect(() => {
-        setTimeout(() => {
-            AsyncStorage.getItem('user')
-                .then((value) => {
-                    console.log(value)
-                    if (value != null) {
-                        props.goMain(value)
-
-                        props.navigation.replace('Main');
-
-                    } else {
-                        props.navigation.replace('Auth');
-                        console.log(value);
-
-                    }
-                }
-                );
-
-        }, 3000);
-    }, []);
-  */
-  
-=======
-
->>>>>>> origin-flit/cli
   useEffect(() => {
     setTimeout(() => {
       setAnimating(false);

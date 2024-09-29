@@ -193,11 +193,7 @@ const RecipeDetail = () => {
                     screen: 'Ingredient', 
                     params: { Id: fridgeId }
                 });
-<<<<<<< HEAD
                 await AsyncStorage.removeItem('selectedFoodNames');
-=======
-                
->>>>>>> origin-flit/cli
                 navigation.reset({
                     index: 1, // 두 번째 화면이 포커스되도록 설정
                     routes: [
@@ -255,7 +251,6 @@ const RecipeDetail = () => {
     return (
         <SafeAreaView style={Styles.container}>
             <View style={Styles.TopContainer}>
-<<<<<<< HEAD
             <Text style={Styles.HeaderText}>레시피</Text>
                 <TouchableOpacity onPress={() => { if (navigation.canGoBack()) {
                         navigation.goBack();
@@ -266,18 +261,6 @@ const RecipeDetail = () => {
                     }}}>
                     <Back style={{marginLeft: BasicWidth*127, marginTop: BasicHeight*15}}/>
                 </TouchableOpacity>
-=======
-                <TouchableOpacity onPress={() => { if (navigation.canGoBack()) {
-    navigation.goBack();
-    console.log('뒤로가기');
-  } else {
-    navigation.navigate('레시피'); // 처음 화면으로 이동하도록 처리
-    console.log('처음 화면으로 이동');
-  }}}>
-                    <Back style={{marginLeft: BasicWidth*358, marginTop: BasicHeight*5}}/>
-                </TouchableOpacity>
-                <Text style={Styles.HeaderText}>레시피</Text>
->>>>>>> origin-flit/cli
             </View>
 
             <View style={Styles.recipeContainer}>
@@ -346,11 +329,8 @@ const Styles = StyleSheet.create({
         marginLeft: BasicWidth * 172,
         marginTop: BasicHeight * 16,
         includeFontPadding: false,
-<<<<<<< HEAD
         fontFamily: 'NotoSansKR-Bold',
         color: '#000000',
-=======
->>>>>>> origin-flit/cli
     },
     Bookmark: {
         position: 'absolute',
@@ -375,26 +355,19 @@ const Styles = StyleSheet.create({
     recipeName: {
         fontSize: 20,
         color: '#000000',
-<<<<<<< HEAD
         includeFontPadding: false,
         fontFamily: 'NotoSansKR-Bold',
-=======
->>>>>>> origin-flit/cli
     },
     ingredienttitle: {
         marginLeft: BasicWidth * 16,
         color: '#000000',
-<<<<<<< HEAD
         includeFontPadding: false,
         fontFamily: 'NotoSansKR-Regular',
         fontSize: 16,
-=======
->>>>>>> origin-flit/cli
     },
     ingredient: {
         fontSize: 16,
         color: '#000000',
-<<<<<<< HEAD
         includeFontPadding: false,
         fontFamily: 'NotoSansKR-Regular',
         flexWrap: 'wrap',
@@ -404,11 +377,6 @@ const Styles = StyleSheet.create({
         color: '#000000',
         includeFontPadding: false,
         fontFamily: 'NotoSansKR-Regular',
-=======
-    },
-    description: {
-        fontSize: 16,
->>>>>>> origin-flit/cli
     },
     recommendContainer: {
         position: 'absolute',
@@ -426,12 +394,9 @@ const Styles = StyleSheet.create({
     question: {
         fontSize: 16,
         color: '#000000',
-<<<<<<< HEAD
         includeFontPadding: false,
         fontFamily: 'NotoSansKR-Regular',
         
-=======
->>>>>>> origin-flit/cli
     },
     Line: {
         width: BasicHeight * 700,
@@ -460,11 +425,7 @@ const Styles = StyleSheet.create({
         color: '#3873EA',
     },
     scrollDescription: {
-<<<<<<< HEAD
         maxHeight: BasicHeight * 240,
-=======
-        maxHeight: BasicHeight * 280,
->>>>>>> origin-flit/cli
         width: BasicWidth * 277,
         marginLeft: BasicWidth * 31,
         color: '#000000',

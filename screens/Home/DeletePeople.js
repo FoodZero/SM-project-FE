@@ -21,18 +21,22 @@ const DeletePeople = ({ isVisible, onClose})=>{
 
     
     const DeleteUserData = async (id) => {
-        const headers = {
-          Authorization: `Bearer ${AccessToken}`,
-          'Content-Type': 'application/json'
-        };
       
         try {
+          const refrigeratorId = await AsyncStorage.getItem('userRefId');
+          const AccessToken = await AsyncStorage.getItem('userAccessToken');
+          const headers = {
+            Authorization: `Bearer ${AccessToken}`,
+            'Content-Type': 'application/json'
+          };
           const response = await axios.delete(
-            `http://www.sm-project-refrigerator.store/api/share/${refrigeratorId}/${id}`, 
+            `http://www.sm-project-refrigerator.store/api/share/${refrigeratorId}`, 
             { headers }
           );
           console.log(response.data);
-          // Update data after successful deletion
+          if(response.status === 200){
+            onClose();
+          }
           GetUserData(); // 삭제 후 사용자 리스트 새로고침
         } catch (error) {
           if (error.response) {

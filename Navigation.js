@@ -13,7 +13,6 @@ import FindEmail from './screens/Auth/EmailScreen/FindEmail';
 import EmailNotice from './screens/Auth/EmailScreen/EmailNotice';
 import FindPassword from './screens/Auth/PasswordScreen/FindPassword';
 import PasswordReset from './screens/Auth/PasswordScreen/PasswordReset';
-import Home from './screens/home';
 import Terms from './screens/Auth/Terms';
 import TermDetail from './screens/Auth/TermDetail';
 import Term1 from './screens/Auth/Term1';
