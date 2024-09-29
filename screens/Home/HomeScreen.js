@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect, useLayoutEffect,useRef} from 'react';
 import {
   View,
@@ -75,54 +74,6 @@ const HomeScreen = ({ route, navigation }) => {
       console.log('냉장고 목록:', refrigerators);
     } catch (error) {
       console.error('Error fetching refrigerators:', error);
-=======
-import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet, Image } from 'react-native';
-import { Fontisto, MaterialIcons, Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
-
-
-const HomeScreen = ({ route, navigation }) => {
-  
-  // Log AccessToken to ensure it's being passed correctly
-
-  // Local state for refrigerators
-  const [refrigerators, setRefrigerators] = useState([]);
-
-  // useEffect to fetch initial refrigerators data
-  useEffect(() => {
-    // Fetch refrigerators data when AccessToken changes
-      fetchRefrigerators();
-  },[]);
-
-  // Function to fetch refrigerators data (simulated API call)
-  const fetchRefrigerators = async () => {
-    // Check if AccessToken is valid
-    try {
-      const AccessToken = await AsyncStorage.getItem('userAccessToken');
-      console.log('AccessToken:', AccessToken);
-      const response = await axios.get('http://www.sm-project-refrigerator.store/api/refrigerator', {
-        headers: { Authorization: `Bearer ${AccessToken}` }
-      });
-      // Extracting refrigerators data from API response
-      console.log('API response:', response.data.result.refrigeratorList);
-      const refrigeratorsData = response.data.result.refrigeratorList;
-      setRefrigerators(refrigeratorsData); // Setting refrigerators state
-    } catch (error) {
-      if (error.response) {
-        // Server responded with a status other than 200 range
-        console.error('Error fetching refrigerators:', error.response.data);
-      } else if (error.request) {
-        // Request was made but no response was received
-        console.error('Error fetching refrigerators:', error.request);
-      } else {
-        // Something happened in setting up the request
-        console.error('Error fetching refrigerators:', error.message);
-      }
->>>>>>> origin-flit/cli
     }
   };
 
@@ -134,7 +85,6 @@ const HomeScreen = ({ route, navigation }) => {
       const data = {
         name: `냉장고 ${newId}`
       };
-<<<<<<< HEAD
       const response = await axios.post('http://www.sm-project-refrigerator.store/api/refrigerator', data, {
         headers: { Authorization: `Bearer ${AccessToken}` }
       });
@@ -142,15 +92,6 @@ const HomeScreen = ({ route, navigation }) => {
         console.log('냉장고 추가 성공:', response.data);
         setRefrigerators([...refrigerators, { id: newId, name: data.name }]);
       }
-=======
-      // Simulated API response
-      const response = await axios.post('http://www.sm-project-refrigerator.store/api/refrigerator', data, {
-        headers: { Authorization: `Bearer ${AccessToken}` }
-      });
-      // Update local state after successful API call
-      setRefrigerators([...refrigerators, { id: newId, name: data.name }]);
-      console.log('API response:', response.data);
->>>>>>> origin-flit/cli
     } catch (error) {
       console.error('Error adding refrigerator:', error);
     }
@@ -161,28 +102,17 @@ const HomeScreen = ({ route, navigation }) => {
     setRefrigerators(refrigerators.filter(fridge => fridge.id !== id));
     try {
       const AccessToken = await AsyncStorage.getItem('userAccessToken');
-<<<<<<< HEAD
       const result = await axios.delete(`http://www.sm-project-refrigerator.store/api/refrigerator/${id}`, {
         headers: { Authorization: `Bearer ${AccessToken}` }
       });
       if(result.status === 200) {
         console.log('냉장고 삭제 성공:', result.data);
       }
-=======
-
-      // Simulated API response
-      await axios.delete(`http://www.sm-project-refrigerator.store/api/refrigerator/${id}`, {
-        headers: { Authorization: `Bearer ${AccessToken}` }
-      });
-      // Update local state after successful API call
-      
->>>>>>> origin-flit/cli
     } catch (error) {
       console.error('Error deleting refrigerator:', error);
     }
   };
 
-<<<<<<< HEAD
   const handleIngredientNameChange = (index, value) => {
     const updatedRefrigerators = [...refrigerators];
     updatedRefrigerators[index].name = value;
@@ -214,24 +144,11 @@ const HomeScreen = ({ route, navigation }) => {
     setModalVisible(true);
     return(
       <DeleteModal isVisible={isModalVisible} onClose={() => setModalVisible(false)} />
-=======
-  // Function to handle deletion confirmation
-  const handleDelete = (id) => {
-    Alert.alert(
-      '삭제 확인',
-      '정말 이 냉장고를 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        { text: '삭제', onPress: () => deleteRefrigerator(id), style: 'destructive' },
-      ],
-      { cancelable: true }
->>>>>>> origin-flit/cli
     );
   };
 
   // Function to handle image press navigation
   const handleImagePress = (id) => {
-<<<<<<< HEAD
     AsyncStorage.setItem('userRefId', id.toString());
     AsyncStorage.setItem('userRefName', refrigerators.find(ref => ref.id === id).name);
     //navigation.navigate('Food',{screen: 'Ingredient', params: { Id: id , Name: refrigerators.find(ref => ref.id === id).name}});
@@ -248,45 +165,16 @@ const HomeScreen = ({ route, navigation }) => {
   // Function to handle sharing alert
   const showSharingAlert = () => {
     setDropModalVisible(true);
-=======
-    // Navigation parameters should be passed as an object
-
-    console.log('id:', id);
-    AsyncStorage.setItem('userRefId', id.toString());
-    navigation.navigate("Ingredient", { Id: id});
-  };
-
-  // Function to handle sharing alert
-  const showSharingAlert = () => {
-    Alert.alert(
-      '공유 옵션',
-      null,
-      [
-        { text: '취소', style: 'cancel' },
-        { text: '공유인원 보기', onPress: () => handleShowSharing(), style: 'default' }, // Changed to call handleShowSharing
-        {
-          text: '이메일로 초대하기',
-          onPress: handleInviteByEmail,
-          style: 'default',
-        },
-      ],
-      { cancelable: true }
-    );
->>>>>>> origin-flit/cli
   };
 
   // Function to handle showing sharing screen
   const handleShowSharing = () => {
-<<<<<<< HEAD
     setDropModalVisible(false);
-=======
->>>>>>> origin-flit/cli
     navigation.navigate('SharingPeople', { screen: 'SharingPeople' });
   };
 
   // Function to handle inviting by email
   const handleInviteByEmail = () => {
-<<<<<<< HEAD
     setDropModalVisible(false);
     setModalVisible(true);
   };
@@ -315,60 +203,10 @@ const HomeScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.refTop}>
-=======
-    Alert.prompt(
-      '초대할 친구의 이메일 주소를 입력해주세요.',
-      null,
-      [
-        {
-          text: '취소',
-          style: 'cancel',
-        },
-        {
-          text: '확인',
-          onPress: (email) => {
-            if (email) {
-              // Handle sending invitation via email (e.g., send API request)
-              Alert.alert('이메일 전송', `이메일 ${email}로 초대를 전송했습니다.`);
-            }
-          },
-        },
-      ],
-      'plain-text' // Optional input type, can be 'plain-text', 'secure-text', or 'login-password'
-    );
-  };
-
-  // useLayoutEffect to set header left button
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity onPress={() => Alert.alert('알림', '벨 아이콘을 클릭했습니다.')}>
-          <Fontisto name="bell" size={30} color="black" style={{ marginLeft: 15 }} />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
-
-  // useLayoutEffect to set header right button
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={showSharingAlert}>
-          <MaterialIcons name="people-alt" size={30} color="black" style={{ marginRight: 15 }} />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
-
-  // Rendering the component
-  return (
-    <View style={styles.container}>
->>>>>>> origin-flit/cli
       <FlatList
         data={refrigerators}
         keyExtractor={(item) => item.id.toString()}
         horizontal
-<<<<<<< HEAD
         pagingEnabled // 슬라이드를 한 페이지씩 넘기게 설정
         showsHorizontalScrollIndicator={false} // 기본 가로 스크롤 인디케이터 제거
         onScroll={handleScroll} // 스크롤할 때 호출되는 함수
@@ -387,24 +225,10 @@ const HomeScreen = ({ route, navigation }) => {
                 blurRadius={1}
               />
               <Trash style={{position: 'absolute', marginTop: BasicHeight*128, marginLeft:BasicWidth*68}}/>
-=======
-        renderItem={({ item }) => (
-          <View style={styles.refrigerator}>
-            <Text style={styles.refrigeratorName}>{item.name}</Text>
-            <TouchableOpacity onPress={() => handleImagePress(item.id)}>
-              <Image
-                source={require('../../assets/refrigerator.png')} // Ensure this path is correct
-                style={styles.refrigeratorImage}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleDelete(item.id)}>
-              <Text style={styles.deleteButton}>삭제</Text>
->>>>>>> origin-flit/cli
             </TouchableOpacity>
           </View>
         )}
         ListFooterComponent={
-<<<<<<< HEAD
           <View style={styles.smallfooterrefrigerator}>
             <Text style={styles.refrigeratorName2}>새 냉장고 추가</Text>
             <TouchableOpacity onPress={addRefrigerator}>
@@ -535,22 +359,10 @@ const BasicHeight =(
     AllHeight / FigmaHeight
 ).toFixed(2);
 
-=======
-          <TouchableOpacity onPress={addRefrigerator}>
-            <Ionicons name="add-circle" size={100} color="black" style={{ marginLeft: 80, marginTop: 200 }} />
-          </TouchableOpacity>
-        }
-      />
-    </View>
-  );
-};
-
->>>>>>> origin-flit/cli
 // Styles for the component
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-<<<<<<< HEAD
   },
   cardSize:{
     width: AllWidth-194,
@@ -730,34 +542,3 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
-=======
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  refrigerator: {
-    padding: 20,
-    margin: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  refrigeratorName: {
-    fontSize: 30, // Increased the font size of the refrigerator name
-    marginBottom: 10,
-  },
-  refrigeratorImage: {
-    width: 270, // Set the desired width
-    height: 435, // Set the desired height
-    marginBottom: 10,
-  },
-  deleteButton: {
-    color: 'red',
-    fontSize: 18, // Increased the font size of the delete button
-    marginTop: 10,
-  },
-});
-
-// Exporting the component as default
-export default HomeScreen;
->>>>>>> origin-flit/cli

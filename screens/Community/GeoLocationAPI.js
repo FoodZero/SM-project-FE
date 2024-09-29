@@ -35,37 +35,6 @@ const GeoLocationAPI = () => {
             {enableHighAccuracy:true, timeout: 15000, maximumAge: 10000 },
         )
     };
-    const LocationHandler= async() => {
-        try {
-          const AccessToken = await AsyncStorage.getItem('userAccessToken');
-          const Latitude = latitude;
-            const Longitude = longitude;
-            const data ={
-                latitude: Latitude,
-                longitude: Longitude,
-            }
-          // API request to save location
-          const response = await axios.post(
-            'http://www.sm-project-refrigerator.store/api/post/location',
-           data,
-              {
-                headers: {
-                  'Authorization': `Bearer ${AccessToken}`,
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
-    
-          if (response.status === 200) {
-            console.log('Success', 'Location saved successfully!');
-            console.log('Response Data:', response.data);
-          } else {
-            console.log('Error', 'Failed to save location.');
-          }
-        } catch (error) {
-          console.error('Error:', error.response ? error.response.data : error.message);
-        }
-      }
       
 
     // Update map style to force a re-render to make sure the geolocation button appears

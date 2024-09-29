@@ -47,14 +47,21 @@ const AlertPage = () => {
                         <Back/>
                     </TouchableOpacity>
                 </View>
+                {Title?
+                (
                 <View style={styles.Content}>
-                    <View style={{flexDirection:'row',}}>
-                        <Bullet style={{marginTop:BasicHeight*7, marginRight:BasicWidth*15}}/>
-                        <Text style={styles.titleText}>유통기한 임박</Text>
-                    </View>
-
-                    <Text style={styles.contentText}>{Content}</Text>
+                <View style={{flexDirection:'row',}}>
+                    <Bullet style={{marginTop:BasicHeight*7, marginRight:BasicWidth*15}}/>
+                    <Text style={styles.titleText}>유통기한 임박</Text>
                 </View>
+
+                <Text style={styles.contentText}>{Content}</Text>
+            </View>):(
+                <View style={styles.null}>
+                    <Text style={styles.titleText}>알림이 없습니다.</Text>
+                </View>
+            )
+                }
             </ScrollView>
         </SafeAreaView>
     );
@@ -109,7 +116,13 @@ const styles = StyleSheet.create({
         includeFontPadding: false,
         color: '#808080',
         marginLeft: BasicWidth*28,
-    }
+    },
+    null: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignContent: 'center',
+        marginTop: BasicHeight*200,     
+    },
 });
 
 export default AlertPage;

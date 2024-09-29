@@ -77,6 +77,13 @@ const GeoLocationAPI = () => {
     
     }, [latitude, longitude]);
 
+    const goBack = () => {
+        navigation.reset({
+            routes: [{
+                name: '커뮤니티',
+              }]
+          })
+    };
 
     return (
         <View>
@@ -86,7 +93,7 @@ const GeoLocationAPI = () => {
         fontFamily: 'NotoSansKR-Regular',
         includeFontPadding: false,
         marginRight:BasicWidth*115}}> 내 위치 설정 </Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={goBack}>
                 <Back/>
                 </TouchableOpacity>
             </View>
