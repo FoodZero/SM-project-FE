@@ -8,6 +8,7 @@ import {
     Button,
     ScrollView,
     ActivityIndicator,
+    Share,
   } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from 'axios';
@@ -110,13 +111,13 @@ const GPTRecipeDetail = () => {
     // toastConfig에 reload 타입 정의
     const toastConfig = {
         'error': ({ text1 }) => (
-          <View style={Styles.toastContainer}>
-            <Text style={{ color: '#000000' }}>{text1}</Text>
+          <View style={Styles.toastContainer2}>
+            <Text style={{ color: '#000000',  fontFamily: 'NotoSansKR-Regular', includeFontPadding: false, fontSize: 15, }}>{text1}</Text>
           </View>
         ),
         'bookmark': ({ text1 }) => (
           <View style={Styles.toastContainer}>
-            <Text style={{ color: '#FFFFFF' }}>{text1}</Text>
+            <Text style={{ color: '#FFFFFF',  fontFamily: 'NotoSansKR-Regular', includeFontPadding: false, fontSize: 14, }}>{text1}</Text>
           </View>
         ),
       };
@@ -322,7 +323,7 @@ const GPTRecipeDetail = () => {
             index: 1, // 두 번째 화면이 포커스되도록 설정
             routes: [
               { name: '레시피' }, // Top2 스택을 초기화하여 '레시피'의 초기 화면으로 만듦
-              { name: '커뮤니티', params: { screen: 'IngredientScreen' } } // 화면을 'IngredientScreen'으로 유지
+              { name: '홈', params: { screen: 'IngredientScreen' } } // 화면을 'IngredientScreen'으로 유지
             ],
           });
           Reset();
@@ -336,6 +337,7 @@ const GPTRecipeDetail = () => {
     
           if (response.status === 200) {
             console.log('Reset log:', response);
+            await AsyncStorage.removeItem('selectedFoodNames');
           } else {
             console.error('Server returned non-200 status code:', response.status);
           }
@@ -353,7 +355,7 @@ const GPTRecipeDetail = () => {
                     style={{marginLeft:BasicWidth*31, marginTop: BasicHeight*15}}>
                     <Reload/>
                 </TouchableOpacity>
-                <Text style={Styles.HeaderText}>레시피</Text>
+                <Text style={Styles.HeaderText}>AI 추천 레시피</Text>
                 <TouchableOpacity
                     onPress={LoadList}>
                     <Text style={Styles.NavList}>목록</Text>
@@ -423,15 +425,20 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
     },
     HeaderText: {
-        fontSize: 16,
-        marginLeft: BasicWidth * 121,
+        fontSize: 19,
+        marginLeft: BasicWidth * 86,
         marginTop: BasicHeight * 16,
         includeFontPadding: false,
+        fontFamily: 'NotoSansKR-Bold',
+        color: '#000000',
     },
     NavList:{
-        fontSize: 16,
-        marginLeft: BasicWidth * 116,
+        fontSize: 20,
+        marginLeft: BasicWidth * 75,
         marginTop: BasicHeight * 14,
+        includeFontPadding: false,
+        fontFamily: 'NotoSansKR-Regular',
+        color: '#000000',
     },
     Bookmark:{
         position: 'absolute',
@@ -456,16 +463,24 @@ const Styles = StyleSheet.create({
     recipeName: {
         fontSize: 20,
         color: '#000000',
+        fontFamily: 'NotoSansKR-SemiBold',
+        includeFontPadding: false,
     },
     ingredienttitle: {
         marginLeft: BasicWidth * 16,
         color: '#000000',
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
+        fontSize: 16,
+        
     },
     ingredient: {
         fontSize: 16,
         marginLeft: BasicWidth * 30,
         marginBottom: BasicHeight * 49,
         color: '#000000',
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
     },
     description: {
         fontSize: 16,
@@ -473,6 +488,8 @@ const Styles = StyleSheet.create({
         marginRight: BasicWidth * 22,
         marginBottom: BasicHeight * 139,
         color: '#000000',
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
     },
     recommendContainer:{
         position: 'absolute',
@@ -488,6 +505,8 @@ const Styles = StyleSheet.create({
     question: {
         fontSize: 16,
         color: '#000000',
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
     },
     Line:{
         width:BasicHeight*700,
@@ -514,6 +533,8 @@ const Styles = StyleSheet.create({
     ButtonText:{
         fontSize: 16,
         color: '#3873EA',
+        fontFamily: 'NotoSansKR-Bold',
+        includeFontPadding: false,
     },
     toastContainer: {
         backgroundColor: '#AFAFAF',
@@ -523,4 +544,23 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
       },
+      toastContainer2: {
+        backgroundColor: '#BECFF3',
+        height: BasicHeight * 80,
+        width: BasicWidth * 300,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      scrollDescription: {
+        maxHeight: BasicHeight * 254,
+        width: BasicWidth * 277,
+        marginLeft: BasicWidth * 31,
+        color: '#000000',
+    },
+    scrollIngredient: {
+        maxHeight: BasicHeight * 95,
+        width: BasicWidth * 277,
+        marginLeft: BasicWidth * 31,
+    },
 });

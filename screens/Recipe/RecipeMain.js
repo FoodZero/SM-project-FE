@@ -12,7 +12,6 @@ import {
 import axios from 'axios';
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DropDownPicker from 'react-native-dropdown-picker';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import useTabBarVisibility from "../useTabBarVisibility";
@@ -21,6 +20,7 @@ import GPTIcon from '../../assets/Icons/GPT.svg';
 import X from '../../assets/Icons/X.svg';
 import Magnifier from '../../assets/Icons/Magnifier.svg';
 import Recommend from '../../assets/Icons/recommend.svg';
+import DropDown from '../../assets/Icons/drop-down.svg';
 
 const RecipeMain = () => {
   useTabBarVisibility(true);
@@ -40,62 +40,32 @@ const RecipeMain = () => {
   const [searchPerformed, setSearchPerformed] = useState(false); // 검색 여부 상태 변수
   const [loadingGPT, setLoadingGPT] = useState(false);
 
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    {label: '냉장고 재료 우선', value: 'ingredientfirst'},
-    {label: '추천 순', value: 'recommendfirst'}
-  ]);
-
   useEffect(() => {
     getIngredients();
     getCloseIngredients();
   }, []);
 
   const getIngredients = async () => {
-    /*
-        setIngredients(selectedFoodNames.map(name => ({ name })));
-        */
-        try {
-          const TOKEN = await AsyncStorage.getItem('userAccessToken');
-          const refrigeratorID = 125;
-      
-          const response = await axios.get(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorID}`, {
-            headers: { Authorization: `Bearer ${TOKEN}` }
-          });
-      
-          if (response.status === 200) {
-            const foodList = response.data.result.foodList || [];
-            const today = new Date();
-      
-            // 유통기한이 14일 이내로 남은 재료 필터링
-            const closeToExpireIngredients = foodList.filter(item => {
-              if (item?.expire) {
-                const expireDate = new Date(item.expire);
-                const diffTime = expireDate.getTime() - today.getTime();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays <= 14 && diffDays >= 0;  // 유통기한이 14일 이내인 재료만 반환
-              }
-              return false;
-            });
-      
-            const formattedIngredients = closeToExpireIngredients.map(item => ({
-              name: item.name || 'Unknown',
-              expire: item.expire ? new Date(item.expire).toLocaleDateString() : '정보 없음'  // 유통기한 날짜 포맷
-            }));
-      
-            setCloseIngredients(formattedIngredients);
-          }
-        } catch (error) {
-          console.error('Error fetching close ingredients:', error);
+        //const selectedFoodNames = awaitt AsyncStorage.getItem('selectedFoodNames');
+        if (selectedFoodNames.length === 0) {
+          const item = await AsyncStorage.getItem('selectedFoodNames');
+          const selectedFood = item ? JSON.parse(item) : [];
+          setIngredients(selectedFood.map(name => ({ name })));
         }
+        else {
+          setIngredients(selectedFoodNames.map(name => ({ name })));
+        }
+        await AsyncStorage.setItem('selectedFoodNames', JSON.stringify(selectedFoodNames));
+        /*
+        const item = await AsyncStorage.getItem('selectedFoodNames');
+        console.log('Selected food names:', item);
+        */
       };
 
   const getCloseIngredients = async () => {
     try {
       const TOKEN = await AsyncStorage.getItem('userAccessToken');
-      const refrigeratorID = 125;
-  
+      const refrigeratorID = await AsyncStorage.getItem('userRefId');
       const response = await axios.get(`http://www.sm-project-refrigerator.store/api/food/${refrigeratorID}`, {
         headers: { Authorization: `Bearer ${TOKEN}` }
       });
@@ -119,7 +89,8 @@ const RecipeMain = () => {
           name: item.name || 'Unknown',
           expire: item.expire ? new Date(item.expire).toLocaleDateString() : '정보 없음'  // 유통기한 날짜 포맷
         }));
-  
+
+        console.log('Close ingredients:', formattedIngredients);
         setCloseIngredients(formattedIngredients);
       }
     } catch (error) {
@@ -207,7 +178,7 @@ const RecipeMain = () => {
       style={Styles.recipeContainer}>
         <View style={Styles.recommendContainer}>
         <Recommend />
-        <Text style={{marginLeft : BasicWidth*3, color: '#AFAFAF'}}>{item.recommendCount}</Text>
+        <Text style={{marginLeft : BasicWidth*3, color: '#AFAFAF',fontFamily:'NotoSansKR-Light', includeFontPadding:false}}>{item.recommendCount}</Text>
       </View>
       <Text style={Styles.recipeName}>{item.name}</Text>
       <Text style={Styles.recipeIngredient}> 필요한 재료: {item.ingredient}</Text>
@@ -256,7 +227,9 @@ const RecipeMain = () => {
         }}>
         <Text
             style={{
-            color: '#000000',
+              color: '#000000',
+              includeFontPadding: false,
+              fontFamily: 'NotoSansKR-Regular',
             marginTop: BasicHeight* 17,
             }}
         >
@@ -264,7 +237,9 @@ const RecipeMain = () => {
         </Text>
         <Text
             style={{
-            color: '#000000',
+              color: '#000000',
+              includeFontPadding: false,
+              fontFamily: 'NotoSansKR-Regular',
             }}
         >
             맛있는 요리 레시피를 찾아드리고 있습니다!
@@ -282,13 +257,30 @@ const RecipeMain = () => {
     });
   }
 
+  const handleClose = async() => {
+    await AsyncStorage.removeItem('selectedFoodNames');
+    navigation.goBack();
+  };
+  
+  const BasicScreen = () =>{
+    navigation.reset({
+      routes: [
+        { name: '레시피', params: { screen: 'RecipeMain'} } // 두 번째 화면을 'Ingredient'로 설정
+      ],
+    });
+  }
+  
+
   return (
     <SafeAreaView style={Styles.container}>
       <View style={Styles.header}>
         <Text style={Styles.HomeText}>레시피</Text>
-        <TouchableOpacity onPress={() => alert('뒤로가기')}>
-          <X style={{marginLeft: BasicWidth*128, marginTop: BasicHeight * 12,}}/>
+        <TouchableOpacity 
+          onPress={searchPerformed ? BasicScreen : handleClose}  // Change onPress based on searchPerformed
+        >
+          <X style={{ marginLeft: BasicWidth * 128, marginTop: BasicHeight * 12 }} />
         </TouchableOpacity>
+
       </View>
 
       <View style={Styles.TextForm}>
@@ -304,8 +296,9 @@ const RecipeMain = () => {
       {searchPerformed ? (
         <>
           <View style={Styles.findstyle}>
-            <Text>총 <Text style={{ color: '#3873EA' }}>{lastIndex}</Text>개 검색결과</Text>
-           <Text>추천 순</Text>
+            <Text style={{fontSize: 16, fontFamily: 'NotoSansKR-SemiBold', includeFontPadding: false, color: '#000000',}}>총 <Text style={{ color: '#3873EA' }}>{lastIndex}</Text>개 검색결과</Text>
+            <Text style={{fontSize: 16, fontFamily: 'NotoSansKR-SemiBold', includeFontPadding: false, color: '#000000',marginLeft:BasicWidth*140}}>추천 순</Text>
+            <DropDown/>
           </View>
           <FlatList
             data={resMsg}
@@ -327,8 +320,10 @@ const RecipeMain = () => {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={Styles.ingredientList}
-            style={{height: BasicHeight*33, flexGrow: 0, marginTop: BasicHeight*10}}
+            style={{ height: BasicHeight * 33, flexGrow: 0, marginTop: BasicHeight * 10 }}
+            ListFooterComponent={<View style={{ width: BasicWidth * 30 }} />}  // Add a footer for extra spacing
           />
+
           <Text style={Styles.ingredient}>유통기한 임박한 재료</Text>
           <FlatList
               data={closeingredients}  // 유통기한 임박 재료
@@ -338,6 +333,7 @@ const RecipeMain = () => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={Styles.ingredientList}
               style={{ height: BasicHeight * 33, flexGrow: 0, marginTop: BasicHeight * 10 }}
+              ListFooterComponent={<View style={{ width: BasicWidth * 30 }} />} 
           />
           {loadingGPT && (
           <ActivityIndicator size="medium" color="#3873EA" />
@@ -378,9 +374,12 @@ const Styles = StyleSheet.create({
     justifyContent: 'center',
   },
   HomeText: {
-    marginTop: BasicHeight * 12,
-    marginLeft: BasicWidth * 174,
+    marginTop: BasicHeight * 16,
+    marginLeft: BasicWidth * 168,
     fontSize: 15,
+    fontFamily: 'NotoSansKR-Bold',
+    includeFontPadding: false,
+    color: '#000000',
   },
   TextForm: {
     width: BasicWidth * 330,
@@ -396,11 +395,18 @@ const Styles = StyleSheet.create({
   Text: {
     marginLeft: BasicWidth * 17,
     width: BasicWidth * 276,
+    fontSize: 16,
+    fontFamily: 'NotoSansKR-Regular',
+    includeFontPadding: false,
     
   },
   ingredient: {
     marginLeft: BasicWidth * 33,
     marginTop: BasicHeight * 25,
+    fontSize: 14,
+    fontFamily: 'NotoSansKR-SemiBold',
+    includeFontPadding: false,
+    color: '#000000',
   },
   Icon: {
     alignSelf: 'center',
@@ -420,6 +426,8 @@ const Styles = StyleSheet.create({
     marginRight: BasicHeight * 10,
     fontSize: 13,
     color: '#3873EA',
+    fontFamily: 'NotoSansKR-Regular',
+    includeFontPadding: false,
   },
   recipeContainer: {
     width: BasicWidth * 330,
@@ -432,11 +440,16 @@ const Styles = StyleSheet.create({
   },
   recipeName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'NotoSansKR-SemiBold',
+    includeFontPadding: false,
+    color: '#000000',
+    width: BasicWidth * 270,
   },
   recipeIngredient: {
     fontSize: 14,
-    color: '#555',
+    fontFamily: 'NotoSansKR-Regular',
+    includeFontPadding: false,
+    color: '#000000',
     width: BasicWidth * 299,
   },
   ingredientList: {
@@ -471,7 +484,6 @@ const Styles = StyleSheet.create({
   },
   recommendContainer:{
     flexDirection: 'row',
-    alignItems: 'center',
     position: 'absolute',
     marginLeft: BasicWidth*275,
     marginTop: BasicHeight*10,

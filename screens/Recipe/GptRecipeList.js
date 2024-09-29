@@ -67,7 +67,7 @@ const GptRecipeList = () => {
       style={Styles.recipeContainer}>
         <View style={Styles.recommendContainer}>
         <Recommend />
-        <Text style={{marginLeft : BasicWidth*3, color: '#AFAFAF'}}>{item.recommendCount}</Text>
+        <Text style={{marginLeft : BasicWidth*3, color: '#AFAFAF', fontFamily: 'NotoSansKR-Light', color: '#000000', includeFontPadding: false,}}>{item.recommendCount}</Text>
       </View>
       <Text style={Styles.recipeName}>{item.recipeName}</Text>
       <Text style={Styles.recipeIngredient}> 필요한 재료: {item.ingredient}</Text>
@@ -103,7 +103,7 @@ const GptRecipeList = () => {
         </TouchableOpacity>
       </View>
       <View style={Styles.findstyle}>
-        <Text>총 {count}개 검색결과</Text>
+        <Text style={{fontFamily: 'NotoSansKR-Light', color: '#000000',includeFontPadding: false,}}>총 {count}개 검색결과</Text>
       </View>
       {loading ? (
         <ActivityIndicator size="large" />
@@ -139,16 +139,18 @@ const Styles = StyleSheet.create({
     height: 59 * BasicHeight,
     width: AllWidth,
     flexDirection: 'row',
-    justifyContent: 'center',
   },
   HomeText: {
     marginTop: BasicHeight * 12,
     marginLeft: BasicWidth * 149,
     fontSize: 15,
+    fontFamily: 'NotoSansKR-Bold',
+    color: '#000000',
+    includeFontPadding: false,
   },
   Back: {
     marginTop: BasicHeight * 13,
-    marginLeft: BasicWidth * 119,
+    marginLeft: BasicWidth * 107,
   },
   findstyle: {
     flexDirection: 'row',
@@ -167,11 +169,15 @@ const Styles = StyleSheet.create({
   },
   recipeName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'NotoSansKR-SemiBold',
+    color: '#000000',
+    includeFontPadding: false,
   },
   recipeIngredient: {
     fontSize: 14,
-    color: '#555',
+    fontFamily: 'NotoSansKR-Regular',
+    color: '#000000',
+    includeFontPadding: false,
   },
   recipeList: {
     paddingBottom: BasicHeight * 20,

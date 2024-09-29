@@ -18,7 +18,6 @@ const SplashScreen = ({navigation}) => {
   //State for ActivityIndicator animation
   const [animating, setAnimating] = useState(true);
   const [isModalVisible, setModalVisible] = useState(true);
-
   useEffect(() => {
     setTimeout(() => {
       setAnimating(false);

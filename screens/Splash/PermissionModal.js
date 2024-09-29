@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import Icon from 'react-native-vector-icons/SimpleLineIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PERMISSIONS, RESULTS, request, requestMultiple, Permission, check, checkNotifications } from "react-native-permissions";
+
 import Camera from '../../assets/Icons/camera.svg';
 import Frame from '../../assets/Icons/Frame.svg';
 import LocationPin from '../../assets/Icons/location-pin.svg';
@@ -17,12 +19,11 @@ import Notification from '../../assets/Icons/notification.svg';
 
 
 const PermissionModal = ({ isVisible, onClose})=>{
-    const [includeFontPadding, setIncludeFontPadding] = useState(false);
     const storeData = async (Alert) => {
         //
         try {
           // 'tasks' 라는 항목에 tasks 저장
-          await AsyncStorage.setItem('alert', 'Alert');
+          //await AsyncStorage.setItem('alert', 'Alert');
         } catch (e) {
           // saving error
         }
@@ -30,59 +31,94 @@ const PermissionModal = ({ isVisible, onClose})=>{
           onClose();
         }
       };
-/*
+
       const requestPermission = async () => {
-        const camera = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.CAMERA) : await request(PERMISSIONS.ANDROID.CAMERA);
-        const photo = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.PHOTO_LIBRARY) : await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
-        const media = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.PHOTO_LIBRARY) : await request(PERMISSIONS.ANDROID.ACCESS_MEDIA_LOCATION);
-        const location = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE) : await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-        const notification = Platform.OS === 'ios' ? await request(PERMISSIONS.IOS.NOTIFICATIONS) : await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
+        try {
+            // 카메라 권한
+            const cameraPermission = Platform.OS === 'ios' ? 
+                await request(PERMISSIONS.IOS.CAMERA) : 
+                await request(PERMISSIONS.ANDROID.CAMERA);
+            
+            // 사진 라이브러리 권한 (iOS) 또는 저장소 권한 (Android)
+            const photoPermission = Platform.OS === 'ios' ? 
+                await request(PERMISSIONS.IOS.PHOTO_LIBRARY) : 
+                await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
+            
+            // 미디어 위치 권한 (Android)
+            const mediaPermission = Platform.OS === 'ios' ? 
+                await request(PERMISSIONS.IOS.PHOTO_LIBRARY) : 
+                await request(PERMISSIONS.ANDROID.ACCESS_MEDIA_LOCATION);
+            
+            // 위치 권한
+            const locationPermission = Platform.OS === 'ios' ? 
+                await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE) : 
+                await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+            
+                
+            // 알림 권한
+            const notificationPermission = Platform.OS === 'ios' ? 
+                await request(PERMISSIONS.IOS.NOTIFICATIONS) : 
+                await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
     
-        console.log('Camera Permission : ', camera);
-        console.log('Photo Permission : ', photo);
-        console.log('Photo Permission : ', media);
-        console.log('Location Permission : ', location);
-        console.log('Notification Permission : ', notification);
+            // 권한 결과 로그 출력
+            console.log('Camera Permission: ', cameraPermission);
+            console.log('Photo Permission: ', photoPermission);
+            console.log('Media Permission: ', mediaPermission);
+            console.log('Location Permission: ', locationPermission);
+            console.log('Notification Permission: ', notificationPermission);
     
-        storeData();
+            // 결과를 AsyncStorage에 저장
+            await storeData({
+                cameraPermission,
+                photoPermission,
+                mediaPermission,
+                locationPermission,
+                notificationPermission
+            });
+        } catch (error) {
+            console.error('Error requesting permissions: ', error);
+        } finally {
+            onClose(); // 모달 닫기
+        }
     };
-    */
+    
+
+    
     return(
         <Modal 
-        animationType="slide"
-        transparent={true}
-        visible={isVisible}
-        onRequestClose={onClose}
-        >
+            animationType="slide"
+            transparent={true}
+            visible={isVisible}
+            onRequestClose={onClose}
+            >
             <View style={Styles.modalcontainer}>
                 <View style={Styles.container}>
                 <View>
-                <View>
+
                     <Text style={Styles.Title}>접근 권한 허용</Text>
                     <Text style={Styles.Minititle}>냉장고 해결사 이용을 위해</Text>
-                </View>
                 <View>
-                    <View style={Styles.Pearea}>
+                    <View style={Styles.Pecamarea}>
                         <Camera />
-                        <View style={Styles.explarea}>
-                            <Text style={Styles.exptitle}>카메라(필수)</Text>
-                            <Text style={Styles.expmin}>영수증 및 음식 촬영</Text>
+                        <View style={Styles.explcamarea}>
+                            <Text style={Styles.expcamtitle}>카메라(필수)</Text>
+                            <Text style={Styles.expcammin}>영수증 및 음식 촬영</Text>
                         </View>
                     </View>
 
-                    <View style={Styles.Pearea}>
+                    <View style={Styles.Pepicarea}>
                         <Frame />
-                        <View style={Styles.explarea}>
-                            <Text style={Styles.exptitle}>사진(필수)</Text>
-                            <Text style={Styles.expmin}>영수증 및 음식 품목 읽기</Text>
+                        <View style={Styles.explpicarea}>
+                            <Text style={Styles.exppictitle}>사진(필수)</Text>
+                            <Text style={Styles.exppicmin}>영수증 및 음식 품목 읽기</Text>
                         </View>
                     </View>
 
-                    <View style={Styles.Pearea}>
+                    <View style={Styles.Pelocarea}>
                         <LocationPin/>
-                        <View style={Styles.explarea}>
-                            <Text style={Styles.exptitle}>위치정보(선택)</Text>
-                            <Text style={Styles.expmin}>위치기반 서비스 제공 시 필요</Text>
+                        <View style={Styles.expllocarea}>
+                            <Text style={Styles.exploctitle}>위치정보(선택)</Text>
+                            <Text style={Styles.explocmin}>위치기반 서비스 제공 시 필요</Text>
                         </View>
                     </View>
 
@@ -98,7 +134,7 @@ const PermissionModal = ({ isVisible, onClose})=>{
                  
                 <TouchableOpacity 
                     style={Styles.ButtonArea}
-                    onPress={storeData}
+                    onPress={requestPermission}
                 >
                     <Text style={Styles.buttontext} >확인</Text>
                 </TouchableOpacity>
@@ -136,56 +172,131 @@ const Styles = StyleSheet.create({
         height: BasicHeight*615,
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
-        justifyContent: 'flex-end',
         alignSelf: 'center',
     },
     Title:{
-        width: BasicWidth*150,
         height: BasicHeight*45,
         marginLeft: BasicWidth*20,
         marginTop: BasicHeight*50,
         color: '#000000',
         fontSize: 25,
-        //fontFamily: 'NotoSansKR-SemiBold',
+        fontFamily: 'NotoSansKR-Medium',
         includeFontPadding: false,
     },
     Minititle: {
-        width: BasicWidth*195,
         height: BasicHeight*26,
         marginLeft: BasicWidth*20,
         fontSize: 18,
         marginBottom: BasicHeight*71,
-        //fontFamily: 'NotoSansKR-SemiBold',
+        fontFamily: 'NotoSansKR-Medium',
         includeFontPadding: false,
     },
-    Pearea:{
-        width:BasicWidth*177,
+    Pecamarea:{
         height: BasicHeight*49,
         marginLeft: BasicWidth*21,
         flexDirection: 'row',
         alignItems: "center",
         marginBottom: BasicHeight*25,
+        padding:0,
     },
-    explarea:{
-        width: BasicWidth*237,
+    explcamarea:{
         height: BasicHeight*49,
         marginLeft: BasicWidth*18,
     },
-    exptitle:{
-        width: BasicWidth*113,
+    expcamtitle:{
         height: BasicHeight*26,
         fontSize: 18,
         color: '#000000',
-        //fontFamily: 'NotoSansKR-SemiBold',
+        fontFamily: 'NotoSansKR-Medium',
         includeFontPadding: false,
     },
-    expmin:{
-        width: BasicWidth*191,
+    expcammin:{
         height: BasicHeight*23,
         fontSize: 16,
-        //fontFamily: 'NotoSansKR-Regular',
+        color: '#808080',
+        fontFamily: 'NotoSansKR-Regular',
         includeFontPadding: false,
     },
+    Pepicarea:{
+        height: BasicHeight*49,
+        marginLeft: BasicWidth*25,
+        flexDirection: 'row',
+        alignItems: "center",
+        marginBottom: BasicHeight*25,
+    },
+    explpicarea:{
+        height: BasicHeight*49,
+        marginLeft: BasicWidth*20,
+    },
+    exppictitle:{
+        height: BasicHeight*26,
+        fontSize: 18,
+        color: '#000000',
+        fontFamily: 'NotoSansKR-Medium',
+        includeFontPadding: false,
+    },
+    exppicmin:{
+        height: BasicHeight*23,
+        color: '#808080',
+        fontSize: 16,
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
+    },
+
+    Pelocarea:{
+        height: BasicHeight*49,
+        marginLeft: BasicWidth*23,
+        flexDirection: 'row',
+        alignItems: "center",
+        marginBottom: BasicHeight*25,
+    },
+    expllocarea:{
+        height: BasicHeight*49,
+        marginLeft: BasicWidth*16,
+    },
+    exploctitle:{
+        height: BasicHeight*26,
+        fontSize: 18,
+        color: '#000000',
+        fontFamily: 'NotoSansKR-Medium',
+        includeFontPadding: false,
+    },
+    explocmin:{
+        height: BasicHeight*23,
+        color: '#808080',
+        fontSize: 16,
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
+    },
+    Pearea1:{
+        height: BasicHeight*72,
+        marginLeft: BasicWidth*22,
+        flexDirection: 'row',
+        alignItems: "center",
+    },
+    explarea1:{
+        width: BasicWidth*237,
+        height: BasicHeight*72,
+        marginLeft: BasicWidth*18,
+    },
+    exptitle:{
+        height: BasicHeight*26,
+        fontSize: 18,
+        color: '#000000',
+        fontFamily: 'NotoSansKR-Medium',
+        includeFontPadding: false,
+    },
+    expmin1:{
+        height: BasicHeight*46,
+        color: '#808080',
+        fontSize: 16,
+        fontFamily: 'NotoSansKR-Regular',
+        includeFontPadding: false,
+    },
+
+
+
+   
     ButtonArea:{
         width: BasicWidth*325,
         height: BasicHeight*65,
@@ -197,27 +308,8 @@ const Styles = StyleSheet.create({
         borderBottomLeftRadius: 10,
         borderBottomRightRadius: 10,
     },
-    Pearea1:{
-        width:BasicWidth*177,
-        height: BasicHeight*72,
-        marginLeft: BasicWidth*21,
-        flexDirection: 'row',
-        alignItems: "center",
-    },
-    explarea1:{
-        width: BasicWidth*237,
-        height: BasicHeight*72,
-        marginLeft: BasicWidth*18,
-    },
-    expmin1:{
-        width: BasicWidth*211,
-        height: BasicHeight*46,
-        fontSize: 16,
-        //fontFamily: 'NotoSansKR-Regular',
-        includeFontPadding: false,
-    },
     buttontext:{
-        //fontFamily: 'NotoSansKR-Bold',
+        fontFamily: 'NotoSansKR-Bold',
         includeFontPadding: false,
         fontSize: 20,
         color: '#FFFFFF',
